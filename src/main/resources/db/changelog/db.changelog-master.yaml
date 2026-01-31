@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/changesing/001-create-persons-table.sql
+  - include:
+      file: db/changelog/changesing/002-create-courses-table.sql
+  - include:
+      file: db/changelog/changesing/003-create-modules-table.sql
