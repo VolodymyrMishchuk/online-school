@@ -19,9 +19,6 @@ public class ModuleEntity {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "course")
-    private String course;
-
     @Column(name = "description")
     private String description;
 
@@ -30,6 +27,13 @@ public class ModuleEntity {
 
     @Column(name = "status")
     private String status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id") // We need to update this because before it was just a string "course"
+    private CourseEntity course;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<LessonEntity> lessons;
 
     @CreationTimestamp
     @Column(name = "created_at")

@@ -40,6 +40,9 @@ public class PersonEntity {
     @Column(name = "status")
     private String status;
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<EnrollmentEntity> enrollments;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

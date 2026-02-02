@@ -4,14 +4,30 @@ import com.mishchuk.onlineschool.controller.dto.ModuleCreateDto;
 import com.mishchuk.onlineschool.controller.dto.ModuleDto;
 import com.mishchuk.onlineschool.controller.dto.ModuleUpdateDto;
 import com.mishchuk.onlineschool.repository.entity.ModuleEntity;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface ModuleMapper {
+    @Mapping(target = "courseId", source = "course.id")
     ModuleDto toDto(ModuleEntity entity);
 
+    @Mapping(target = "course.id", source = "courseId")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "lessons", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     ModuleEntity toEntity(ModuleCreateDto dto);
 
-    void updateEntityFromDto(ModuleUpdateDto dto, @MappingTarget ModuleEntity entity);
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "course", ignore = true)
+    @Mapping(target = "lessons", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(@MappingTarget ModuleEntity entity, ModuleUpdateDto dto);
 }

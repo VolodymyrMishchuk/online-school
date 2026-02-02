@@ -1,7 +1,19 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/changesing/001-create-persons-table.sql
+      file: changesing/001-create-persons-table.sql
+      relativeToChangelogFile: true
   - include:
-      file: db/changelog/changesing/002-create-courses-table.sql
+      file: changesing/002-create-courses-table.sql
+      relativeToChangelogFile: true
   - include:
-      file: db/changelog/changesing/003-create-modules-table.sql
+      file: changesing/003-create-modules-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/004-create-lessons-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/005-create-enrollments-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/006-alter-modules-table.sql
+      relativeToChangelogFile: true

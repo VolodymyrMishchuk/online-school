@@ -22,6 +22,14 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
+    private final com.mishchuk.onlineschool.service.PersonService personService;
+
+    @PostMapping("/register")
+    public ResponseEntity<Void> register(
+            @RequestBody com.mishchuk.onlineschool.controller.dto.PersonCreateDto request) {
+        personService.createPerson(request);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
@@ -29,6 +37,8 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         final String token = jwtUtils.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(token));
+        com.mishchuk.onlineschool.repository.entity.PersonEntity person = ((com.mishchuk.onlineschool.security.CustomUserDetailsService) userDetailsService)
+                .getPerson(request.getEmail());
+        return ResponseEntity.ok(new AuthResponse(token, person.getId(), person.getRole()));
     }
 }

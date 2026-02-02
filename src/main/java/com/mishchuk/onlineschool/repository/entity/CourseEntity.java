@@ -28,6 +28,9 @@ public class CourseEntity {
     @Column(name = "status")
     private String status;
 
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<ModuleEntity> modules;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

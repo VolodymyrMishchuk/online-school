@@ -47,7 +47,7 @@ public class ModuleServiceImpl implements ModuleService {
     public void updateModule(java.util.UUID id, ModuleUpdateDto dto) {
         ModuleEntity entity = moduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Module not found"));
-        moduleMapper.updateEntityFromDto(dto, entity);
+        moduleMapper.updateEntity(entity, dto);
         moduleRepository.save(entity);
     }
 
