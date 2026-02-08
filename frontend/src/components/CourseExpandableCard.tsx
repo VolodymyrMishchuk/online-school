@@ -30,6 +30,7 @@ interface CourseExpandableCardProps {
     onEditLesson?: (lesson: Lesson) => void;
     onDeleteLesson?: (lesson: Lesson) => void;
     onEnroll?: (courseId: string) => void;
+    isCatalogMode?: boolean;
 }
 
 function CourseExpandableCard({
@@ -39,12 +40,77 @@ function CourseExpandableCard({
     onDelete,
     onEditLesson,
     onDeleteLesson,
-    onEnroll
+    onEnroll,
+    isCatalogMode = false
 }: CourseExpandableCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Filter modules for this course
     const courseModules = modules.filter(m => m.courseId === course.id);
+
+    // Calculate access status
+    const getAccessDisplay = () => {
+        if (isCatalogMode) return null; // Don't show access info in catalog mode
+        if (!course.isEnrolled || !course.enrolledAt) return null;
+
+        if (course.enrollmentStatus === 'BLOCKED') {
+            return {
+                text: 'Доступ завершено',
+                className: 'bg-red-50 border-red-200 text-red-700',
+                iconColor: 'text-red-600'
+            };
+        }
+
+        if (!course.accessDuration) {
+            return {
+                text: new Date(course.enrolledAt).toLocaleDateString('uk-UA', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }),
+                className: 'bg-green-50 border-green-200 text-green-700',
+                iconColor: 'text-green-600'
+            };
+        }
+
+        const enrolledDate = new Date(course.enrolledAt);
+        const expirationDate = new Date(enrolledDate.getTime() + course.accessDuration * 24 * 60 * 60 * 1000);
+        const now = new Date();
+        const diffMs = expirationDate.getTime() - now.getTime();
+
+        if (diffMs <= 0) {
+            return {
+                text: 'Доступ завершено',
+                className: 'bg-red-50 border-red-200 text-red-700',
+                iconColor: 'text-red-600'
+            };
+        }
+
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        let timeText = '';
+
+        if (diffDays >= 2) {
+            const months = Math.floor(diffDays / 30);
+            const days = diffDays % 30;
+            if (months > 0) {
+                timeText = `${months} міс. ${days} дн.`;
+            } else {
+                timeText = `${days} ${pluralize(days, 'день', 'дні', 'днів')}`;
+            }
+        } else {
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            timeText = `${diffHours} год ${diffMinutes} хв`;
+        }
+
+        return {
+            text: `Залишилось: ${timeText}`,
+            className: diffDays < 2 ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-green-50 border-green-200 text-green-700',
+            iconColor: diffDays < 2 ? 'text-orange-600' : 'text-green-600'
+        };
+    };
+
+    const accessDisplay = getAccessDisplay();
 
     return (
         <div className={`bg-white rounded-xl shadow-sm border border-gray-100 transition-all duration-300 ${isExpanded ? 'shadow-md ring-2 ring-blue-50' : 'hover:shadow-md'}`}>
@@ -62,17 +128,13 @@ function CourseExpandableCard({
                                 <h3 className="text-xl font-bold text-gray-800">
                                     {course.name}
                                 </h3>
-                                {course.isEnrolled && course.enrolledAt && (
-                                    <div className="flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
-                                        <CheckCircle className="text-green-600" size={14} />
-                                        <span className="text-xs font-semibold text-green-700">Мій курс</span>
-                                        <span className="text-xs text-green-600">•</span>
-                                        <span className="text-xs text-green-600">
-                                            {new Date(course.enrolledAt).toLocaleDateString('uk-UA', {
-                                                day: 'numeric',
-                                                month: 'long',
-                                                year: 'numeric'
-                                            })}
+                                {course.isEnrolled && accessDisplay && !isCatalogMode && (
+                                    <div className={`flex items-center gap-1.5 px-3 py-1 border rounded-full ${accessDisplay.className}`}>
+                                        <CheckCircle className={accessDisplay.iconColor} size={14} />
+                                        <span className="text-xs font-semibold">Мій курс</span>
+                                        <span className={`text-xs ${accessDisplay.iconColor}`}>•</span>
+                                        <span className="text-xs font-medium">
+                                            {accessDisplay.text}
                                         </span>
                                     </div>
                                 )}
@@ -120,38 +182,70 @@ function CourseExpandableCard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                            {!course.isEnrolled && onEnroll && (
-                                <button
-                                    onClick={() => onEnroll(course.id)}
-                                    className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors font-medium flex items-center gap-2"
-                                    title="Придбати курс"
-                                >
-                                    <ShoppingCart size={16} />
-                                    <span>Придбати</span>
-                                </button>
-                            )}
-                            {!course.isEnrolled && (
-                                <>
+                    <div className="flex items-center gap-4">
+                        {/* Price Display */}
+                        {isCatalogMode && (
+                            course.price ? (
+                                <div className="flex flex-col items-end">
+                                    {(course.discountAmount && course.discountAmount > 0) || (course.discountPercentage && course.discountPercentage > 0) ? (
+                                        <>
+                                            <div className="flex items-center gap-1.5 text-xs">
+                                                <span className="text-gray-400 line-through decoration-gray-400">{course.price}€</span>
+                                                <span className="bg-red-100 text-red-600 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                                    {course.discountAmount ? `-${course.discountAmount}€` : `-${course.discountPercentage}%`}
+                                                </span>
+                                            </div>
+                                            <div className="text-lg font-bold text-gray-900 leading-none">
+                                                {(course.discountAmount
+                                                    ? (course.price - course.discountAmount)
+                                                    : (course.price * (1 - (course.discountPercentage || 0) / 100))
+                                                ).toFixed(2)}€
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="text-lg font-bold text-gray-900">
+                                            {course.price}€
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                course.price === 0 && <span className="text-green-600 font-bold">Безкоштовно</span>
+                            )
+                        )}
+
+                        <div className="flex items-center gap-3">
+                            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                                {(!course.isEnrolled || isCatalogMode) && onEnroll && (
                                     <button
-                                        onClick={() => onEdit(course)}
-                                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                        title="Редагувати курс"
+                                        onClick={() => onEnroll(course.id)}
+                                        className="px-4 py-2 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors font-medium flex items-center gap-2"
+                                        title="Придбати курс"
                                     >
-                                        <Edit2 size={18} />
+                                        <ShoppingCart size={16} />
+                                        <span>Придбати</span>
                                     </button>
-                                    <button
-                                        onClick={() => onDelete(course)}
-                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Видалити курс"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
-                                </>
-                            )}
+                                )}
+                                {(!course.isEnrolled || isCatalogMode) && (
+                                    <>
+                                        <button
+                                            onClick={() => onEdit(course)}
+                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                            title="Редагувати курс"
+                                        >
+                                            <Edit2 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => onDelete(course)}
+                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            title="Видалити курс"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                            {isExpanded ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
                         </div>
-                        {isExpanded ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
                     </div>
                 </div>
             </div>

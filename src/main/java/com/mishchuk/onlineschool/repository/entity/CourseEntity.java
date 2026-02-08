@@ -25,8 +25,20 @@ public class CourseEntity {
     @Column(name = "modules_number")
     private Integer modulesNumber;
 
+    @Column(name = "access_duration")
+    private Integer accessDuration;
+
     @Column(name = "status")
     private String status;
+
+    @Column(name = "price")
+    private java.math.BigDecimal price;
+
+    @Column(name = "discount_amount")
+    private java.math.BigDecimal discountAmount;
+
+    @Column(name = "discount_percentage")
+    private Integer discountPercentage;
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<ModuleEntity> modules;

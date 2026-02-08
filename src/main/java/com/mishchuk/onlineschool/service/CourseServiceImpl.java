@@ -26,6 +26,15 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public void createCourse(CourseCreateDto dto) {
         CourseEntity entity = courseMapper.toEntity(dto);
+        entity.setStatus("PUBLISHED");
+
+        // Mutual exclusion for discounts
+        if (entity.getDiscountAmount() != null && entity.getDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            entity.setDiscountPercentage(null);
+        } else if (entity.getDiscountPercentage() != null && entity.getDiscountPercentage() > 0) {
+            entity.setDiscountAmount(null);
+        }
+
         CourseEntity savedCourse = courseRepository.save(entity);
 
         if (dto.moduleIds() != null && !dto.moduleIds().isEmpty()) {
@@ -76,10 +85,15 @@ public class CourseServiceImpl implements CourseService {
                             baseDto.description(),
                             baseDto.modulesNumber(),
                             baseDto.status(),
+                            baseDto.price(),
+                            baseDto.discountAmount(),
+                            baseDto.discountPercentage(),
+                            baseDto.accessDuration(),
                             baseDto.createdAt(),
                             baseDto.updatedAt(),
                             isEnrolled,
-                            enrolledAt);
+                            enrolledAt,
+                            isEnrolled ? enrollment.get().getStatus() : null);
                 })
                 .toList();
     }
@@ -90,6 +104,24 @@ public class CourseServiceImpl implements CourseService {
         CourseEntity entity = courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found"));
         courseMapper.updateEntityFromDto(dto, entity);
+
+        // Mutual exclusion for discounts
+        if (dto.discountAmount() != null && dto.discountAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            entity.setDiscountAmount(dto.discountAmount());
+            entity.setDiscountPercentage(null);
+        } else if (dto.discountPercentage() != null && dto.discountPercentage() > 0) {
+            entity.setDiscountPercentage(dto.discountPercentage());
+            entity.setDiscountAmount(null);
+        }
+        // If both are null/empty in DTO but user wanted to clear them,
+        // we might need more explicit logic, but assuming frontend sends 0 or null.
+        // If we want to allow clearing both:
+        if (dto.discountAmount() == null && dto.discountPercentage() == null) {
+            // Do nothing, keep existing or MapStruct handled it?
+            // If I want to clear, I should probably send logic for that.
+            // For now, let's strictly follow "if one is entered, remove other".
+        }
+
         CourseEntity savedCourse = courseRepository.save(entity);
 
         if (dto.moduleIds() != null) {

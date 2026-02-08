@@ -6,7 +6,7 @@ databaseChangeLog:
       file: changesing/002-create-courses-table.sql
       relativeToChangelogFile: true
   - include:
-      file: changesing/003-create-modules-table.sql
+      file: changesing/010-alter-courses-table-add-access-duration.sql
       relativeToChangelogFile: true
   - include:
       file: changesing/004-create-lessons-table.sql
@@ -25,4 +25,7 @@ databaseChangeLog:
       relativeToChangelogFile: true
   - include:
       file: changesing/009-add-lesson-relationship-to-files.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/011-alter-courses-table-add-price-and-discounts.sql
       relativeToChangelogFile: true

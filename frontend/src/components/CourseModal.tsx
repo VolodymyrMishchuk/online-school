@@ -22,16 +22,28 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
+    const [price, setPrice] = useState<number | undefined>(undefined);
+    const [discountAmount, setDiscountAmount] = useState<number | undefined>(undefined);
+    const [discountPercentage, setDiscountPercentage] = useState<number | undefined>(undefined);
+    const [accessDuration, setAccessDuration] = useState<number | undefined>(undefined);
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
 
     useEffect(() => {
         if (initialData) {
             setName(initialData.name);
             setDescription(initialData.description);
+            setPrice(initialData.price);
+            setDiscountAmount(initialData.discountAmount);
+            setDiscountPercentage(initialData.discountPercentage);
+            setAccessDuration(initialData.accessDuration);
             setSelectedModuleIds(initialModuleIds);
         } else {
             setName('');
             setDescription('');
+            setPrice(undefined);
+            setDiscountAmount(undefined);
+            setDiscountPercentage(undefined);
+            setAccessDuration(undefined);
             setSelectedModuleIds([]);
         }
     }, [initialData, isOpen, initialModuleIds]);
@@ -41,6 +53,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
         onSubmit({
             name,
             description,
+            price,
+            discountAmount,
+            discountPercentage,
+            accessDuration,
             moduleIds: selectedModuleIds
         });
         onClose();
@@ -103,6 +119,105 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                 rows={3}
                                 required
                             />
+                        </div>
+
+
+
+                        {/* Price and Discounts */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Price */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Ціна (€)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={price || ''}
+                                        onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="0.00"
+                                    />
+                                    <span className="absolute right-3 top-2 text-gray-400">€</span>
+                                </div>
+                                {price && (discountAmount || discountPercentage) ? (
+                                    <div className="mt-2 text-sm">
+                                        <span className="text-gray-500">Нова ціна: </span>
+                                        <span className="font-bold text-green-600">
+                                            {(discountAmount
+                                                ? (price - discountAmount)
+                                                : (price * (1 - (discountPercentage || 0) / 100))
+                                            ).toFixed(2)}€
+                                        </span>
+                                    </div>
+                                ) : null}
+                            </div>
+
+                            {/* Discount Fixed */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Знижка (Сума)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={discountAmount || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value ? parseFloat(e.target.value) : undefined;
+                                            setDiscountAmount(val);
+                                            if (val && val > 0) setDiscountPercentage(undefined);
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="0.00"
+                                    />
+                                    <span className="absolute right-3 top-2 text-gray-400">€</span>
+                                </div>
+                            </div>
+
+                            {/* Discount Percentage */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Знижка (%)
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={discountPercentage || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value ? parseInt(e.target.value) : undefined;
+                                            setDiscountPercentage(val);
+                                            if (val && val > 0) setDiscountAmount(undefined);
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-3 top-2 text-gray-400">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Access Duration */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Тривалість доступу (дні)
+                            </label>
+                            <input
+                                type="number"
+                                min="1"
+                                value={accessDuration || ''}
+                                onChange={(e) => setAccessDuration(e.target.value ? parseInt(e.target.value) : undefined)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Наприклад: 30"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Залиште порожнім для необмеженого доступу
+                            </p>
                         </div>
 
                         {/* Module Selection */}

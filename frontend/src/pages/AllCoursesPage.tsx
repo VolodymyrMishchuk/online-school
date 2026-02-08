@@ -61,6 +61,12 @@ export default function AllCoursesPage() {
     });
 
     const handleEnroll = (courseId: string) => {
+        const course = courses?.find(c => c.id === courseId);
+        if (course?.isEnrolled) {
+            alert('Ви вже придбали цей курс!');
+            return;
+        }
+
         if (userId) {
             enrollMutation.mutate({ studentId: userId, courseId });
         }
@@ -148,6 +154,7 @@ export default function AllCoursesPage() {
                             onEnroll={handleEnroll}
                             onEditLesson={() => { }} // TODO: Add lesson edit handler if needed from here
                             onDeleteLesson={() => { }} // TODO: Add lesson delete handler if needed from here
+                            isCatalogMode={true}
                         />
                     ))}
                 </div>

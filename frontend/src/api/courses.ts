@@ -6,13 +6,22 @@ export interface CourseDto {
     description: string;
     modulesNumber: number;
     status: string;
+    price?: number;
+    discountAmount?: number;
+    discountPercentage?: number;
+    accessDuration?: number; // Days
     isEnrolled?: boolean;
     enrolledAt?: string; // ISO string
+    enrollmentStatus?: string;
 }
 
 export interface CreateCourseDto {
     name: string;
     description: string;
+    price?: number;
+    discountAmount?: number;
+    discountPercentage?: number;
+    accessDuration?: number;
     moduleIds?: string[];
 }
 
@@ -20,6 +29,10 @@ export interface UpdateCourseDto {
     name: string;
     description: string;
     status: string;
+    price?: number;
+    discountAmount?: number;
+    discountPercentage?: number;
+    accessDuration?: number;
     moduleIds?: string[];
 }
 

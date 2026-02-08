@@ -728,6 +728,20 @@ components:
           type: string
           enum: [DRAFT, PUBLISHED, ARCHIVED]
           default: DRAFT
+        price:
+          type: number
+          format: double
+          description: Ціна курсу
+        discountAmount:
+          type: number
+          format: double
+          description: Фіксована сума знижки
+        discountPercentage:
+          type: integer
+          description: Відсоток знижки
+        accessDuration:
+          type: integer
+          description: Тривалість доступу в днях
 
     CourseDto:
       type: object
@@ -744,6 +758,17 @@ components:
         status:
           type: string
           enum: [DRAFT, PUBLISHED, ARCHIVED]
+        price:
+          type: number
+          format: double
+        discountAmount:
+          type: number
+          format: double
+        discountPercentage:
+          type: integer
+        accessDuration:
+          type: integer
+          description: Тривалість доступу в днях
 
     CourseUpdateDto:
       type: object
@@ -755,6 +780,14 @@ components:
         status:
           type: string
           enum: [DRAFT, PUBLISHED, ARCHIVED]
+        price:
+          type: number
+          format: double
+        discountAmount:
+          type: number
+          format: double
+        discountPercentage:
+          type: integer
 
     # ==================== Module Schemas ====================
     ModuleCreateDto:
@@ -886,7 +919,7 @@ components:
           format: date-time
         status:
           type: string
-          enum: [ACTIVE, COMPLETED, CANCELLED]
+          enum: [ACTIVE, COMPLETED, CANCELLED, BLOCKED]
 
     # ==================== File Schemas ====================
     FileDto:
