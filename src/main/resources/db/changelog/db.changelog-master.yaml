@@ -29,3 +29,9 @@ databaseChangeLog:
   - include:
       file: changesing/011-alter-courses-table-add-price-and-discounts.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/012-alter-enrollments-add-cascade-delete.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/013-alter-files-fk-set-null.sql
+      relativeToChangelogFile: true

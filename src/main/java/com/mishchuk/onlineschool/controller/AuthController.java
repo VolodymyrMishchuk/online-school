@@ -41,6 +41,7 @@ public class AuthController {
         private final JwtUtils jwtUtils;
         private final PersonService personService;
         private final RefreshTokenService refreshTokenService;
+        private final com.mishchuk.onlineschool.service.email.EmailService emailService;
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(
@@ -64,6 +65,9 @@ public class AuthController {
                 setRefreshTokenCookie(response, refreshToken.getToken());
 
                 log.info("User registered and authenticated successfully: {}", request.email());
+
+                // Send welcome email
+                emailService.sendWelcomeEmail(request.email(), request.firstName() + " " + request.lastName());
 
                 // Повертаємо 200 OK замість 201 Created
                 return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name()));

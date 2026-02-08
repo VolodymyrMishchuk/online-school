@@ -24,6 +24,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final PersonRepository personRepository;
     private final CourseRepository courseRepository;
     private final EnrollmentMapper enrollmentMapper;
+    private final com.mishchuk.onlineschool.service.email.EmailService emailService;
 
     @Override
     @Transactional
@@ -41,6 +42,10 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         entity.setStudent(student);
         entity.setCourse(course);
         enrollmentRepository.save(entity);
+
+        // Send purchase email
+        emailService.sendCoursePurchaseEmail(student.getEmail(), student.getFirstName() + " " + student.getLastName(),
+                course.getName());
     }
 
     @Override
