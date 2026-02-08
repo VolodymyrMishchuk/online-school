@@ -34,11 +34,13 @@ public class PersonEntity {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "role")
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private PersonRole role = PersonRole.USER;
 
-    @Column(name = "status")
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private PersonStatus status = PersonStatus.ACTIVE;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<EnrollmentEntity> enrollments;

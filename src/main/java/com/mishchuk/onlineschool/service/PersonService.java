@@ -6,15 +6,16 @@ import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface PersonService {
     void createPerson(PersonCreateDto dto);
 
-    Optional<PersonDto> getPerson(java.util.UUID id);
+    Optional<PersonDto> getPerson(UUID id);
 
     List<PersonDto> getAllPersons();
 
-    void updatePerson(java.util.UUID id, PersonUpdateDto dto);
+    void updatePerson(UUID id, PersonUpdateDto dto);
 
-    void deletePerson(java.util.UUID id);
+    void deletePerson(UUID id);
 }

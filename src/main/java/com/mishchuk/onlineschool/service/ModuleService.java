@@ -1,5 +1,6 @@
 package com.mishchuk.onlineschool.service;
 
+import com.mishchuk.onlineschool.controller.dto.LessonDto;
 import com.mishchuk.onlineschool.controller.dto.ModuleCreateDto;
 import com.mishchuk.onlineschool.controller.dto.ModuleDto;
 import com.mishchuk.onlineschool.controller.dto.ModuleUpdateDto;
@@ -13,6 +14,8 @@ public interface ModuleService {
     Optional<ModuleDto> getModule(java.util.UUID id);
 
     List<ModuleDto> getAllModules();
+
+    List<LessonDto> getModuleLessons(java.util.UUID moduleId);
 
     void updateModule(java.util.UUID id, ModuleUpdateDto dto);
 

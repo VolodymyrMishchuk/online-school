@@ -1,6 +1,7 @@
 spring:
   application:
     name: online-school
+
   datasource:
     url: jdbc:postgresql://localhost:5432/onlineschool
     username: user
@@ -14,5 +15,23 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
 server:
   port: 8080
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET:placeholder}
+      expiration: 900000 # 15 minutes for access token
+      refresh-token-expiration: 604800000 # 7 days for refresh token
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: online-school-files

@@ -13,6 +13,8 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface ModuleMapper {
     @Mapping(target = "courseId", source = "course.id")
+    @Mapping(target = "lessonsNumber", expression = "java(entity.getLessons() != null ? entity.getLessons().size() : 0)")
+    @Mapping(target = "durationMinutes", expression = "java(entity.getLessons() != null ? entity.getLessons().stream().mapToInt(l -> l.getDurationMinutes() != null ? l.getDurationMinutes() : 0).sum() : 0)")
     ModuleDto toDto(ModuleEntity entity);
 
     @Mapping(target = "course.id", source = "courseId")
@@ -21,6 +23,7 @@ public interface ModuleMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "lessonsNumber", ignore = true)
     ModuleEntity toEntity(ModuleCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -1,0 +1,201 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { createCourse, deleteCourse, getCourses, updateCourse } from '../api/courses';
+import type { CourseDto, CreateCourseDto } from '../api/courses';
+import { enrollInCourse } from '../api/enrollments';
+import { getModules } from '../api/modules';
+import { CourseModal } from '../components/CourseModal';
+import CourseExpandableCard from '../components/CourseExpandableCard';
+import { BookOpen, Plus } from 'lucide-react';
+import { useState } from 'react';
+
+export default function AllCoursesPage() {
+    const queryClient = useQueryClient();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingCourse, setEditingCourse] = useState<CourseDto | undefined>(undefined);
+    const [courseToDelete, setCourseToDelete] = useState<CourseDto | null>(null);
+
+    const userId = localStorage.getItem('userId') || '';
+
+    const { data: courses, isLoading: coursesLoading } = useQuery({
+        queryKey: ['allCourses', userId],
+        queryFn: () => getCourses(userId)
+    });
+
+    const { data: modules } = useQuery({
+        queryKey: ['allModules'],
+        queryFn: getModules
+    });
+
+    const createMutation = useMutation({
+        mutationFn: createCourse,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+            queryClient.invalidateQueries({ queryKey: ['allModules'] }); // Update modules status
+        }
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: (data: { id: string; dto: any }) => updateCourse(data.id, data.dto),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+            queryClient.invalidateQueries({ queryKey: ['allModules'] }); // Update modules status
+        }
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteCourse,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+            queryClient.invalidateQueries({ queryKey: ['allModules'] }); // Update modules status
+            setCourseToDelete(null);
+        }
+    });
+
+    const enrollMutation = useMutation({
+        mutationFn: ({ studentId, courseId }: { studentId: string; courseId: string }) =>
+            enrollInCourse(studentId, courseId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+            queryClient.invalidateQueries({ queryKey: ['myEnrollments'] });
+        }
+    });
+
+    const handleEnroll = (courseId: string) => {
+        if (userId) {
+            enrollMutation.mutate({ studentId: userId, courseId });
+        }
+    };
+
+    const handleCreateClick = () => {
+        setEditingCourse(undefined);
+        setIsModalOpen(true);
+    };
+
+    const handleEditClick = (course: CourseDto) => {
+        setEditingCourse(course);
+        setIsModalOpen(true);
+    };
+
+    const handleDeleteClick = (course: CourseDto) => {
+        setCourseToDelete(course);
+    };
+
+    const confirmDelete = () => {
+        if (courseToDelete) {
+            deleteMutation.mutate(courseToDelete.id);
+        }
+    };
+
+    const handleModalSubmit = (data: CreateCourseDto) => {
+        if (editingCourse) {
+            updateMutation.mutate({
+                id: editingCourse.id,
+                dto: {
+                    ...data,
+                    status: editingCourse.status // Preserve status for now
+                }
+            });
+        } else {
+            createMutation.mutate(data);
+        }
+    };
+
+    if (coursesLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-brand-primary font-medium">Завантаження курсів...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mx-auto px-6 py-12">
+            <div className="flex justify-between items-center mb-8">
+                <div className="flex items-center gap-3">
+                    <BookOpen className="w-8 h-8 text-brand-primary" />
+                    <h1 className="text-3xl font-bold text-brand-dark">Всі курси</h1>
+                    <span className="text-gray-400 font-medium">({courses?.length || 0})</span>
+                </div>
+                <button
+                    onClick={handleCreateClick}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                >
+                    <Plus size={20} />
+                    Додати Курс
+                </button>
+            </div>
+
+            {courses?.length === 0 ? (
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-16 text-center">
+                    <p className="text-gray-500 mb-6">Курсів поки що немає</p>
+                    <button
+                        onClick={handleCreateClick}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        <Plus size={20} />
+                        Створити Перший Курс
+                    </button>
+                </div>
+            ) : (
+                <div className="flex flex-col gap-6">
+                    {courses?.map((course) => (
+                        <CourseExpandableCard
+                            key={course.id}
+                            course={course}
+                            modules={modules || []}
+                            onEdit={handleEditClick}
+                            onDelete={handleDeleteClick}
+                            onEnroll={handleEnroll}
+                            onEditLesson={() => { }} // TODO: Add lesson edit handler if needed from here
+                            onDeleteLesson={() => { }} // TODO: Add lesson delete handler if needed from here
+                        />
+                    ))}
+                </div>
+            )}
+
+            <CourseModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleModalSubmit}
+                modules={modules || []}
+                initialData={editingCourse}
+                initialModuleIds={
+                    editingCourse && modules
+                        ? modules.filter(m => m.courseId === editingCourse.id).map(m => m.id)
+                        : []
+                }
+            />
+
+            {/* Delete Confirmation Modal */}
+            {courseToDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">
+                            Видалити курс "{courseToDelete.name}"?
+                        </h3>
+                        <div className="mb-6 text-gray-600">
+                            <p className="mb-2">Ви впевнені, що хочете видалити цей курс?</p>
+                            <p className="text-red-600 font-medium bg-red-50 p-3 rounded-lg border border-red-100">
+                                ⚠️ Увага: Ця дія також видалить всі модулі та уроки, які входять до складу цього курсу!
+                            </p>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => setCourseToDelete(null)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                Скасувати
+                            </button>
+                            <button
+                                onClick={confirmDelete}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                            >
+                                Видалити
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}

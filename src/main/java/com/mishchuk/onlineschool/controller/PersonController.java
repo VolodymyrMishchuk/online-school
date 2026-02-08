@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/persons")
@@ -25,7 +26,7 @@ public class PersonController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PersonDto> getPerson(@PathVariable java.util.UUID id) {
+    public ResponseEntity<PersonDto> getPerson(@PathVariable UUID id) {
         return personService.getPerson(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -41,7 +42,7 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updatePerson(@PathVariable java.util.UUID id, @RequestBody PersonUpdateDto dto) {
+    public ResponseEntity<Void> updatePerson(@PathVariable UUID id, @RequestBody PersonUpdateDto dto) {
         try {
             personService.updatePerson(id, dto);
             return ResponseEntity.noContent().build();
@@ -52,7 +53,7 @@ public class PersonController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePerson(@PathVariable java.util.UUID id) {
+    public ResponseEntity<Void> deletePerson(@PathVariable UUID id) {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();
     }

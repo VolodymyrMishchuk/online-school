@@ -5,6 +5,7 @@ export interface EnrollmentDto {
     studentId: string;
     courseId: string;
     status: string;
+    createdAt?: string; // ISO string
 }
 
 export const getMyEnrollments = async (studentId: string): Promise<EnrollmentDto[]> => {

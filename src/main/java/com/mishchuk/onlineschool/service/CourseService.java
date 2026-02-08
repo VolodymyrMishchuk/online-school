@@ -14,6 +14,8 @@ public interface CourseService {
 
     List<CourseDto> getAllCourses();
 
+    List<CourseDto> getAllCoursesWithEnrollment(java.util.UUID userId);
+
     void updateCourse(java.util.UUID id, CourseUpdateDto dto);
 
     void deleteCourse(java.util.UUID id);

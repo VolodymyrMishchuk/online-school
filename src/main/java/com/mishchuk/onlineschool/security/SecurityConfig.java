@@ -17,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -54,7 +55,20 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/lessons", "/lessons/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/lessons").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/lessons/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/lessons/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/modules", "/modules/**").permitAll()
+                        .requestMatchers("/api/files/my-files").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/files/**").authenticated()
+                        .requestMatchers("/api/files/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/files/**").authenticated()
+                        .requestMatchers("/api/files/**").authenticated()
                         .anyRequest().authenticated())
+                .exceptionHandling(e -> e.authenticationEntryPoint(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(
+                                org.springframework.http.HttpStatus.UNAUTHORIZED)))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -12,7 +12,9 @@ export interface LoginRequest {
 }
 
 export const login = async (request: LoginRequest): Promise<AuthResponse> => {
-    const response = await client.post<AuthResponse>('/auth/login', request);
+    const response = await client.post<AuthResponse>('/auth/login', request, {
+        withCredentials: true // Enable sending/receiving cookies
+    });
     return response.data;
 };
 
@@ -25,6 +27,26 @@ export interface RegisterRequest {
     password: string;
 }
 
-export const register = async (request: RegisterRequest): Promise<void> => {
-    await client.post('/auth/register', request);
+export const register = async (request: RegisterRequest): Promise<AuthResponse> => {
+    const response = await client.post<AuthResponse>('/auth/register', request, {
+        withCredentials: true // Enable sending/receiving cookies
+    });
+    return response.data;
+};
+
+export const refreshAccessToken = async (): Promise<AuthResponse> => {
+    const response = await client.post<AuthResponse>('/auth/refresh', {}, {
+        withCredentials: true // Send refresh token cookie
+    });
+    return response.data;
+};
+
+export const logout = async (): Promise<void> => {
+    await client.post('/auth/logout', {}, {
+        withCredentials: true
+    });
+    // Clear local storage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
 };

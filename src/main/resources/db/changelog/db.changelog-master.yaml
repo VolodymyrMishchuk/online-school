@@ -17,3 +17,12 @@ databaseChangeLog:
   - include:
       file: changesing/006-alter-modules-table.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/007-create-refresh-tokens-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/008-create-files-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/009-add-lesson-relationship-to-files.sql
+      relativeToChangelogFile: true

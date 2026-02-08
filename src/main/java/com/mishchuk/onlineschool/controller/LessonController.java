@@ -1,8 +1,10 @@
 package com.mishchuk.onlineschool.controller;
 
+import com.mishchuk.onlineschool.controller.dto.FileDto;
 import com.mishchuk.onlineschool.controller.dto.LessonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.LessonDto;
 import com.mishchuk.onlineschool.controller.dto.LessonUpdateDto;
+import com.mishchuk.onlineschool.service.FileStorageService;
 import com.mishchuk.onlineschool.service.LessonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,11 +20,24 @@ import java.util.UUID;
 public class LessonController {
 
     private final LessonService lessonService;
+    private final FileStorageService fileStorageService;
 
     @PostMapping
-    public ResponseEntity<Void> createLesson(@RequestBody LessonCreateDto dto) {
-        lessonService.createLesson(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<LessonDto> createLesson(@RequestBody LessonCreateDto dto) {
+        LessonDto createdLesson = lessonService.createLesson(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LessonDto>> getAllLessons() {
+        List<LessonDto> lessons = lessonService.getAllLessons();
+        return ResponseEntity.ok(lessons);
+    }
+
+    @GetMapping("/unassigned")
+    public ResponseEntity<List<LessonDto>> getUnassignedLessons() {
+        List<LessonDto> lessons = lessonService.getUnassignedLessons();
+        return ResponseEntity.ok(lessons);
     }
 
     @GetMapping("/{id}")
@@ -30,6 +45,12 @@ public class LessonController {
         return lessonService.getLesson(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<FileDto>> getLessonFiles(@PathVariable UUID id) {
+        List<FileDto> files = fileStorageService.getLessonFiles(id);
+        return ResponseEntity.ok(files);
     }
 
     @PutMapping("/{id}")

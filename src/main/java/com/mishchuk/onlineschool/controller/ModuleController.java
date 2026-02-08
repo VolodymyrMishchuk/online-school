@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/modules")
@@ -25,7 +26,7 @@ public class ModuleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ModuleDto> getModule(@PathVariable java.util.UUID id) {
+    public ResponseEntity<ModuleDto> getModule(@PathVariable UUID id) {
         return moduleService.getModule(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -34,14 +35,18 @@ public class ModuleController {
     @GetMapping
     public ResponseEntity<List<ModuleDto>> getAllModules() {
         List<ModuleDto> modules = moduleService.getAllModules();
-        if (modules.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
         return ResponseEntity.ok(modules);
     }
 
+    @GetMapping("/{id}/lessons")
+    public ResponseEntity<List<com.mishchuk.onlineschool.controller.dto.LessonDto>> getModuleLessons(
+            @PathVariable UUID id) {
+        List<com.mishchuk.onlineschool.controller.dto.LessonDto> lessons = moduleService.getModuleLessons(id);
+        return ResponseEntity.ok(lessons);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateModule(@PathVariable java.util.UUID id, @RequestBody ModuleUpdateDto dto) {
+    public ResponseEntity<Void> updateModule(@PathVariable UUID id, @RequestBody ModuleUpdateDto dto) {
         try {
             moduleService.updateModule(id, dto);
             return ResponseEntity.noContent().build();
@@ -51,7 +56,7 @@ public class ModuleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteModule(@PathVariable java.util.UUID id) {
+    public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
         moduleService.deleteModule(id);
         return ResponseEntity.noContent().build();
     }

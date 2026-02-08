@@ -1,374 +1,751 @@
-openapi: 3.0.0
+openapi: 3.0.3
 info:
   title: Online School API
+  description: REST API для платформи онлайн-навчання. Включає управління курсами, модулями, уроками, користувачами, реєстрацією на курси та файлами.
   version: 1.0.0
-paths:
-  /persons:
-    post:
-      summary: Create person
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PersonCreate'
-      responses:
-        '201':
-          description: Created
-    get:
-      summary: Retrieve all persons
-      responses:
-        '200':
-          description: List of persons
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Person'
-        '204':
-          description: No persons found
-  /persons/{id}:
-    get:
-      summary: Retrieve single person
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Person details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Person'
-        '404':
-          description: Not found
-        '204':
-           description: No content
-    put:
-      summary: Update person
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PersonUpdate'
-      responses:
-        '204':
-          description: Updated
-    delete:
-      summary: Delete person
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '204':
-          description: Deleted
+  contact:
+    name: API Support
+    email: support@onlineschool.com
 
-  /courses:
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: Реєстрація, логін, refresh token, logout
+  - name: Courses
+    description: Управління курсами
+  - name: Modules
+    description: Управління модулями курсів
+  - name: Lessons
+    description: Управління уроками
+  - name: Enrollments
+    description: Реєстрація студентів на курси
+  - name: Persons
+    description: Управління користувачами
+  - name: Files
+    description: Завантаження та керування файлами
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== Authentication ====================
+  /api/auth/register:
     post:
-      summary: Create course
+      tags:
+        - Authentication
+      summary: Реєстрація нового користувача
+      operationId: register
+      security: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CourseCreate'
-      responses:
-        '201':
-          description: Created
-    get:
-      summary: Retrieve all courses
+              $ref: '#/components/schemas/PersonCreateDto'
       responses:
         '200':
-          description: List of courses
+          description: Успішна реєстрація
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              description: Refresh token as HTTP-only cookie
+              schema:
+                type: string
+                example: refreshToken=abc123; HttpOnly; Secure; Path=/; Max-Age=604800
+        '400':
+          description: Невалідні дані
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Логін користувача
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успішний логін
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              description: Refresh token as HTTP-only cookie
+              schema:
+                type: string
+        '401':
+          description: Невірні credentials
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Оновлення access token
+      operationId: refreshToken
+      security: []
+      parameters:
+        - in: cookie
+          name: refreshToken
+          required: true
+          schema:
+            type: string
+          description: Refresh token from cookie
+      responses:
+        '200':
+          description: Новий access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Невалідний refresh token
+
+  /api/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Вихід користувача
+      operationId: logout
+      responses:
+        '200':
+          description: Успішний logout
+        '401':
+          description: Unauthorized
+
+  # ==================== Courses ====================
+  /courses:
+    get:
+      tags:
+        - Courses
+      summary: Отримати всі курси
+      operationId: getAllCourses
+      security: []
+      responses:
+        '200':
+          description: Список курсів
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: '#/components/schemas/CourseDto'
         '204':
-          description: No courses found
+          description: Немає курсів
+    post:
+      tags:
+        - Courses
+      summary: Створити новий курс
+      operationId: createCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreateDto'
+      responses:
+        '201':
+          description: Курс створено
+        '400':
+          description: Невалідні дані
+
   /courses/{id}:
     get:
-      summary: Retrieve single course
+      tags:
+        - Courses
+      summary: Отримати курс за ID
+      operationId: getCourse
+      security: []
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/IdPathParam'
       responses:
         '200':
-          description: Course details
+          description: Деталі курсу
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: '#/components/schemas/CourseDto'
         '404':
-          description: Not found
-        '204':
-          description: No content
+          description: Курс не знайдено
     put:
-      summary: Update course
+      tags:
+        - Courses
+      summary: Оновити курс
+      operationId: updateCourse
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/IdPathParam'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CourseUpdate'
+              $ref: '#/components/schemas/CourseUpdateDto'
       responses:
         '204':
-          description: Updated
+          description: Курс оновлено
+        '404':
+          description: Курс не знайдено
     delete:
-      summary: Delete course
+      tags:
+        - Courses
+      summary: Видалити курс
+      operationId: deleteCourse
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - $ref: '#/components/parameters/IdPathParam'
       responses:
         '204':
-          description: Deleted
+          description: Курс видалено
 
+  # ==================== Modules ====================
   /modules:
-    post:
-      summary: Create module
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ModuleCreate'
-      responses:
-        '201':
-          description: Created
     get:
-      summary: Retrieve all modules
+      tags:
+        - Modules
+      summary: Отримати всі модулі
+      operationId: getAllModules
       responses:
         '200':
-          description: List of modules
+          description: Список модулів
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Module'
+                  $ref: '#/components/schemas/ModuleDto'
         '204':
-          description: No modules found
-  /modules/{id}:
-    get:
-      summary: Retrieve single module
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Module details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Module'
-        '404':
-          description: Not found
-        '204':
-          description: No content
-    put:
-      summary: Update module
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
+          description: Немає модулів
+    post:
+      tags:
+        - Modules
+      summary: Створити новий модуль
+      operationId: createModule
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ModuleUpdate'
+              $ref: '#/components/schemas/ModuleCreateDto'
+      responses:
+        '201':
+          description: Модуль створено
+
+  /modules/{id}:
+    get:
+      tags:
+        - Modules
+      summary: Отримати модуль за ID
+      operationId: getModule
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі модуля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleDto'
+        '404':
+          description: Модуль не знайдено
+    put:
+      tags:
+        - Modules
+      summary: Оновити модуль
+      operationId: updateModule
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleUpdateDto'
       responses:
         '204':
-          description: Updated
+          description: Модуль оновлено
+        '404':
+          description: Модуль не знайдено
     delete:
-      summary: Delete module
+      tags:
+        - Modules
+      summary: Видалити модуль
+      operationId: deleteModule
       parameters:
-        - name: id
-          in: path
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Модуль видалено
+
+  # ==================== Lessons ====================
+  /lessons:
+    post:
+      tags:
+        - Lessons
+      summary: Створити новий урок
+      operationId: createLesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonCreateDto'
+      responses:
+        '201':
+          description: Урок створено
+
+  /lessons/{id}:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати урок за ID
+      operationId: getLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі уроку
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonDto'
+        '404':
+          description: Урок не знайдено
+    put:
+      tags:
+        - Lessons
+      summary: Оновити урок
+      operationId: updateLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonUpdateDto'
+      responses:
+        '204':
+          description: Урок оновлено
+        '404':
+          description: Урок не знайдено
+    delete:
+      tags:
+        - Lessons
+      summary: Видалити урок
+      operationId: deleteLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Урок видалено
+
+  # ==================== Enrollments ====================
+  /enrollments:
+    get:
+      tags:
+        - Enrollments
+      summary: Отримати реєстрації
+      operationId: getEnrollments
+      parameters:
+        - in: query
+          name: studentId
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Фільтр по ID студента
+      responses:
+        '200':
+          description: Список реєстрацій
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnrollmentDto'
+    post:
+      tags:
+        - Enrollments
+      summary: Зареєструвати студента на курс
+      operationId: createEnrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentCreateDto'
+      responses:
+        '201':
+          description: Реєстрація створена
+        '400':
+          description: Невалідні дані
+
+  # ==================== Persons ====================
+  /persons:
+    get:
+      tags:
+        - Persons
+      summary: Отримати всіх користувачів
+      operationId: getAllPersons
+      responses:
+        '200':
+          description: Список користувачів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonDto'
+        '204':
+          description: Немає користувачів
+    post:
+      tags:
+        - Persons
+      summary: Створити користувача
+      operationId: createPerson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonCreateDto'
+      responses:
+        '201':
+          description: Користувача створено
+
+  /persons/{id}:
+    get:
+      tags:
+        - Persons
+      summary: Отримати користувача за ID
+      operationId: getPerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі користувача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonDto'
+        '404':
+          description: Користувача не знайдено
+    put:
+      tags:
+        - Persons
+      summary: Оновити користувача
+      operationId: updatePerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonUpdateDto'
+      responses:
+        '204':
+          description: Користувача оновлено
+        '404':
+          description: Користувача не знайдено
+    delete:
+      tags:
+        - Persons
+      summary: Видалити користувача
+      operationId: deletePerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Користувача видалено
+
+
+
+  # ==================== Files ====================
+  /api/files/upload:
+    post:
+      tags:
+        - Files
+      summary: Завантажити файл
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл для завантаження (PDF, JPEG, PNG)
+                entityType:
+                  type: string
+                  description: Тип entity (COURSE, MODULE, LESSON)
+                  example: COURSE
+                entityId:
+                  type: string
+                  format: uuid
+                  description: ID entity, до якої прив'язаний файл
+      responses:
+        '200':
+          description: Файл завантажено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDto'
+        '400':
+          description: Невалідний файл
+
+  /api/files/{fileId}:
+    get:
+      tags:
+        - Files
+      summary: Завантажити файл
+      operationId: downloadFile
+      security: []
+      parameters:
+        - in: path
+          name: fileId
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Файл
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: 'attachment; filename="..."'
+        '404':
+          description: Файл не знайдено
+    delete:
+      tags:
+        - Files
+      summary: Видалити файл
+      operationId: deleteFile
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '204':
-          description: Deleted
+          description: Файл видалено
+        '404':
+          description: Файл не знайдено
 
+  /api/files/entity/{entityType}/{entityId}:
+    get:
+      tags:
+        - Files
+      summary: Отримати файли для entity
+      operationId: getFilesForEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            type: string
+            enum: [COURSE, MODULE, LESSON]
+        - in: path
+          name: entityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Список файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
+
+  /api/files/my-files:
+    get:
+      tags:
+        - Files
+      summary: Отримати мої файли
+      operationId: getMyFiles
+      responses:
+        '200':
+          description: Список моїх файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
+
+# ==================== Components ====================
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID ідентифікатор
+
   schemas:
-    PersonCreate:
+    # ==================== Auth Schemas ====================
+    AuthRequest:
       type: object
+      required:
+        - email
+        - password
       properties:
-        first_name:
-          type: string
-        last_name:
-          type: string
-        borned_at:
-          type: string
-          format: date-time
-        phone_number:
-          type: string
         email:
           type: string
+          format: email
+          example: user@example.com
         password:
           type: string
-    Person:
+          format: password
+          example: password123
+
+    AuthResponse:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
-        role:
+        accessToken:
           type: string
-        first_name:
+          description: JWT access token (15 хвилин)
+        tokenType:
           type: string
-        last_name:
+          example: Bearer
+        userId:
           type: string
-        borned_at:
-          type: string
-          format: date-time
-        phone_number:
-          type: string
+          format: uuid
         email:
           type: string
-        status:
+          format: email
+        role:
           type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    PersonUpdate:
+          enum: [USER, ADMIN]
+
+    # ==================== Person Schemas ====================
+    PersonCreateDto:
       type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
       properties:
-        role:
+        firstName:
           type: string
-        first_name:
+          example: John
+        lastName:
           type: string
-        last_name:
-          type: string
-        borned_at:
-          type: string
-          format: date-time
-        phone_number:
-          type: string
+          example: Doe
         email:
           type: string
+          format: email
+          example: john.doe@example.com
         password:
           type: string
-        status:
-          type: string
+          format: password
+          minLength: 6
 
-    CourseCreate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-    Course:
+    PersonDto:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        name:
           type: string
-        description:
+          format: uuid
+        firstName:
           type: string
-        modules_number:
-          type: integer
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN]
         status:
           type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    CourseUpdate:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        status:
-          type: string
+          enum: [ACTIVE, BLOCKED]
 
-    ModuleCreate:
+    PersonUpdateDto:
       type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+
+
+
+    # ==================== Course Schemas ====================
+    CourseCreateDto:
+      type: object
+      required:
+        - name
+        - description
       properties:
         name:
           type: string
-        course:
-          type: string
+          example: Introduction to Java
         description:
           type: string
-    Module:
+          example: Learn Java programming from scratch
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+          default: DRAFT
+
+    CourseDto:
       type: object
       properties:
         id:
-          type: integer
-          format: int64
-        name:
           type: string
-        course:
+          format: uuid
+        name:
           type: string
         description:
           type: string
-        lessons_number:
+        modulesNumber:
           type: integer
         status:
           type: string
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    ModuleUpdate:
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+
+    CourseUpdateDto:
       type: object
       properties:
         name:
@@ -377,3 +754,167 @@ components:
           type: string
         status:
           type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+
+    # ==================== Module Schemas ====================
+    ModuleCreateDto:
+      type: object
+      required:
+        - name
+        - description
+        - courseId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+
+    ModuleDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+        courseName:
+          type: string
+        orderIndex:
+          type: integer
+
+    ModuleUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+
+    # ==================== Lesson Schemas ====================
+    LessonCreateDto:
+      type: object
+      required:
+        - title
+        - content
+        - moduleId
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        moduleId:
+          type: string
+          format: uuid
+        orderIndex:
+          type: integer
+
+    LessonDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        moduleId:
+          type: string
+          format: uuid
+        moduleName:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+          description: Тривалість в хвилинах
+
+    LessonUpdateDto:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+
+    # ==================== Enrollment Schemas ====================
+    EnrollmentCreateDto:
+      type: object
+      required:
+        - studentId
+        - courseId
+      properties:
+        studentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+
+    EnrollmentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+        courseName:
+          type: string
+        enrollmentDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [ACTIVE, COMPLETED, CANCELLED]
+
+    # ==================== File Schemas ====================
+    FileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        originalName:
+          type: string
+        contentType:
+          type: string
+          example: application/pdf
+        fileSize:
+          type: integer
+          format: int64
+          description: Розмір в байтах
+        uploadedAt:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
+          example: /api/files/uuid
+        relatedEntityType:
+          type: string
+          enum: [COURSE, MODULE, LESSON]
+        relatedEntityId:
+          type: string
+          format: uuid

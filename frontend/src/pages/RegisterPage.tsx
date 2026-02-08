@@ -17,12 +17,13 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
         try {
-            // Format date to ISO OffsetDateTime equivalent roughly
-            // We'll just assume UTC or append 'T00:00:00Z'
+            // Format date to ISO OffsetDateTime
             const bornedAt = new Date(formData.birthDate).toISOString();
 
-            await register({
+            const response = await register({
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
@@ -30,10 +31,17 @@ export default function RegisterPage() {
                 bornedAt: bornedAt,
                 password: formData.password
             });
-            alert('Registration successful! Please login.');
-            navigate('/login');
+
+            // Зберігаємо токен та дані користувача
+            localStorage.setItem('token', response.accessToken);
+            localStorage.setItem('userId', response.userId);
+            localStorage.setItem('userRole', response.role);
+
+            // Перенаправляємо на dashboard
+            navigate('/dashboard');
         } catch (err: any) {
-            setError('Registration failed: ' + (err.response?.data?.message || err.message));
+            const message = err.response?.data?.message || err.message;
+            setError(message);
         }
     };
 

@@ -14,9 +14,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface LessonMapper {
 
     @Mapping(target = "moduleId", source = "module.id")
+    @Mapping(target = "moduleName", source = "module.name")
+    @Mapping(target = "courseName", source = "module.course.name")
     LessonDto toDto(LessonEntity entity);
 
-    @Mapping(target = "module.id", source = "moduleId")
+    @Mapping(target = "module", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ModuleRepository extends JpaRepository<ModuleEntity, java.util.UUID> {
+    java.util.List<ModuleEntity> findByCourseId(java.util.UUID courseId);
 }

@@ -8,4 +8,6 @@ import java.util.UUID;
 @Repository
 public interface LessonRepository extends JpaRepository<LessonEntity, UUID> {
     java.util.List<LessonEntity> findByModuleId(UUID moduleId);
+
+    java.util.List<LessonEntity> findByModuleIdIsNull();
 }

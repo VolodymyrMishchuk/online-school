@@ -8,9 +8,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface LessonService {
-    void createLesson(LessonCreateDto dto);
+    LessonDto createLesson(LessonCreateDto dto);
 
     Optional<LessonDto> getLesson(UUID id);
+
+    List<LessonDto> getAllLessons();
+
+    List<LessonDto> getUnassignedLessons();
 
     List<LessonDto> getLessonsByModule(UUID moduleId);
 

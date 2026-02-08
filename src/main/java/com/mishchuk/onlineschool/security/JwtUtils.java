@@ -13,16 +13,20 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 @Component
 public class JwtUtils {
 
-    @Value("${application.security.jwt.secret-key:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     @Value("${application.security.jwt.expiration:86400000}")
     private long jwtExpiration;
+
+    @Value("${application.security.jwt.refresh-token-expiration:604800000}")
+    private long refreshTokenExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -41,12 +45,35 @@ public class JwtUtils {
         return buildToken(extraClaims, userDetails, jwtExpiration);
     }
 
+    public String generateRefreshToken(UUID personId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("personId", personId.toString());
+        claims.put("type", "refresh");
+        return buildRefreshToken(claims, personId.toString(), refreshTokenExpiration);
+    }
+
+    public UUID extractPersonIdFromRefreshToken(String token) {
+        Claims claims = extractAllClaims(token);
+        String personIdStr = claims.get("personId", String.class);
+        return UUID.fromString(personIdStr);
+    }
+
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new java.util.Date(System.currentTimeMillis()))
                 .setExpiration(new java.util.Date(System.currentTimeMillis() + expiration))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    private String buildRefreshToken(Map<String, Object> extraClaims, String subject, long expiration) {
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

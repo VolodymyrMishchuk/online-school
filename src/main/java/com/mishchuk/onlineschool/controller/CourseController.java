@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/courses")
@@ -25,15 +26,20 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseDto> getCourse(@PathVariable java.util.UUID id) {
+    public ResponseEntity<CourseDto> getCourse(@PathVariable UUID id) {
         return courseService.getCourse(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseDto>> getAllCourses() {
-        List<CourseDto> courses = courseService.getAllCourses();
+    public ResponseEntity<List<CourseDto>> getAllCourses(@RequestParam(required = false) UUID userId) {
+        List<CourseDto> courses;
+        if (userId != null) {
+            courses = courseService.getAllCoursesWithEnrollment(userId);
+        } else {
+            courses = courseService.getAllCourses();
+        }
         if (courses.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -41,7 +47,7 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCourse(@PathVariable java.util.UUID id, @RequestBody CourseUpdateDto dto) {
+    public ResponseEntity<Void> updateCourse(@PathVariable UUID id, @RequestBody CourseUpdateDto dto) {
         try {
             courseService.updateCourse(id, dto);
             return ResponseEntity.noContent().build();
@@ -51,7 +57,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable java.util.UUID id) {
+    public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }

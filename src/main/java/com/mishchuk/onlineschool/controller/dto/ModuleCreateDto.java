@@ -1,7 +1,8 @@
 package com.mishchuk.onlineschool.controller.dto;
 
 public record ModuleCreateDto(
-                String name,
-                java.util.UUID courseId,
-                String description) {
+        String name,
+        java.util.UUID courseId,
+        String description,
+        java.util.List<java.util.UUID> lessonIds) {
 }

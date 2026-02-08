@@ -26,19 +26,40 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     @Transactional
-    public void createLesson(LessonCreateDto dto) {
-        ModuleEntity module = moduleRepository.findById(dto.moduleId())
-                .orElseThrow(() -> new RuntimeException("Module not found"));
-
+    public LessonDto createLesson(LessonCreateDto dto) {
         LessonEntity entity = lessonMapper.toEntity(dto);
-        entity.setModule(module);
-        lessonRepository.save(entity);
+
+        // Module is optional - only set if provided
+        if (dto.moduleId() != null) {
+            ModuleEntity module = moduleRepository.findById(dto.moduleId())
+                    .orElseThrow(() -> new RuntimeException("Module not found"));
+            entity.setModule(module);
+        }
+
+        LessonEntity savedLesson = lessonRepository.save(entity);
+        return lessonMapper.toDto(savedLesson);
     }
 
     @Override
     public Optional<LessonDto> getLesson(UUID id) {
         return lessonRepository.findById(id)
                 .map(lessonMapper::toDto);
+    }
+
+    @Override
+    public List<LessonDto> getAllLessons() {
+        return lessonRepository.findAll()
+                .stream()
+                .map(lessonMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<LessonDto> getUnassignedLessons() {
+        return lessonRepository.findByModuleIdIsNull()
+                .stream()
+                .map(lessonMapper::toDto)
+                .toList();
     }
 
     @Override

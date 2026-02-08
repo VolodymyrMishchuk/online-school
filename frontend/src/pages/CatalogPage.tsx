@@ -5,7 +5,7 @@ import { BookOpen, Clock, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function CatalogPage() {
-    const { data: courses, isLoading } = useQuery({ queryKey: ['courses'], queryFn: getCourses });
+    const { data: courses, isLoading } = useQuery({ queryKey: ['courses'], queryFn: () => getCourses() });
     const navigate = useNavigate();
 
     // Get user from local storage
