@@ -20,10 +20,13 @@ export default function DashboardLayout() {
         { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
         { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
         { to: '/dashboard/my-courses', icon: GraduationCap, label: 'Мої курси' },
-        { to: '/dashboard/my-modules', icon: BookMarked, label: 'Мої модулі' },
-        { to: '/dashboard/my-lessons', icon: FileCheck, label: 'Мої уроки' },
         { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },
     ];
+
+
+
+    // TEMPORARY: Show Users tab for everyone since roles are not fully implemented yet
+    navItems.push({ to: '/dashboard/users', icon: Users, label: 'Користувачі' });
 
     return (
         <div className="h-screen overflow-hidden bg-gray-50 flex">
@@ -37,7 +40,11 @@ export default function DashboardLayout() {
                         </div>
                         <div>
                             <h2 className="font-bold text-brand-dark text-lg">Dashboard</h2>
-                            <p className="text-xs text-gray-500">{user?.email || 'User'}</p>
+                            <p className="text-xs text-gray-500">
+                                {user?.firstName && user?.lastName
+                                    ? `${user.firstName} ${user.lastName}`
+                                    : (user?.email || 'User')}
+                            </p>
                         </div>
                     </div>
                 </div>

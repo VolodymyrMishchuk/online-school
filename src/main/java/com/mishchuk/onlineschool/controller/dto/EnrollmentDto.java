@@ -4,10 +4,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record EnrollmentDto(
-        UUID id,
-        UUID studentId,
-        UUID courseId,
-        String status,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt) {
+                UUID id,
+                UUID studentId,
+                UUID courseId,
+                String courseName,
+                String status,
+                OffsetDateTime createdAt,
+                OffsetDateTime updatedAt) {
 }

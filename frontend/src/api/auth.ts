@@ -4,6 +4,8 @@ export interface AuthResponse {
     accessToken: string;
     userId: string;
     role: string;
+    firstName: string;
+    lastName: string;
 }
 
 export interface LoginRequest {
@@ -14,6 +16,17 @@ export interface LoginRequest {
 export const login = async (request: LoginRequest): Promise<AuthResponse> => {
     const response = await client.post<AuthResponse>('/auth/login', request, {
         withCredentials: true // Enable sending/receiving cookies
+    });
+    return response.data;
+};
+
+export interface MagicLoginRequest {
+    token: string;
+}
+
+export const magicLogin = async (request: MagicLoginRequest): Promise<AuthResponse> => {
+    const response = await client.post<AuthResponse>('/auth/magic-login', request, {
+        withCredentials: true
     });
     return response.data;
 };

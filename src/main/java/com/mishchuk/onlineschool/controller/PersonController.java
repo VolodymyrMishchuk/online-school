@@ -57,4 +57,37 @@ public class PersonController {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Users Management Endpoints
+
+    @GetMapping("/with-enrollments")
+    public ResponseEntity<List<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto>> getAllPersonsWithEnrollments() {
+        return ResponseEntity.ok(personService.getAllPersonsWithEnrollments());
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> updatePersonStatus(@PathVariable UUID id, @RequestParam String status) {
+        try {
+            personService.updatePersonStatus(id, status);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/{id}/enrollments/{courseId}")
+    public ResponseEntity<Void> addCourseAccess(@PathVariable UUID id, @PathVariable UUID courseId) {
+        try {
+            personService.addCourseAccess(id, courseId);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @DeleteMapping("/{id}/enrollments/{courseId}")
+    public ResponseEntity<Void> removeCourseAccess(@PathVariable UUID id, @PathVariable UUID courseId) {
+        personService.removeCourseAccess(id, courseId);
+        return ResponseEntity.noContent().build();
+    }
 }

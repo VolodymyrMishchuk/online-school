@@ -3,6 +3,7 @@ package com.mishchuk.onlineschool.service;
 import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
+import com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +19,13 @@ public interface PersonService {
     void updatePerson(UUID id, PersonUpdateDto dto);
 
     void deletePerson(UUID id);
+
+    // Users Management
+    List<PersonWithEnrollmentsDto> getAllPersonsWithEnrollments();
+
+    void updatePersonStatus(UUID id, String status);
+
+    void addCourseAccess(UUID personId, UUID courseId);
+
+    void removeCourseAccess(UUID personId, UUID courseId);
 }

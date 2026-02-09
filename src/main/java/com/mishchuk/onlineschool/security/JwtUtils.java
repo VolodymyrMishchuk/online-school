@@ -49,6 +49,7 @@ public class JwtUtils {
         Map<String, Object> claims = new HashMap<>();
         claims.put("personId", personId.toString());
         claims.put("type", "refresh");
+        claims.put("jti", UUID.randomUUID().toString()); // Add unique identifier
         return buildRefreshToken(claims, personId.toString(), refreshTokenExpiration);
     }
 
@@ -97,6 +98,21 @@ public class JwtUtils {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public String generateMagicToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "magic_link");
+        return buildRefreshToken(claims, username, 900000); // 15 minutes
+    }
+
+    public boolean validateMagicToken(String token) {
+        try {
+            final String type = extractClaim(token, claims -> claims.get("type", String.class));
+            return "magic_link".equals(type) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private Key getSignInKey() {

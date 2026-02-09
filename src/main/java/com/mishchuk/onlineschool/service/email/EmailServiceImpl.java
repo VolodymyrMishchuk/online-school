@@ -4,6 +4,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -20,6 +21,10 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
+    private final com.mishchuk.onlineschool.security.JwtUtils jwtUtils;
+
+    @Value("${spring.application.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Override
     @Async
@@ -27,6 +32,11 @@ public class EmailServiceImpl implements EmailService {
         log.info("Sending welcome email to {}", to);
         Context context = new Context();
         context.setVariable("userName", userName);
+
+        String token = jwtUtils.generateMagicToken(to);
+        String magicLink = frontendUrl + "/magic-login?token=" + token + "&redirect=/dashboard/all-courses";
+        context.setVariable("magicLink", magicLink);
+
         sendHtmlEmail(to, "Ласкаво просимо до Online School!", "email/welcome", context);
     }
 
@@ -37,6 +47,11 @@ public class EmailServiceImpl implements EmailService {
         Context context = new Context();
         context.setVariable("userName", userName);
         context.setVariable("courseName", courseName);
+
+        String token = jwtUtils.generateMagicToken(to);
+        String magicLink = frontendUrl + "/magic-login?token=" + token + "&redirect=/dashboard/my-courses";
+        context.setVariable("magicLink", magicLink);
+
         sendHtmlEmail(to, "Вітаємо з покупкою курсу!", "email/course-purchase", context);
     }
 
@@ -66,7 +81,7 @@ public class EmailServiceImpl implements EmailService {
 
             javaMailSender.send(mimeMessage);
             log.info("Email sent successfully to {}", to);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send email to {}", to, e);
             // In a real app, might want to retry or store failed emails
         }

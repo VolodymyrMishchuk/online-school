@@ -8,9 +8,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = { EnrollmentMapper.class })
 public interface PersonMapper {
     PersonDto toDto(PersonEntity entity);
+
+    com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto toDtoWithEnrollments(PersonEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", ignore = true)

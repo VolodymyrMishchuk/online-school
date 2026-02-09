@@ -15,4 +15,6 @@ public class AuthResponse {
     private String accessToken;
     private UUID userId;
     private String role;
+    private String firstName;
+    private String lastName;
 }

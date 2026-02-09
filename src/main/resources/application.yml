@@ -1,6 +1,8 @@
 spring:
   application:
     name: online-school
+  frontend:
+    url: http://localhost:5173
 
   datasource:
     url: jdbc:postgresql://localhost:5432/onlineschool
@@ -18,10 +20,8 @@ spring:
   servlet:
 
   mail:
-    host: localhost
+    host: 127.0.0.1
     port: 1025
-    username: user
-    password: password
     properties:
       mail:
         smtp:

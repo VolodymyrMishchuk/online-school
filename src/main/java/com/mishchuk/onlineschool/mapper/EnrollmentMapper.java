@@ -11,6 +11,7 @@ public interface EnrollmentMapper {
 
     @Mapping(target = "studentId", source = "student.id")
     @Mapping(target = "courseId", source = "course.id")
+    @Mapping(target = "courseName", source = "course.name")
     EnrollmentDto toDto(EnrollmentEntity entity);
 
     @Mapping(target = "student.id", source = "studentId")

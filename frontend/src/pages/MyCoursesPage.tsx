@@ -8,7 +8,9 @@ import CourseExpandableCard from '../components/CourseExpandableCard';
 
 export default function MyCoursesPage() {
     const navigate = useNavigate();
-    const userId = localStorage.getItem('userId') || '';
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const userId = user?.userId || localStorage.getItem('userId') || '';
 
     useEffect(() => {
         if (!userId) {

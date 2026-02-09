@@ -13,8 +13,12 @@ export default function LoginPage() {
         e.preventDefault();
         try {
             const response = await login({ email, password });
-            localStorage.setItem('token', response.accessToken);
-            localStorage.setItem('user', JSON.stringify({ userId: response.userId, role: response.role }));
+            const { accessToken, userId, role, firstName, lastName } = response;
+            localStorage.clear(); // Clear previous session
+            localStorage.setItem('token', accessToken);
+            localStorage.setItem('userId', userId);
+            localStorage.setItem('userRole', role);
+            localStorage.setItem('user', JSON.stringify({ userId, role, firstName, lastName, email }));
             navigate('/dashboard');
         } catch (err) {
             setError('Invalid email or password');

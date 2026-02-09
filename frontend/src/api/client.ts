@@ -62,12 +62,16 @@ apiClient.interceptors.response.use(
                     withCredentials: true,
                 });
 
-                const { accessToken, userId, role } = response.data;
+                const { accessToken, userId, role, firstName, lastName } = response.data;
 
                 // Save new tokens
                 localStorage.setItem('token', accessToken);
                 localStorage.setItem('userId', userId);
                 localStorage.setItem('userRole', role);
+                // Sync user object
+                const currentUser = localStorage.getItem('user');
+                const userEmail = currentUser ? JSON.parse(currentUser).email : '';
+                localStorage.setItem('user', JSON.stringify({ userId, role, firstName, lastName, email: userEmail }));
 
                 // Update authorization header
                 apiClient.defaults.headers.common.Authorization = `Bearer ${accessToken}`;

@@ -70,7 +70,8 @@ public class AuthController {
                 emailService.sendWelcomeEmail(request.email(), request.firstName() + " " + request.lastName());
 
                 // Повертаємо 200 OK замість 201 Created
-                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name()));
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                                person.getFirstName(), person.getLastName()));
         }
 
         @PostMapping("/login")
@@ -94,7 +95,8 @@ public class AuthController {
 
                 log.info("User logged in successfully: {}", request.getEmail());
 
-                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name()));
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                                person.getFirstName(), person.getLastName()));
         }
 
         @PostMapping("/refresh")
@@ -127,8 +129,8 @@ public class AuthController {
 
                         log.info("Tokens refreshed successfully for person: {}", person.id());
 
-                        return ResponseEntity
-                                        .ok(new AuthResponse(newAccessToken, person.id(), person.role()));
+                        return ResponseEntity.ok(new AuthResponse(newAccessToken, person.id(), person.role(),
+                                        person.firstName(), person.lastName()));
                 } catch (Exception e) {
                         log.error("Token refresh failed: {}", e.getMessage());
                         clearRefreshTokenCookie(response);
@@ -153,6 +155,26 @@ public class AuthController {
 
                 clearRefreshTokenCookie(response);
                 return ResponseEntity.noContent().build();
+        }
+
+        @PostMapping("/magic-login")
+        public ResponseEntity<AuthResponse> magicLogin(@RequestBody java.util.Map<String, String> request,
+                        HttpServletResponse response) {
+                String token = request.get("token");
+                if (token == null || !jwtUtils.validateMagicToken(token)) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+
+                String email = jwtUtils.extractUsername(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                final String accessToken = jwtUtils.generateToken(userDetails);
+                PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(email);
+
+                RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
+                setRefreshTokenCookie(response, refreshToken.getToken());
+
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                                person.getFirstName(), person.getLastName()));
         }
 
         // Helper methods for cookie management
