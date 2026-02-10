@@ -35,3 +35,9 @@ databaseChangeLog:
   - include:
       file: changesing/013-alter-files-fk-set-null.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/014-alter-enrollments-add-cascade-delete-course-fk.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/015-create-password-reset-tokens-table.sql
+      relativeToChangelogFile: true

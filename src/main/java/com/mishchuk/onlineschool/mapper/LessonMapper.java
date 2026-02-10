@@ -13,9 +13,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface LessonMapper {
 
+    @Mapping(target = "videoUrl", source = "videoUrl")
     @Mapping(target = "moduleId", source = "module.id")
     @Mapping(target = "moduleName", source = "module.name")
     @Mapping(target = "courseName", source = "module.course.name")
+    @Mapping(target = "filesCount", expression = "java(entity.getFiles() != null ? entity.getFiles().size() : 0)")
     LessonDto toDto(LessonEntity entity);
 
     @Mapping(target = "module", ignore = true)

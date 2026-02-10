@@ -11,11 +11,12 @@ import ImagePreviewModal from './ImagePreviewModal';
 
 interface ModuleExpandableItemProps {
     module: Module;
+    isLocked?: boolean;
     onEditLesson?: (lesson: Lesson) => void;
     onDeleteLesson?: (lessonId: string) => void;
 }
 
-export function ModuleExpandableItem({ module, onEditLesson, onDeleteLesson }: ModuleExpandableItemProps) {
+export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson }: ModuleExpandableItemProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: lessons, isLoading: lessonsLoading } = useQuery({
@@ -39,7 +40,7 @@ export function ModuleExpandableItem({ module, onEditLesson, onDeleteLesson }: M
                 filesData.map(({ lessonId, files }) => [lessonId, files])
             );
         },
-        enabled: !!lessons && lessons.length > 0,
+        enabled: !!lessons && lessons.length > 0 && !isLocked, // Disable file fetching if locked
     });
 
     // Helper to get files for a specific lesson
@@ -110,6 +111,7 @@ export function ModuleExpandableItem({ module, onEditLesson, onDeleteLesson }: M
                                     key={lesson.id}
                                     lesson={lesson}
                                     files={getLessonFilesById(lesson.id)}
+                                    isLocked={isLocked}
                                     onImageClick={(url) => setPreviewImage(url)}
                                     onEdit={onEditLesson}
                                     onDelete={onDeleteLesson}

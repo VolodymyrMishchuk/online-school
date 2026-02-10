@@ -2,8 +2,11 @@ package com.mishchuk.onlineschool.controller;
 
 import com.mishchuk.onlineschool.controller.dto.AuthRequest;
 import com.mishchuk.onlineschool.controller.dto.AuthResponse;
+import com.mishchuk.onlineschool.controller.dto.ChangePasswordRequest;
+import com.mishchuk.onlineschool.controller.dto.ForgotPasswordRequest;
 import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonDto;
+import com.mishchuk.onlineschool.controller.dto.ResetPasswordRequest;
 import java.util.UUID;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import com.mishchuk.onlineschool.repository.entity.RefreshTokenEntity;
@@ -42,6 +45,7 @@ public class AuthController {
         private final PersonService personService;
         private final RefreshTokenService refreshTokenService;
         private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+        private final com.mishchuk.onlineschool.service.PasswordResetService passwordResetService;
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(
@@ -70,7 +74,8 @@ public class AuthController {
                 emailService.sendWelcomeEmail(request.email(), request.firstName() + " " + request.lastName());
 
                 // Повертаємо 200 OK замість 201 Created
-                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(),
+                                person.getRole() != null ? person.getRole().name() : "USER",
                                 person.getFirstName(), person.getLastName()));
         }
 
@@ -95,7 +100,8 @@ public class AuthController {
 
                 log.info("User logged in successfully: {}", request.getEmail());
 
-                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(),
+                                person.getRole() != null ? person.getRole().name() : "USER",
                                 person.getFirstName(), person.getLastName()));
         }
 
@@ -129,7 +135,8 @@ public class AuthController {
 
                         log.info("Tokens refreshed successfully for person: {}", person.id());
 
-                        return ResponseEntity.ok(new AuthResponse(newAccessToken, person.id(), person.role(),
+                        return ResponseEntity.ok(new AuthResponse(newAccessToken, person.id(),
+                                        person.role() != null ? person.role() : "USER",
                                         person.firstName(), person.lastName()));
                 } catch (Exception e) {
                         log.error("Token refresh failed: {}", e.getMessage());
@@ -173,11 +180,37 @@ public class AuthController {
                 RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
                 setRefreshTokenCookie(response, refreshToken.getToken());
 
-                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(), person.getRole().name(),
+                return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(),
+                                person.getRole() != null ? person.getRole().name() : "USER",
                                 person.getFirstName(), person.getLastName()));
         }
 
+        // Password Reset Endpoints
+
+        @PostMapping("/forgot-password")
+        public ResponseEntity<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+                log.info("Forgot password request for email: {}", request.email());
+                passwordResetService.initiatePasswordReset(request.email());
+                return ResponseEntity.ok().build();
+        }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+                log.info("Reset password request received");
+                passwordResetService.resetPassword(request.token(), request.newPassword());
+                return ResponseEntity.ok().build();
+        }
+
         // Helper methods for cookie management
+
+        @PostMapping("/change-password")
+        public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
+                        java.security.Principal principal) {
+                log.info("Change password request received for user: {}", principal.getName());
+                PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+                personService.changePassword(person.getId(), request.oldPassword(), request.newPassword());
+                return ResponseEntity.ok().build();
+        }
 
         private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
                 Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);

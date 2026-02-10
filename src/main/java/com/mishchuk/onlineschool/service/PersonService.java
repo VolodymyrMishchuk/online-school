@@ -28,4 +28,6 @@ public interface PersonService {
     void addCourseAccess(UUID personId, UUID courseId);
 
     void removeCourseAccess(UUID personId, UUID courseId);
+
+    void changePassword(UUID personId, String oldPassword, String newPassword);
 }

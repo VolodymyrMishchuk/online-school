@@ -4,6 +4,8 @@ import LandingPage from './pages/LandingPage';
 import CatalogPage from './pages/CatalogPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import MagicLoginPage from './pages/MagicLoginPage';
 import DashboardLayout from './layouts/DashboardLayout';
 import AllCoursesPage from './pages/AllCoursesPage';
@@ -25,6 +27,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/magic-login" element={<MagicLoginPage />} />
           <Route path="/dashboard" element={<DashboardLayout />}>

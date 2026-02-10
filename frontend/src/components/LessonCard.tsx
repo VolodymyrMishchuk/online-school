@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Paperclip, ChevronDown, ChevronUp, Clock, FileIcon, FileImage, Pencil, Trash2 } from 'lucide-react';
+import { FileText, Paperclip, ChevronDown, ChevronUp, Clock, FileIcon, FileImage, Pencil, Trash2, Lock } from 'lucide-react';
 import type { Lesson } from '../api/lessons';
 import type { FileDto } from '../api/files';
 import { downloadFile, deleteFile } from '../api/files';
@@ -8,13 +8,14 @@ import { VideoPlayer } from './VideoPlayer';
 interface LessonCardProps {
     lesson: Lesson;
     files?: FileDto[];
+    isLocked?: boolean;
     onImageClick: (url: string) => void;
     onEdit?: (lesson: Lesson) => void;
     onDelete?: (lessonId: string) => void;
     onFileDelete?: (fileId: string) => void;
 }
 
-export default function LessonCard({ lesson, files = [], onImageClick, onEdit, onDelete, onFileDelete }: LessonCardProps) {
+export default function LessonCard({ lesson, files = [], isLocked = false, onImageClick, onEdit, onDelete, onFileDelete }: LessonCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const getFileIcon = (contentType: string) => {
@@ -63,38 +64,42 @@ export default function LessonCard({ lesson, files = [], onImageClick, onEdit, o
 
     return (
         <div
-            className={`bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 w-full cursor-pointer ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
-            onClick={() => setIsExpanded(!isExpanded)}
+            className={`bg-white rounded-3xl p-6 shadow-sm border border-gray-100 transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
+            onClick={() => !isLocked && setIsExpanded(!isExpanded)}
         >
             <div className="flex items-start gap-4">
-                <div className="bg-brand-primary/10 p-3 rounded-2xl h-fit">
-                    <FileText className="w-6 h-6 text-brand-primary" />
+                <div className={`${isLocked ? 'bg-gray-100' : 'bg-brand-primary/10'} p-3 rounded-2xl h-fit`}>
+                    {isLocked ? (
+                        <Lock className="w-6 h-6 text-gray-400" />
+                    ) : (
+                        <FileText className="w-6 h-6 text-brand-primary" />
+                    )}
                 </div>
 
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                         <div className="flex-1 pr-4">
-                            <h3 className="text-xl font-bold text-brand-dark mb-1 truncate">
+                            <h3 className={`text-xl font-bold mb-1 truncate ${isLocked ? 'text-gray-500' : 'text-brand-dark'}`}>
                                 {lesson.name}
                             </h3>
                             <div className="flex flex-col gap-0.5 text-sm">
                                 {lesson.courseName && (
                                     <p className="text-gray-600 font-medium flex items-center gap-1.5">
-                                        <span className="text-brand-primary">Курс:</span> {lesson.courseName}
+                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary'}`}>Курс:</span> {lesson.courseName}
                                     </p>
                                 )}
                                 {lesson.moduleName && (
                                     <p className="text-gray-500 font-medium flex items-center gap-1.5">
-                                        <span className="text-brand-primary/80">Модуль:</span> {lesson.moduleName}
+                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary/80'}`}>Модуль:</span> {lesson.moduleName}
                                     </p>
                                 )}
                             </div>
                         </div>
                         <div className="flex items-center gap-4 text-gray-400 shrink-0">
-                            {files.length > 0 && (
-                                <div className="flex items-center gap-1.5" title={`${files.length} файлів`}>
+                            {(files.length > 0 || (lesson.filesCount !== undefined && lesson.filesCount > 0)) && (
+                                <div className="flex items-center gap-1.5" title={`${lesson.filesCount !== undefined ? lesson.filesCount : files.length} файлів`}>
                                     <Paperclip className="w-4 h-4" />
-                                    <span className="text-sm font-medium">{files.length}</span>
+                                    <span className="text-sm font-medium">{lesson.filesCount !== undefined ? lesson.filesCount : files.length}</span>
                                 </div>
                             )}
                             {lesson.durationMinutes && (
@@ -106,7 +111,7 @@ export default function LessonCard({ lesson, files = [], onImageClick, onEdit, o
 
                             {/* Action Buttons */}
                             <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                {onEdit && (
+                                {!isLocked && onEdit && (
                                     <button
                                         onClick={() => onEdit(lesson)}
                                         className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
@@ -115,10 +120,10 @@ export default function LessonCard({ lesson, files = [], onImageClick, onEdit, o
                                         <Pencil className="w-4 h-4" />
                                     </button>
                                 )}
-                                {onDelete && (
+                                {!isLocked && onDelete && (
                                     <button
                                         onClick={() => onDelete(lesson.id)}
-                                        className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors"
+                                        className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-50 transition-colors"
                                         title="Видалити"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -126,7 +131,7 @@ export default function LessonCard({ lesson, files = [], onImageClick, onEdit, o
                                 )}
                             </div>
 
-                            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            {isLocked ? null : (isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />)}
                         </div>
                     </div>
 

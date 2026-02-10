@@ -148,14 +148,8 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional
     public void deleteCourse(java.util.UUID id) {
-        // Unassign modules before deleting (optional, but good practice if cascade
-        // isn't set)
-        List<com.mishchuk.onlineschool.repository.entity.ModuleEntity> currentModules = moduleRepository
-                .findByCourseId(id);
-        for (com.mishchuk.onlineschool.repository.entity.ModuleEntity module : currentModules) {
-            module.setCourse(null);
-            moduleRepository.save(module);
-        }
+        // Modules will be deleted automatically due to CascadeType.ALL and
+        // orphanRemoval=true in CourseEntity
         courseRepository.deleteById(id);
     }
 }

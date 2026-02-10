@@ -56,15 +56,21 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    @Async
     public void sendCourseExpirationReminderEmail(String to, String userName, String courseName,
             LocalDate expirationDate) {
-        log.info("Sending expiration reminder email to {} for course {}", to, courseName);
         Context context = new Context();
         context.setVariable("userName", userName);
         context.setVariable("courseName", courseName);
         context.setVariable("expirationDate", expirationDate);
-        sendHtmlEmail(to, "Нагадування: закінчується доступ до курсу", "email/course-expiration", context);
+        sendHtmlEmail(to, "Нагадування: закінчується термін доступу до курсу", "email/course-expiration", context);
+    }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String userName, String resetLink) {
+        Context context = new Context();
+        context.setVariable("userName", userName);
+        context.setVariable("resetLink", resetLink);
+        sendHtmlEmail(to, "Відновлення паролю | Svitlo School", "email/password-reset", context);
     }
 
     private void sendHtmlEmail(String to, String subject, String templateName, Context context) {

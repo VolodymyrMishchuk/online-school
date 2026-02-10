@@ -59,7 +59,33 @@ export const logout = async (): Promise<void> => {
         withCredentials: true
     });
     // Clear local storage
-    localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
+};
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export const forgotPassword = async (request: ForgotPasswordRequest): Promise<void> => {
+    await client.post('/auth/forgot-password', request);
+};
+
+export interface ResetPasswordRequest {
+    token: string;
+    newPassword: string;
+}
+
+
+export const resetPassword = async (request: ResetPasswordRequest): Promise<void> => {
+    await client.post('/auth/reset-password', request);
+};
+
+export interface ChangePasswordRequest {
+    oldPassword: string;
+    newPassword: string;
+}
+
+export const changePassword = async (request: ChangePasswordRequest): Promise<void> => {
+    await client.post('/auth/change-password', request);
 };

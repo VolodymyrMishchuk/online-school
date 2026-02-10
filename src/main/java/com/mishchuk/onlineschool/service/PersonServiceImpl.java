@@ -152,4 +152,18 @@ public class PersonServiceImpl implements PersonService {
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
         enrollmentRepository.delete(enrollment);
     }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID personId, String oldPassword, String newPassword) {
+        PersonEntity person = personRepository.findById(personId)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + personId));
+
+        if (!passwordEncoder.matches(oldPassword, person.getPassword())) {
+            throw new IllegalArgumentException("Invalid old password");
+        }
+
+        person.setPassword(passwordEncoder.encode(newPassword));
+        personRepository.save(person);
+    }
 }

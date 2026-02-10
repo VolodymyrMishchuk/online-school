@@ -125,6 +125,67 @@ paths:
         '401':
           description: Unauthorized
 
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Ініціювати скидання паролю
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Email відправлено (або email не знайдено)
+        '400':
+          description: Невалідні дані
+
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Виконати скидання паролю
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Пароль успішно змінено
+        '400':
+          description: Невалідний токен або пароль
+
+  /api/auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Змінити пароль (для авторизованих користувачів)
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Пароль успішно змінено
+        '400':
+          description: Невірний старий пароль або невалідні дані
+        '401':
+          description: Неавторизований
+
   # ==================== Courses ====================
   /courses:
     get:
@@ -634,6 +695,45 @@ components:
           type: string
           format: password
           example: password123
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Token received in email link
+        newPassword:
+          type: string
+          format: password
+          minLength: 6
+          example: newPassword123
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+          minLength: 6
 
     AuthResponse:
       type: object

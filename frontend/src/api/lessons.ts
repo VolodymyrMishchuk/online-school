@@ -9,6 +9,7 @@ export interface Lesson {
     moduleName?: string;
     courseName?: string;
     durationMinutes?: number;
+    filesCount?: number;
     orderIndex?: number;
 }
 

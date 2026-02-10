@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/change-password").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/lessons", "/lessons/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/lessons").authenticated()

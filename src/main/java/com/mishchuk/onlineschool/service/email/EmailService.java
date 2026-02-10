@@ -8,4 +8,6 @@ public interface EmailService {
     void sendCoursePurchaseEmail(String to, String userName, String courseName);
 
     void sendCourseExpirationReminderEmail(String to, String userName, String courseName, LocalDate expirationDate);
+
+    void sendPasswordResetEmail(String to, String userName, String resetLink);
 }

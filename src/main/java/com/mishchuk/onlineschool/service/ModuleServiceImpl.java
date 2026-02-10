@@ -8,13 +8,21 @@ import com.mishchuk.onlineschool.mapper.ModuleMapper;
 import com.mishchuk.onlineschool.repository.CourseRepository;
 import com.mishchuk.onlineschool.repository.LessonRepository;
 import com.mishchuk.onlineschool.repository.ModuleRepository;
+import com.mishchuk.onlineschool.repository.PersonRepository;
+import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.entity.CourseEntity;
 import com.mishchuk.onlineschool.repository.entity.LessonEntity;
 import com.mishchuk.onlineschool.repository.entity.ModuleEntity;
+import com.mishchuk.onlineschool.repository.entity.PersonEntity;
+import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
+import com.mishchuk.onlineschool.repository.entity.PersonRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +35,8 @@ public class ModuleServiceImpl implements ModuleService {
     private final ModuleMapper moduleMapper;
     private final LessonService lessonService;
     private final LessonRepository lessonRepository;
+    private final PersonRepository personRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Override
     @Transactional
@@ -71,7 +81,70 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     @Transactional(readOnly = true)
     public List<LessonDto> getModuleLessons(java.util.UUID moduleId) {
-        return lessonService.getLessonsByModule(moduleId);
+        // Security Check: Ensure user has access to this module's course
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<PersonEntity> userOpt = personRepository.findByEmail(userEmail);
+
+        boolean isAccessDenied = true;
+
+        if (userOpt.isPresent()) {
+            PersonEntity user = userOpt.get();
+            // Admins have full access
+            if (user.getRole() == PersonRole.ADMIN) {
+                isAccessDenied = false;
+            } else {
+                // For regular users, check enrollment validity
+                ModuleEntity module = moduleRepository.findById(moduleId)
+                        .orElseThrow(() -> new RuntimeException("Module not found"));
+
+                if (module.getCourse() != null) {
+                    Optional<EnrollmentEntity> enrollmentOpt = enrollmentRepository
+                            .findByStudentIdAndCourseId(user.getId(), module.getCourse().getId());
+
+                    if (enrollmentOpt.isPresent()) {
+                        EnrollmentEntity enrollment = enrollmentOpt.get();
+
+                        // Check if blocked
+                        boolean isBlocked = "BLOCKED".equals(enrollment.getStatus());
+                        boolean isExpired = false;
+
+                        if (module.getCourse().getAccessDuration() != null) {
+                            OffsetDateTime expirationDate = enrollment.getCreatedAt()
+                                    .plusDays(module.getCourse().getAccessDuration());
+                            if (OffsetDateTime.now().isAfter(expirationDate)) {
+                                isExpired = true;
+                            }
+                        }
+
+                        if (!isBlocked && !isExpired) {
+                            isAccessDenied = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        List<LessonDto> lessons = lessonService.getLessonsByModule(moduleId);
+
+        if (isAccessDenied) {
+            // Scrub sensitive data (videoUrl) but return structure
+            return lessons.stream()
+                    .map(lesson -> new LessonDto(
+                            lesson.id(),
+                            lesson.moduleId(),
+                            lesson.name(),
+                            lesson.description(),
+                            null, // Scrubbed videoUrl
+                            lesson.durationMinutes(),
+                            lesson.moduleName(),
+                            lesson.courseName(),
+                            lesson.filesCount(),
+                            lesson.createdAt(),
+                            lesson.updatedAt()))
+                    .toList();
+        }
+
+        return lessons;
     }
 
     @Override
