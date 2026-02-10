@@ -18,3 +18,44 @@
 :root {
     font-family: 'Roboto', sans-serif;
 }
+
+body {
+    background-color: var(--color-brand-light);
+    background-image:
+        radial-gradient(at 0% 0%, hsla(11, 82%, 87%, 1) 0px, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(5, 77%, 76%, 1) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(11, 82%, 87%, 1) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+@layer utilities {
+    .glass-panel {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .glass-sidebar {
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.6));
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    }
+
+    .glass-button {
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.2s;
+    }
+
+    .glass-button:hover {
+        background: rgba(255, 255, 255, 0.6);
+        transform: translateY(-1px);
+    }
+}

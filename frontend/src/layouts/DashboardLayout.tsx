@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, BookMarked, FolderOpen, FileCheck, Users, LayoutGrid } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users } from 'lucide-react';
 
 import { useRef } from 'react';
 import { ScrollToTop } from '../components/ScrollToTop';
@@ -29,18 +29,18 @@ export default function DashboardLayout() {
     navItems.push({ to: '/dashboard/users', icon: Users, label: 'Користувачі' });
 
     return (
-        <div className="h-screen overflow-hidden bg-gray-50 flex">
+        <div className="h-screen overflow-hidden flex bg-transparent">
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <aside className="w-64 glass-sidebar flex flex-col z-20 m-4 rounded-3xl h-[calc(100vh-2rem)] transition-all duration-300">
                 {/* Logo/Header */}
-                <div className="p-6 border-b border-gray-100">
+                <div className="p-6 border-b border-white/20">
                     <div className="flex items-center gap-3">
-                        <div className="bg-brand-light p-2 rounded-full">
+                        <div className="bg-white/50 p-2 rounded-full backdrop-blur-sm">
                             <Heart className="w-5 h-5 text-brand-secondary fill-brand-secondary" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-brand-dark text-lg">Dashboard</h2>
-                            <p className="text-xs text-gray-500">
+                            <h2 className="font-bold text-gray-800 text-lg">Dashboard</h2>
+                            <p className="text-xs text-gray-500 font-medium">
                                 {user?.firstName && user?.lastName
                                     ? `${user.firstName} ${user.lastName}`
                                     : (user?.email || 'User')}
@@ -50,15 +50,15 @@ export default function DashboardLayout() {
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1">
+                <nav className="flex-1 p-4 space-y-2">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${isActive
-                                    ? 'bg-brand-primary text-white shadow-md'
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-brand-primary'
+                                `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${isActive
+                                    ? 'bg-brand-primary/90 text-white shadow-lg shadow-brand-primary/30 backdrop-blur-md'
+                                    : 'text-gray-600 hover:bg-white/40 hover:text-brand-primary'
                                 }`
                             }
                         >

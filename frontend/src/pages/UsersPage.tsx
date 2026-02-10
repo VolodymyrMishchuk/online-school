@@ -10,6 +10,8 @@ import type {
     CreatePersonDto,
     UpdatePersonDto
 } from '../api/users';
+import { getCourses } from '../api/courses';
+import type { CourseDto } from '../api/courses';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
 import { ManageAccessModal } from '../components/ManageAccessModal';
@@ -17,6 +19,7 @@ import * as Icons from 'lucide-react';
 
 export const UsersPage: React.FC = () => {
     const [users, setUsers] = useState<PersonWithEnrollments[]>([]);
+    const [courses, setCourses] = useState<CourseDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -26,15 +29,19 @@ export const UsersPage: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
 
-    const fetchUsers = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const data = await getUsersWithEnrollments();
-            setUsers(data);
+            const [usersData, coursesData] = await Promise.all([
+                getUsersWithEnrollments(),
+                getCourses()
+            ]);
+            setUsers(usersData);
+            setCourses(coursesData);
 
             // Sync selectedUser with fresh data if modal is open
             if (selectedUser) {
-                const updatedUser = data.find(u => u.id === selectedUser.id);
+                const updatedUser = usersData.find(u => u.id === selectedUser.id);
                 if (updatedUser) {
                     setSelectedUser(updatedUser);
                 }
@@ -42,31 +49,31 @@ export const UsersPage: React.FC = () => {
 
             setError(null);
         } catch (err) {
-            setError('Не вдалося завантажити користувачів.');
+            setError('Не вдалося завантажити дані.');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchUsers();
+        fetchData();
     }, []);
 
     const handleCreateUser = async (data: CreatePersonDto) => {
         await createPerson(data);
-        await fetchUsers();
+        await fetchData();
     };
 
     const handleUpdateUser = async (id: string, data: UpdatePersonDto) => {
         await updatePerson(id, data);
-        await fetchUsers();
+        await fetchData();
     };
 
     const handleDeleteUser = async (id: string) => {
         if (window.confirm('Ви впевнені, що хочете видалити цього користувача? Цю дію неможливо скасувати.')) {
             try {
                 await deletePerson(id);
-                await fetchUsers();
+                await fetchData();
             } catch (err) {
                 alert('Не вдалося видалити користувача.');
             }
@@ -89,6 +96,39 @@ export const UsersPage: React.FC = () => {
             direction = 'desc';
         }
         setSortConfig({ key, direction });
+    };
+
+    const calculateTimeLeft = (enrollmentDate?: string, courseId?: string) => {
+        if (!enrollmentDate || !courseId) return null;
+
+        const course = courses.find(c => c.id === courseId);
+        if (!course || !course.accessDuration) return 'Назавжди';
+
+        const startDate = new Date(enrollmentDate);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + course.accessDuration);
+
+        const today = new Date();
+        const diffTime = endDate.getTime() - today.getTime();
+
+        if (diffTime < 0) return 'Минув';
+
+        const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
+        if (diffHours < 48) {
+            return `${diffHours} год`;
+        }
+
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const lastDigit = diffDays % 10;
+        const lastTwoDigits = diffDays % 100;
+
+        if (lastDigit === 1 && lastTwoDigits !== 11) {
+            return `${diffDays} день`;
+        } else if ([2, 3, 4].includes(lastDigit) && ![12, 13, 14].includes(lastTwoDigits)) {
+            return `${diffDays} дні`;
+        } else {
+            return `${diffDays} днів`;
+        }
     };
 
     const sortedUsers = React.useMemo(() => {
@@ -155,7 +195,7 @@ export const UsersPage: React.FC = () => {
     };
 
     if (loading && users.length === 0) {
-        return <div className="p-8 text-center text-gray-500">Завантаження користувачів...</div>;
+        return <div className="p-8 text-center text-gray-500">Завантаження...</div>;
     }
 
     return (
@@ -185,126 +225,117 @@ export const UsersPage: React.FC = () => {
                 <input
                     type="text"
                     placeholder="Пошук за ім'ям або email..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
             {/* Users Table */}
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="glass-panel overflow-hidden rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200/50">
+                    <thead className="bg-white/30 backdrop-blur-sm">
                         <tr>
                             <th
                                 scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-white/40 transition-colors whitespace-nowrap w-1"
                                 onClick={() => handleSort('name')}
                             >
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-1">
                                     Ім'я
                                     {getSortIcon('name')}
                                 </div>
                             </th>
                             <th
                                 scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-white/40 transition-colors whitespace-nowrap w-1"
                                 onClick={() => handleSort('contacts')}
                             >
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-1">
                                     Контакти
                                     {getSortIcon('contacts')}
                                 </div>
                             </th>
                             <th
                                 scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('role')}
-                            >
-                                <div className="flex items-center">
-                                    Роль
-                                    {getSortIcon('role')}
-                                </div>
-                            </th>
-                            <th
-                                scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                                onClick={() => handleSort('status')}
-                            >
-                                <div className="flex items-center">
-                                    Статус
-                                    {getSortIcon('status')}
-                                </div>
-                            </th>
-                            <th
-                                scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-white/40 transition-colors whitespace-nowrap w-1"
                                 onClick={() => handleSort('createdAt')}
                             >
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-1">
                                     Дата реєстрації
                                     {getSortIcon('createdAt')}
                                 </div>
                             </th>
                             <th
                                 scope="col"
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-white/40 transition-colors w-full"
                                 onClick={() => handleSort('enrollments')}
                             >
-                                <div className="flex items-center">
+                                <div className="flex items-center gap-1">
                                     Придбані курси
                                     {getSortIcon('enrollments')}
                                 </div>
                             </th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap w-1">
                                 Дії
                             </th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-200/50">
                         {sortedUsers.map((user) => (
-                            <tr key={user.id}>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">
-                                        {user.firstName} {user.lastName}
+                            <tr key={user.id} className="hover:bg-white/40 transition-colors">
+                                <td className="px-6 py-2 whitespace-nowrap w-1">
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-sm font-medium text-gray-900">
+                                            {user.firstName} {user.lastName}
+                                        </div>
+                                        {user.role === 'ADMIN' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                                ADMIN
+                                            </span>
+                                        )}
+                                        {user.role === 'INSTRUCTOR' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                INSTRUCTOR
+                                            </span>
+                                        )}
+                                        {user.status !== 'ACTIVE' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                                                {user.status}
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-2 whitespace-nowrap w-1">
                                     <div className="text-sm text-gray-900">{user.email}</div>
                                     <div className="text-sm text-gray-500">{user.phoneNumber}</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        ${user.role === 'ADMIN' ? 'bg-purple-100 text-purple-800' :
-                                            user.role === 'INSTRUCTOR' ? 'bg-blue-100 text-blue-800' :
-                                                'bg-green-100 text-green-800'}`}>
-                                        {user.role}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        ${user.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                                        {user.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-6 py-2 whitespace-nowrap text-sm text-gray-500 w-1">
                                     {user.createdAt ? new Date(user.createdAt).toLocaleDateString('uk-UA') : '-'}
                                 </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex flex-wrap gap-1">
+                                <td className="px-6 py-2">
+                                    <div className="flex flex-wrap gap-2">
                                         {user.enrollments.length > 0 ? (
-                                            user.enrollments.map(enrollment => (
-                                                <span key={enrollment.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" title={`Придбано: ${enrollment.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('uk-UA') : 'Невідомо'}`}>
-                                                    {enrollment.courseName || 'Курс'}
-                                                    {enrollment.createdAt && <span className="ml-1 text-gray-500">({new Date(enrollment.createdAt).toLocaleDateString('uk-UA')})</span>}
-                                                </span>
-                                            ))
+                                            user.enrollments.map(enrollment => {
+                                                const timeLeft = calculateTimeLeft(enrollment.createdAt, enrollment.courseId);
+                                                return (
+                                                    <div key={enrollment.id} className="inline-flex flex-col px-3 py-1.5 rounded-md bg-white/60 border border-gray-200 shadow-sm">
+                                                        <span className="text-xs font-bold text-gray-800 leading-tight block">
+                                                            {enrollment.courseName || 'Курс'}
+                                                        </span>
+                                                        <span className="text-[10px] text-gray-500 leading-tight block mt-0.5">
+                                                            {enrollment.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('uk-UA') : 'Невідомо'}
+                                                            {timeLeft && <span> | {timeLeft}</span>}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
                                         ) : (
                                             <span className="text-sm text-gray-400 font-italic">Немає курсів</span>
                                         )}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+                                <td className="px-6 py-2 whitespace-nowrap text-right text-sm font-medium space-x-3">
                                     <button
                                         onClick={() => openManageAccessModal(user)}
                                         className="text-indigo-600 hover:text-indigo-900"
@@ -356,7 +387,7 @@ export const UsersPage: React.FC = () => {
                     setSelectedUser(null);
                 }}
                 user={selectedUser}
-                onRefresh={fetchUsers}
+                onRefresh={fetchData}
             />
         </div>
     );
