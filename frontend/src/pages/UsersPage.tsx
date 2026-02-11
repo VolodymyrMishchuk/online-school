@@ -336,7 +336,7 @@ export const UsersPage: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-900">Управління користувачами</h1>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                 >
                     <Icons.Plus size={20} />
                     <span>Створити користувача</span>
@@ -462,7 +462,7 @@ export const UsersPage: React.FC = () => {
                                 onClick={() => handleSort('createdAt')}
                             >
                                 <div className="flex items-center gap-1">
-                                    Дата реєстрації
+                                    Реєстрація
                                     {getSortIcon('createdAt')}
                                 </div>
                             </th>
@@ -475,7 +475,7 @@ export const UsersPage: React.FC = () => {
                                         className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                                         onClick={() => handleSort('enrollment_name')}
                                     >
-                                        Придбані курси
+                                        Курси
                                         {getSortIcon('enrollment_name')}
                                     </div>
 
