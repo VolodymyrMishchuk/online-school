@@ -165,6 +165,7 @@ export default function AllCoursesPage() {
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleModalSubmit}
                 modules={modules || []}
+                courses={courses || []}
                 initialData={editingCourse}
                 initialModuleIds={
                     editingCourse && modules

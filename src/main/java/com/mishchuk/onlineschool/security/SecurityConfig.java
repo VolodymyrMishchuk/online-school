@@ -57,6 +57,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/change-password").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/lessons", "/lessons/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/courses", "/courses/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/lessons").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/lessons/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/lessons/**").authenticated()

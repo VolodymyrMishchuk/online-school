@@ -10,9 +10,13 @@ export interface CourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number; // Days
+    promotionalDiscount?: number;
+    nextCourseId?: string;
+    nextCourseName?: string;
     isEnrolled?: boolean;
     enrolledAt?: string; // ISO string
-    enrollmentStatus?: string;
+    enrollmentStatus?: 'ACTIVE' | 'EXPIRED' | 'BLOCKED' | 'PENDING';
+    expiresAt?: string;
 }
 
 export interface CreateCourseDto {
@@ -22,6 +26,8 @@ export interface CreateCourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number;
+    promotionalDiscount?: number;
+    nextCourseId?: string;
     moduleIds?: string[];
 }
 
@@ -33,6 +39,8 @@ export interface UpdateCourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number;
+    promotionalDiscount?: number;
+    nextCourseId?: string;
     moduleIds?: string[];
 }
 
@@ -52,4 +60,14 @@ export const updateCourse = async (id: string, data: UpdateCourseDto): Promise<v
 
 export const deleteCourse = async (id: string): Promise<void> => {
     await client.delete(`/courses/${id}`);
+};
+
+export const extendAccessForReview = async (courseId: string, video: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('video', video);
+    await client.post(`/courses/${courseId}/extend-access`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 };

@@ -10,4 +10,6 @@ public interface EmailService {
     void sendCourseExpirationReminderEmail(String to, String userName, String courseName, LocalDate expirationDate);
 
     void sendPasswordResetEmail(String to, String userName, String resetLink);
+
+    void sendAccessExtendedEmail(String to, String userName, String courseName, LocalDate expirationDate);
 }

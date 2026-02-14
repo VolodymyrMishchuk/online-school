@@ -3,10 +3,12 @@ package com.mishchuk.onlineschool.controller;
 import com.mishchuk.onlineschool.controller.dto.CourseCreateDto;
 import com.mishchuk.onlineschool.controller.dto.CourseDto;
 import com.mishchuk.onlineschool.controller.dto.CourseUpdateDto;
+import com.mishchuk.onlineschool.security.CustomUserDetailsService;
 import com.mishchuk.onlineschool.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.UUID;
 public class CourseController {
 
     private final CourseService courseService;
+    private final com.mishchuk.onlineschool.repository.PersonRepository personRepository;
 
     @PostMapping
     public ResponseEntity<Void> createCourse(@RequestBody CourseCreateDto dto) {
@@ -33,13 +36,33 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseDto>> getAllCourses(@RequestParam(required = false) UUID userId) {
+    public ResponseEntity<List<CourseDto>> getAllCourses(
+            @RequestParam(required = false) UUID userId,
+            java.security.Principal principal) {
+
         List<CourseDto> courses;
         if (userId != null) {
+            // Check if user is authenticated
+            if (principal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+
+            // Check if requesting own data or is Admin
+            com.mishchuk.onlineschool.repository.entity.PersonEntity currentUser = personRepository
+                    .findByEmail(principal.getName())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            boolean isAdmin = currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.ADMIN;
+
+            if (!currentUser.getId().equals(userId) && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             courses = courseService.getAllCoursesWithEnrollment(userId);
         } else {
             courses = courseService.getAllCourses();
         }
+
         if (courses.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -60,5 +83,41 @@ public class CourseController {
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/extend-access")
+    public ResponseEntity<Void> extendAccessForReview(
+            @PathVariable UUID id,
+            @RequestParam("video") org.springframework.web.multipart.MultipartFile video,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        try {
+            // Get person from authenticated user
+            com.mishchuk.onlineschool.repository.entity.PersonEntity person = personRepository
+                    .findByEmail(userDetails.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Create directory if not exists
+            String uploadDir = "uploads/reviews/" + person.getId();
+            java.nio.file.Path uploadPath = java.nio.file.Paths.get(uploadDir);
+            if (!java.nio.file.Files.exists(uploadPath)) {
+                java.nio.file.Files.createDirectories(uploadPath);
+            }
+
+            // Save file
+            String filename = java.util.UUID.randomUUID() + "_" + video.getOriginalFilename();
+            java.nio.file.Path filePath = uploadPath.resolve(filename);
+            java.nio.file.Files.copy(video.getInputStream(), filePath,
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            // Construct URL (Local)
+            String videoUrl = "/uploads/reviews/" + person.getId() + "/" + filename;
+
+            courseService.extendAccessForReview(person.getId(), id, videoUrl,
+                    video.getOriginalFilename());
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

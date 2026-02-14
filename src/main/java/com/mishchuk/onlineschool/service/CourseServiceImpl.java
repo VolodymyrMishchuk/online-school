@@ -3,53 +3,48 @@ package com.mishchuk.onlineschool.service;
 import com.mishchuk.onlineschool.controller.dto.CourseCreateDto;
 import com.mishchuk.onlineschool.controller.dto.CourseDto;
 import com.mishchuk.onlineschool.controller.dto.CourseUpdateDto;
+import com.mishchuk.onlineschool.exception.ResourceNotFoundException;
 import com.mishchuk.onlineschool.mapper.CourseMapper;
 import com.mishchuk.onlineschool.repository.CourseRepository;
+import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.entity.CourseEntity;
+import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
+import com.mishchuk.onlineschool.repository.entity.NotificationType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import com.mishchuk.onlineschool.repository.entity.CourseReviewRequestEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
-    private final com.mishchuk.onlineschool.repository.ModuleRepository moduleRepository;
-    private final com.mishchuk.onlineschool.repository.EnrollmentRepository enrollmentRepository;
+    private final NotificationService notificationService;
+    private final com.mishchuk.onlineschool.repository.CourseReviewRequestRepository courseReviewRequestRepository;
+    private final com.mishchuk.onlineschool.service.email.EmailService emailService;
 
     @Override
     @Transactional
     public void createCourse(CourseCreateDto dto) {
+        log.info("Creating new course: {}", dto.name());
         CourseEntity entity = courseMapper.toEntity(dto);
-        entity.setStatus("PUBLISHED");
-
-        // Mutual exclusion for discounts
-        if (entity.getDiscountAmount() != null && entity.getDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
-            entity.setDiscountPercentage(null);
-        } else if (entity.getDiscountPercentage() != null && entity.getDiscountPercentage() > 0) {
-            entity.setDiscountAmount(null);
-        }
-
-        CourseEntity savedCourse = courseRepository.save(entity);
-
-        if (dto.moduleIds() != null && !dto.moduleIds().isEmpty()) {
-            List<com.mishchuk.onlineschool.repository.entity.ModuleEntity> modules = moduleRepository
-                    .findAllById(dto.moduleIds());
-            for (com.mishchuk.onlineschool.repository.entity.ModuleEntity module : modules) {
-                module.setCourse(savedCourse);
-                moduleRepository.save(module);
-            }
-        }
+        courseRepository.save(entity);
+        log.info("Successfully created course with ID: {}", entity.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<CourseDto> getCourse(java.util.UUID id) {
+    public Optional<CourseDto> getCourse(UUID id) {
         return courseRepository.findById(id)
                 .map(courseMapper::toDto);
     }
@@ -58,98 +53,128 @@ public class CourseServiceImpl implements CourseService {
     @Transactional(readOnly = true)
     public List<CourseDto> getAllCourses() {
         return courseRepository.findAll().stream()
-                .map(entity -> courseMapper.toDto(entity))
-                .toList();
+                .map(courseMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<CourseDto> getAllCoursesWithEnrollment(java.util.UUID userId) {
-        List<CourseEntity> courses = courseRepository.findAll();
+    public List<CourseDto> getAllCoursesWithEnrollment(UUID userId) {
+        List<CourseEntity> allCourses = courseRepository.findAll();
+        List<EnrollmentEntity> userEnrollments = enrollmentRepository.findByStudentId(userId);
 
-        return courses.stream()
-                .map(course -> {
-                    CourseDto baseDto = courseMapper.toDto(course);
+        return allCourses.stream().map(course -> {
+            CourseDto baseDto = courseMapper.toDto(course);
 
-                    // Check enrollment
-                    java.util.Optional<com.mishchuk.onlineschool.repository.entity.EnrollmentEntity> enrollment = enrollmentRepository
-                            .findByStudentIdAndCourseId(userId, course.getId());
+            // Find enrollment for this course
+            Optional<EnrollmentEntity> enrollment = userEnrollments.stream()
+                    .filter(e -> e.getCourse().getId().equals(course.getId()))
+                    .findFirst();
 
-                    boolean isEnrolled = enrollment.isPresent();
-                    java.time.OffsetDateTime enrolledAt = enrollment.map(
-                            com.mishchuk.onlineschool.repository.entity.EnrollmentEntity::getCreatedAt).orElse(null);
+            if (enrollment.isPresent()) {
+                log.info("Found enrollment for course {}: ID={}, Status={}, ExpiresAt={}",
+                        course.getId(), enrollment.get().getId(), enrollment.get().getStatus(),
+                        enrollment.get().getExpiresAt());
 
-                    return new CourseDto(
-                            baseDto.id(),
-                            baseDto.name(),
-                            baseDto.description(),
-                            baseDto.modulesNumber(),
-                            baseDto.status(),
-                            baseDto.price(),
-                            baseDto.discountAmount(),
-                            baseDto.discountPercentage(),
-                            baseDto.accessDuration(),
-                            baseDto.createdAt(),
-                            baseDto.updatedAt(),
-                            isEnrolled,
-                            enrolledAt,
-                            isEnrolled ? enrollment.get().getStatus() : null);
-                })
-                .toList();
+                // Create new DTO with enrollment data
+                return new CourseDto(
+                        baseDto.id(),
+                        baseDto.name(),
+                        baseDto.description(),
+                        baseDto.modulesNumber(),
+                        baseDto.status(),
+                        baseDto.price(),
+                        baseDto.discountAmount(),
+                        baseDto.discountPercentage(),
+                        baseDto.accessDuration(),
+                        baseDto.promotionalDiscount(),
+                        baseDto.nextCourseId(),
+                        baseDto.nextCourseName(),
+                        baseDto.createdAt(),
+                        baseDto.updatedAt(),
+                        true, // isEnrolled
+                        enrollment.get().getCreatedAt(),
+                        enrollment.get().getStatus(),
+                        enrollment.get().getExpiresAt());
+            }
+
+            return baseDto;
+        }).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void updateCourse(java.util.UUID id, CourseUpdateDto dto) {
+    public void updateCourse(UUID id, CourseUpdateDto dto) {
+        log.info("Updating course with ID: {}", id);
         CourseEntity entity = courseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
         courseMapper.updateEntityFromDto(dto, entity);
-
-        // Mutual exclusion for discounts
-        if (dto.discountAmount() != null && dto.discountAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
-            entity.setDiscountAmount(dto.discountAmount());
-            entity.setDiscountPercentage(null);
-        } else if (dto.discountPercentage() != null && dto.discountPercentage() > 0) {
-            entity.setDiscountPercentage(dto.discountPercentage());
-            entity.setDiscountAmount(null);
-        }
-        // If both are null/empty in DTO but user wanted to clear them,
-        // we might need more explicit logic, but assuming frontend sends 0 or null.
-        // If we want to allow clearing both:
-        if (dto.discountAmount() == null && dto.discountPercentage() == null) {
-            // Do nothing, keep existing or MapStruct handled it?
-            // If I want to clear, I should probably send logic for that.
-            // For now, let's strictly follow "if one is entered, remove other".
-        }
-
-        CourseEntity savedCourse = courseRepository.save(entity);
-
-        if (dto.moduleIds() != null) {
-            // Unassign all modules currently assigned to this course
-            List<com.mishchuk.onlineschool.repository.entity.ModuleEntity> currentModules = moduleRepository
-                    .findByCourseId(id);
-            for (com.mishchuk.onlineschool.repository.entity.ModuleEntity module : currentModules) {
-                module.setCourse(null);
-                moduleRepository.save(module);
-            }
-
-            // Assign new modules
-            if (!dto.moduleIds().isEmpty()) {
-                List<com.mishchuk.onlineschool.repository.entity.ModuleEntity> newModules = moduleRepository
-                        .findAllById(dto.moduleIds());
-                for (com.mishchuk.onlineschool.repository.entity.ModuleEntity module : newModules) {
-                    module.setCourse(savedCourse);
-                    moduleRepository.save(module);
-                }
-            }
-        }
+        courseRepository.save(entity);
+        log.info("Successfully updated course with ID: {}", id);
     }
 
     @Override
     @Transactional
-    public void deleteCourse(java.util.UUID id) {
-        // Modules will be deleted automatically due to CascadeType.ALL and
-        // orphanRemoval=true in CourseEntity
-        courseRepository.deleteById(id);
+    public void deleteCourse(UUID id) {
+        log.info("Deleting course with ID: {}", id);
+        CourseEntity entity = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
+        courseRepository.delete(entity);
+        log.info("Successfully deleted course with ID: {}", id);
+    }
+
+    @Override
+    @Transactional
+    public void extendAccessForReview(UUID userId, UUID courseId, String videoUrl, String originalFilename) {
+        log.info("Extending access for review - User: {}, Course: {}, Video: {}", userId, courseId, originalFilename);
+
+        // Find the enrollment to verify it exists
+        EnrollmentEntity enrollment = enrollmentRepository.findByStudentIdAndCourseId(userId, courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        // Extend access by 31 days from now
+        enrollment.setExpiresAt(java.time.OffsetDateTime.now().plusDays(31));
+        enrollment.setStatus("ACTIVE");
+        enrollmentRepository.save(enrollment);
+
+        log.info("Access extended by 31 days for user {} on course {}", userId, courseId);
+        log.info("Review video stored at: {}", videoUrl);
+
+        // Save review request
+        CourseReviewRequestEntity reviewRequest = new CourseReviewRequestEntity();
+        reviewRequest.setUser(enrollment.getStudent());
+        reviewRequest.setCourse(enrollment.getCourse());
+        reviewRequest.setVideoUrl(videoUrl);
+        reviewRequest.setOriginalFilename(originalFilename);
+        reviewRequest.setStatus("APPROVED"); // Auto-approved for now
+        courseReviewRequestRepository.save(reviewRequest);
+
+        // Create notification for user
+        String message = "Дякуємо за ваш відгук! Доступ до курсу поновлено на 31 день.";
+        notificationService.createNotification(userId, "Доступ продовжено", message,
+                NotificationType.COURSE_ACCESS_EXTENDED);
+
+        // Notify Admins
+        notificationService.broadcastToAdmins(
+                "Продовження доступу за відгук",
+                "Користувач " + enrollment.getStudent().getFirstName() + " " + enrollment.getStudent().getLastName() +
+                        " (" + enrollment.getStudent().getEmail() + ") надіслав відео-відгук для курсу \"" +
+                        enrollment.getCourse().getName() + "\". Доступ продовжено автоматично.",
+                NotificationType.SYSTEM,
+                videoUrl);
+
+        // Send email notification
+        try {
+            java.time.LocalDate newExpiryDate = enrollment.getExpiresAt().toLocalDate();
+            emailService.sendAccessExtendedEmail(enrollment.getStudent().getEmail(),
+                    enrollment.getStudent().getFirstName(),
+                    enrollment.getCourse().getName(),
+                    newExpiryDate);
+        } catch (Exception e) {
+            log.error("Failed to send access extension email to user {}", userId, e);
+            // Don't fail the transaction if email sending fails
+        }
     }
 }

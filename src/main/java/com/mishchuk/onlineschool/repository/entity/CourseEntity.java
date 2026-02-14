@@ -40,6 +40,13 @@ public class CourseEntity {
     @Column(name = "discount_percentage")
     private Integer discountPercentage;
 
+    @Column(name = "promotional_discount")
+    private java.math.BigDecimal promotionalDiscount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "next_course_id")
+    private CourseEntity nextCourse;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<ModuleEntity> modules;
 

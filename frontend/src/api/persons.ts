@@ -32,3 +32,8 @@ export const getPerson = async (id: string): Promise<PersonDto> => {
 export const updatePerson = async (id: string, data: PersonUpdateDto): Promise<void> => {
     await client.put(`/persons/${id}`, data);
 };
+
+export const getAllPersons = async (): Promise<PersonDto[]> => {
+    const response = await client.get<PersonDto[]>('/persons');
+    return response.data || [];
+};

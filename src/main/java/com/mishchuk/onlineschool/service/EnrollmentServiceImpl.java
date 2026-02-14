@@ -25,6 +25,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
     private final CourseRepository courseRepository;
     private final EnrollmentMapper enrollmentMapper;
     private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -46,6 +47,20 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         // Send purchase email
         emailService.sendCoursePurchaseEmail(student.getEmail(), student.getFirstName() + " " + student.getLastName(),
                 course.getName());
+
+        // Notify Admins
+        notificationService.broadcastToAdmins(
+                "Нова покупка курсу",
+                "Користувач " + student.getFirstName() + " " + student.getLastName() + " (" + student.getEmail()
+                        + ") купив курс \"" + course.getName() + "\"",
+                com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED);
+
+        // Notify Student
+        notificationService.createNotification(
+                student.getId(),
+                "Успішна покупка!",
+                "Ви успішно придбали курс \"" + course.getName() + "\". Бажаємо успішного навчання!",
+                com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED);
     }
 
     @Override

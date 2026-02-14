@@ -46,6 +46,7 @@ public class AuthController {
         private final RefreshTokenService refreshTokenService;
         private final com.mishchuk.onlineschool.service.email.EmailService emailService;
         private final com.mishchuk.onlineschool.service.PasswordResetService passwordResetService;
+        private final com.mishchuk.onlineschool.service.NotificationService notificationService;
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(
@@ -72,6 +73,20 @@ public class AuthController {
 
                 // Send welcome email
                 emailService.sendWelcomeEmail(request.email(), request.firstName() + " " + request.lastName());
+
+                // Notify Admins
+                notificationService.broadcastToAdmins(
+                                "Нова реєстрація",
+                                "Новий користувач зареєструвався: " + request.firstName() + " " + request.lastName()
+                                                + " (" + request.email() + ")",
+                                com.mishchuk.onlineschool.repository.entity.NotificationType.NEW_USER_REGISTRATION);
+
+                // Notify User
+                notificationService.createNotification(
+                                person.getId(),
+                                "Ласкаво просимо!",
+                                "Вітаємо в Svitlo School! Ми раді, що ви з нами. Перегляньте доступні курси.",
+                                com.mishchuk.onlineschool.repository.entity.NotificationType.GENERIC);
 
                 // Повертаємо 200 OK замість 201 Created
                 return ResponseEntity.ok(new AuthResponse(accessToken, person.getId(),

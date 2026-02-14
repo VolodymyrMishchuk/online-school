@@ -15,6 +15,7 @@ import MyCoursesPage from './pages/MyCoursesPage';
 import MyModulesPage from './pages/MyModulesPage';
 import MyLessonsPage from './pages/MyLessonsPage';
 import { UsersPage } from './pages/UsersPage';
+import { NotificationsPage } from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ function App() {
             <Route path="my-courses" element={<MyCoursesPage />} />
             <Route path="my-lessons" element={<MyLessonsPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />

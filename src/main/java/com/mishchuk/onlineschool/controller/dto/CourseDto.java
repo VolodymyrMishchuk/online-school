@@ -3,18 +3,22 @@ package com.mishchuk.onlineschool.controller.dto;
 import java.time.OffsetDateTime;
 
 public record CourseDto(
-                java.util.UUID id,
-                String name,
-                String description,
-                Integer modulesNumber,
-                String status,
-                java.math.BigDecimal price,
-                java.math.BigDecimal discountAmount,
-                Integer discountPercentage,
-                Integer accessDuration,
-                OffsetDateTime createdAt,
-                OffsetDateTime updatedAt,
-                Boolean isEnrolled,
-                OffsetDateTime enrolledAt,
-                String enrollmentStatus) {
+        java.util.UUID id,
+        String name,
+        String description,
+        Integer modulesNumber,
+        String status,
+        java.math.BigDecimal price,
+        java.math.BigDecimal discountAmount,
+        Integer discountPercentage,
+        Integer accessDuration,
+        java.math.BigDecimal promotionalDiscount,
+        java.util.UUID nextCourseId,
+        String nextCourseName,
+        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime createdAt,
+        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime updatedAt,
+        Boolean isEnrolled,
+        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime enrolledAt,
+        String enrollmentStatus,
+        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime expiresAt) {
 }

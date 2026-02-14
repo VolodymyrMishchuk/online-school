@@ -8,6 +8,7 @@ interface CourseModalProps {
     onClose: () => void;
     onSubmit: (data: CreateCourseDto) => void;
     modules: Module[];
+    courses: CourseDto[]; // All available courses for next course selection
     initialData?: CourseDto;
     initialModuleIds?: string[]; // IDs of modules assigned to this course (for editing)
 }
@@ -17,6 +18,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     onClose,
     onSubmit,
     modules,
+    courses,
     initialData,
     initialModuleIds = []
 }) => {
@@ -26,6 +28,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     const [discountAmount, setDiscountAmount] = useState<number | undefined>(undefined);
     const [discountPercentage, setDiscountPercentage] = useState<number | undefined>(undefined);
     const [accessDuration, setAccessDuration] = useState<number | undefined>(undefined);
+    const [promotionalDiscount, setPromotionalDiscount] = useState<number | undefined>(undefined);
+    const [nextCourseId, setNextCourseId] = useState<string | undefined>(undefined);
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
 
     useEffect(() => {
@@ -36,6 +40,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setDiscountAmount(initialData.discountAmount);
             setDiscountPercentage(initialData.discountPercentage);
             setAccessDuration(initialData.accessDuration);
+            setPromotionalDiscount(initialData.promotionalDiscount);
+            setNextCourseId(initialData.nextCourseId);
             setSelectedModuleIds(initialModuleIds);
         } else {
             setName('');
@@ -44,6 +50,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setDiscountAmount(undefined);
             setDiscountPercentage(undefined);
             setAccessDuration(undefined);
+            setPromotionalDiscount(undefined);
+            setNextCourseId(undefined);
             setSelectedModuleIds([]);
         }
     }, [initialData, isOpen, initialModuleIds]);
@@ -57,6 +65,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             discountAmount,
             discountPercentage,
             accessDuration,
+            promotionalDiscount,
+            nextCourseId,
             moduleIds: selectedModuleIds
         });
         onClose();
@@ -217,6 +227,49 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             />
                             <p className="text-xs text-gray-500 mt-1">
                                 Залиште порожнім для необмеженого доступу
+                            </p>
+                        </div>
+
+                        {/* Promotional Discount */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Акційна знижка на наступний курс (%)
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={promotionalDiscount || ''}
+                                onChange={(e) => setPromotionalDiscount(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Наприклад: 15"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Знижка для тих, хто завершив цей курс
+                            </p>
+                        </div>
+
+                        {/* Next Course Recommendation */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Наступний рекомендований курс
+                            </label>
+                            <select
+                                value={nextCourseId || ''}
+                                onChange={(e) => setNextCourseId(e.target.value || undefined)}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Не вказано</option>
+                                {courses
+                                    .filter(course => course.id !== initialData?.id)
+                                    .map(course => (
+                                        <option key={course.id} value={course.id}>
+                                            {course.name}
+                                        </option>
+                                    ))}
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Рекомендований наступний курс після завершення цього
                             </p>
                         </div>
 

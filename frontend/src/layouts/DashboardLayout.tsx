@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell } from 'lucide-react';
 
 import { useRef } from 'react';
 import { ScrollToTop } from '../components/ScrollToTop';
@@ -20,6 +20,7 @@ export default function DashboardLayout() {
         { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
         { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
         { to: '/dashboard/my-courses', icon: GraduationCap, label: 'Мої курси' },
+        { to: '/dashboard/notifications', icon: Bell, label: 'Сповіщення' },
         { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },
     ];
 

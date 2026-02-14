@@ -19,4 +19,7 @@ public interface CourseService {
     void updateCourse(java.util.UUID id, CourseUpdateDto dto);
 
     void deleteCourse(java.util.UUID id);
+
+    void extendAccessForReview(java.util.UUID userId, java.util.UUID courseId, String videoUrl,
+            String originalFilename);
 }

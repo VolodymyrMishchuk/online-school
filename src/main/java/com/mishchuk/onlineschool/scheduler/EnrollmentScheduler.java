@@ -29,8 +29,14 @@ public class EnrollmentScheduler {
 
         for (EnrollmentEntity enrollment : activeEnrollments) {
             if (enrollment.getCourse() != null && enrollment.getCourse().getAccessDuration() != null) {
-                OffsetDateTime expirationDate = enrollment.getCreatedAt()
-                        .plusDays(enrollment.getCourse().getAccessDuration());
+                OffsetDateTime expirationDate;
+
+                if (enrollment.getExpiresAt() != null) {
+                    expirationDate = enrollment.getExpiresAt();
+                } else {
+                    expirationDate = enrollment.getCreatedAt()
+                            .plusDays(enrollment.getCourse().getAccessDuration());
+                }
 
                 if (now.isAfter(expirationDate)) {
                     enrollment.setStatus("BLOCKED");

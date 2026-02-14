@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PersonRepository extends JpaRepository<PersonEntity, java.util.UUID> {
     Optional<PersonEntity> findByEmail(String email);
+
+    java.util.List<PersonEntity> findAllByRole(com.mishchuk.onlineschool.repository.entity.PersonRole role);
 }

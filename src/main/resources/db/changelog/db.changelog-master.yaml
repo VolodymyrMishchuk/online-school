@@ -41,3 +41,18 @@ databaseChangeLog:
   - include:
       file: changesing/015-create-password-reset-tokens-table.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/016-add-next-course-and-promo.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/017-alter-enrollments-add-expires-at.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/018-create-notifications-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/019-create-course-review-requests-table.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/020-alter-notifications-add-button-url.sql
+      relativeToChangelogFile: true

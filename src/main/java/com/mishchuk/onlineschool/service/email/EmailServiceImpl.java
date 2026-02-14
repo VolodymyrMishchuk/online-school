@@ -73,6 +73,18 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlEmail(to, "Відновлення паролю | Svitlo School", "email/password-reset", context);
     }
 
+    @Override
+    public void sendAccessExtendedEmail(String to, String userName, String courseName, LocalDate expirationDate) {
+        Context context = new Context();
+        context.setVariable("userName", userName);
+        context.setVariable("courseName", courseName);
+        context.setVariable("expirationDate", expirationDate);
+        // We can link directly to the course or just the dashboard
+        context.setVariable("courseUrl", frontendUrl + "/dashboard/my-courses");
+
+        sendHtmlEmail(to, "Доступ до курсу продовжено!", "email/access-extended", context);
+    }
+
     private void sendHtmlEmail(String to, String subject, String templateName, Context context) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();

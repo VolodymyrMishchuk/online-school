@@ -18,6 +18,9 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
   servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
   mail:
     host: 127.0.0.1

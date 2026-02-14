@@ -27,6 +27,9 @@ public class EnrollmentEntity {
     @Column(name = "status")
     private String status;
 
+    @Column(name = "expires_at")
+    private OffsetDateTime expiresAt;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
