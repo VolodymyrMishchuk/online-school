@@ -131,4 +131,13 @@ public class NotificationServiceImpl implements NotificationService {
     public long getUnreadCount(UUID userId) {
         return notificationRepository.countByRecipientIdAndIsReadFalse(userId);
     }
+
+    @Override
+    @Transactional
+    public void deleteNotification(UUID id) {
+        if (!notificationRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Notification not found with id: " + id);
+        }
+        notificationRepository.deleteById(id);
+    }
 }

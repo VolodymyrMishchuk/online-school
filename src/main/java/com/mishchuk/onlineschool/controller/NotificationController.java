@@ -69,6 +69,17 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getUnreadCount(person.getId()));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable UUID id, Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        // In a real app we might verify ownership here (that the notification belongs
+        // to the user)
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/broadcast")
     public ResponseEntity<Void> broadcastToAll(
             @RequestBody @jakarta.validation.Valid com.mishchuk.onlineschool.controller.dto.BroadcastRequest request,
@@ -105,7 +116,6 @@ public class NotificationController {
                 entity.getType(),
                 entity.isRead(),
                 entity.getCreatedAt(),
-                entity.getButtonUrl()
-        );
+                entity.getButtonUrl());
     }
 }

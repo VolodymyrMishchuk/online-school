@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { getNotifications, markAsRead } from '../api/notifications';
+import { getNotifications, markAsRead, deleteNotification } from '../api/notifications';
 import type { NotificationDto } from '../api/notifications';
-import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus } from 'lucide-react';
+import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { CreateNotificationModal } from '../components/CreateNotificationModal';
@@ -42,6 +42,18 @@ export const NotificationsPage: React.FC = () => {
         }
     };
 
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        // Removed confirmation as requested
+
+        try {
+            await deleteNotification(id);
+            setNotifications(prev => prev.filter(n => n.id !== id));
+        } catch (error) {
+            console.error('Failed to delete notification', error);
+        }
+    };
+
     const handleNotificationClick = (notification: NotificationDto) => {
         if (!notification.read) {
             handleMarkAsRead(notification.id, { stopPropagation: () => { } } as React.MouseEvent);
@@ -50,13 +62,13 @@ export const NotificationsPage: React.FC = () => {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'COURSE_ACCESS_EXTENDED': return <CheckCircle className="w-6 h-6 text-green-400" />;
-            case 'COURSE_PURCHASED': return <ShoppingCart className="w-6 h-6 text-brand-primary" />;
-            case 'NEW_USER_REGISTRATION': return <UserPlus className="w-6 h-6 text-blue-400" />;
-            case 'ADMIN_ANNOUNCEMENT': return <Megaphone className="w-6 h-6 text-orange-400" />;
-            case 'SYSTEM': return <Info className="w-6 h-6 text-gray-400" />;
-            case 'GENERIC': return <Info className="w-6 h-6 text-brand-secondary" />;
-            default: return <Info className="w-6 h-6 text-brand-secondary" />;
+            case 'COURSE_ACCESS_EXTENDED': return <CheckCircle className="w-8 h-8 text-green-400" />;
+            case 'COURSE_PURCHASED': return <ShoppingCart className="w-8 h-8 text-brand-primary" />;
+            case 'NEW_USER_REGISTRATION': return <UserPlus className="w-8 h-8 text-blue-400" />;
+            case 'ADMIN_ANNOUNCEMENT': return <Megaphone className="w-8 h-8 text-orange-400" />;
+            case 'SYSTEM': return <Info className="w-8 h-8 text-gray-400" />;
+            case 'GENERIC': return <Info className="w-8 h-8 text-brand-secondary" />;
+            default: return <Info className="w-8 h-8 text-brand-secondary" />;
         }
     };
 
@@ -83,31 +95,27 @@ export const NotificationsPage: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-6 py-12 max-w-4xl">
+        <div className="container mx-auto px-6 py-12">
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Сповіщення</h1>
-                    <p className="text-gray-500">Важливі оновлення та події</p>
                 </div>
                 <div className="flex gap-3">
                     {isAdmin && (
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-secondary transition-all shadow-lg shadow-brand-primary/30"
+                            className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                         >
-                            <Plus className="w-4 h-4" />
-                            <span>Створити</span>
+                            <Plus className="w-5 h-5" />
+                            <span>Надіслати сповіщення</span>
                         </button>
                     )}
-                    <div className="p-3 bg-brand-light/30 rounded-2xl">
-                        <Bell className="w-6 h-6 text-brand-primary" />
-                    </div>
                 </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-2">
                 {notifications.length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                    <div className="text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                             <Bell className="w-8 h-8 text-gray-300" />
                         </div>
@@ -120,14 +128,14 @@ export const NotificationsPage: React.FC = () => {
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
                             className={`
-                                relative p-6 rounded-2xl border transition-all duration-300 cursor-pointer group
+                                relative p-5 rounded-lg border transition-all duration-300 cursor-pointer group overflow-hidden
                                 ${getBackground(notification.type, notification.read)}
-                                hover:scale-[1.01] hover:shadow-md
+                                hover:shadow-lg
                             `}
                         >
-                            <div className="flex gap-5">
+                            <div className="flex gap-5 relative z-10 transition-all duration-300 group-hover:pr-[90px]">
                                 <div className="shrink-0 mt-1">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-white shadow-sm transition-opacity duration-300 ${notification.read ? 'opacity-50' : ''}`}>
+                                    <div className={`w-14 h-14 rounded-lg flex items-center justify-center bg-white shadow-sm transition-opacity duration-300 ${notification.read ? 'opacity-50' : ''}`}>
                                         {getIcon(notification.type)}
                                     </div>
                                 </div>
@@ -142,15 +150,17 @@ export const NotificationsPage: React.FC = () => {
                                             </p>
                                         </div>
 
-                                        {!notification.read && (
-                                            <button
-                                                onClick={(e) => handleMarkAsRead(notification.id, e)}
-                                                className="shrink-0 p-2 hover:bg-black/5 rounded-full transition-colors group/btn"
-                                                title="Позначити, як прочитане"
-                                            >
-                                                <div className="w-2.5 h-2.5 rounded-full bg-brand-primary group-hover/btn:bg-brand-secondary transition-colors" />
-                                            </button>
-                                        )}
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            {!notification.read && (
+                                                <button
+                                                    onClick={(e) => handleMarkAsRead(notification.id, e)}
+                                                    className="p-2 hover:bg-black/5 rounded-full transition-colors group/btn"
+                                                    title="Позначити, як прочитане"
+                                                >
+                                                    <div className="w-2.5 h-2.5 rounded-full bg-brand-primary group-hover/btn:bg-brand-secondary transition-colors" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {notification.buttonUrl && (
@@ -188,6 +198,14 @@ export const NotificationsPage: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+
+                            {/* Hover Delete Action */}
+                            <div
+                                onClick={(e) => handleDelete(notification.id, e)}
+                                className="absolute right-0 top-0 bottom-0 w-[100px] bg-red-50/90 backdrop-blur-[2px] border-l border-red-100 flex items-center justify-center translate-x-full group-hover:translate-x-0 transition-transform duration-300 z-20 hover:bg-red-500 group/delete"
+                            >
+                                <Trash2 className="w-6 h-6 text-red-500 transition-colors group-hover/delete:text-white" />
                             </div>
                         </div>
                     ))

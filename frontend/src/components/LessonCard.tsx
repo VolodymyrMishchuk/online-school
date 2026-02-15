@@ -64,7 +64,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, onIma
 
     return (
         <div
-            className={`bg-white rounded-3xl p-6 shadow-sm border border-gray-100 transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
+            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
             onClick={() => !isLocked && setIsExpanded(!isExpanded)}
         >
             <div className="flex items-start gap-4">

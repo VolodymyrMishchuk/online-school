@@ -44,6 +44,10 @@ export const sendTargetedNotification = async (data: TargetedNotificationRequest
     await client.post('/notifications/send-to-users', data);
 };
 
+export const deleteNotification = async (id: string): Promise<void> => {
+    await client.delete(`/notifications/${id}`);
+};
+
 export const markAllAsRead = async (): Promise<void> => {
     // Assuming backend has such endpoint or we loop. 
     // Given the backend summary, I didn't explicitly see markAllAsRead.
@@ -51,4 +55,9 @@ export const markAllAsRead = async (): Promise<void> => {
     // For now, I'll stick to basic get.
     // Wait, did I implement markAsRead in backend? I just saw NotificationService has create and get.
     // Let me check NotificationController.java.
+};
+
+export const getUnreadCount = async (): Promise<number> => {
+    const response = await client.get('/notifications/unread-count');
+    return response.data;
 };

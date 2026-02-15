@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell } from 'lucide-react';
 
-import { useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { getUnreadCount } from '../api/notifications';
 import { ScrollToTop } from '../components/ScrollToTop';
 
 export default function DashboardLayout() {
@@ -9,11 +10,29 @@ export default function DashboardLayout() {
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
     const mainRef = useRef<HTMLElement>(null);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const handleLogout = () => {
         localStorage.clear();
         navigate('/');
     };
+
+    useEffect(() => {
+        const fetchUnreadCount = async () => {
+            try {
+                const count = await getUnreadCount();
+                setUnreadCount(count);
+            } catch (error) {
+                console.error('Failed to fetch unread count', error);
+            }
+        };
+
+        fetchUnreadCount();
+
+        // Optional: Set up interval to refresh count periodically
+        const interval = setInterval(fetchUnreadCount, 60000); // Every minute
+        return () => clearInterval(interval);
+    }, []);
 
     const navItems = [
         { to: '/dashboard/all-courses', icon: BookOpen, label: 'Всі курси' },
@@ -23,8 +42,6 @@ export default function DashboardLayout() {
         { to: '/dashboard/notifications', icon: Bell, label: 'Сповіщення' },
         { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },
     ];
-
-
 
     // TEMPORARY: Show Users tab for everyone since roles are not fully implemented yet
     navItems.push({ to: '/dashboard/users', icon: Users, label: 'Користувачі' });
@@ -63,8 +80,18 @@ export default function DashboardLayout() {
                                 }`
                             }
                         >
-                            <item.icon className="w-5 h-5" />
+                            <div className="relative">
+                                <item.icon className="w-5 h-5" />
+                                {item.label === 'Сповіщення' && unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                                )}
+                            </div>
                             <span>{item.label}</span>
+                            {item.label === 'Сповіщення' && unreadCount > 0 && (
+                                <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
                         </NavLink>
                     ))}
                 </nav>

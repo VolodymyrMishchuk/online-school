@@ -1,22 +1,43 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { FileText, Plus } from 'lucide-react';
+import { Plus, Filter } from 'lucide-react';
 import { getLessons, deleteLesson } from '../api/lessons';
 import type { Lesson } from '../api/lessons';
 import { getLessonFiles, type FileDto } from '../api/files';
+import { getCourses } from '../api/courses';
+import { getModules } from '../api/modules';
 import LessonCard from '../components/LessonCard';
 import LessonModal from '../components/LessonModal';
 import ImagePreviewModal from '../components/ImagePreviewModal';
+import MultiSelect from '../components/MultiSelect';
 
 export default function AllLessonsPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const queryClient = useQueryClient();
 
-    const { data: lessons, isLoading } = useQuery({
+    // Filter states (Arrays for multi-select)
+    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
+    const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
+
+    const queryClient = useQueryClient();
+    const userId = localStorage.getItem('userId') || '';
+
+    // Fetch Data
+    const { data: lessons, isLoading: lessonsLoading } = useQuery({
         queryKey: ['allLessons'],
         queryFn: getLessons,
+    });
+
+    const { data: courses } = useQuery({
+        queryKey: ['allCourses', userId],
+        queryFn: () => getCourses(userId),
+        enabled: !!userId
+    });
+
+    const { data: modules } = useQuery({
+        queryKey: ['allModules'],
+        queryFn: () => getModules(),
     });
 
     // Fetch files for each lesson
@@ -66,11 +87,52 @@ export default function AllLessonsPage() {
     };
 
     const handleFileDelete = () => {
-        // Refresh lesson files after deletion
         queryClient.invalidateQueries({ queryKey: ['lessonFiles'] });
     };
 
-    if (isLoading) {
+    // Filtering Logic
+    const filteredModules = useMemo(() => {
+        if (!modules) return [];
+        if (selectedCourseIds.length === 0) return modules;
+        return modules.filter(m => m.courseId && selectedCourseIds.includes(m.courseId));
+    }, [modules, selectedCourseIds]);
+
+    // Map module ID to course ID for efficient lookup
+    const moduleCourseMap = useMemo(() => {
+        const map = new Map<string, string>();
+        modules?.forEach(m => {
+            if (m.courseId) map.set(m.id, m.courseId);
+        });
+        return map;
+    }, [modules]);
+
+    const filteredLessons = useMemo(() => {
+        if (!lessons) return [];
+        return lessons.filter(lesson => {
+            // Filter by Course
+            const courseId = moduleCourseMap.get(lesson.moduleId);
+            if (selectedCourseIds.length > 0) {
+                if (!courseId || !selectedCourseIds.includes(courseId)) {
+                    return false;
+                }
+            }
+
+            // Filter by Module
+            if (selectedModuleIds.length > 0) {
+                if (!selectedModuleIds.includes(lesson.moduleId)) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [lessons, selectedCourseIds, selectedModuleIds, moduleCourseMap]);
+
+    // Derived counts
+    const totalLessons = lessons?.length || 0;
+    const displayedLessons = filteredLessons.length;
+
+    if (lessonsLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-brand-primary font-medium">Завантаження уроків...</div>
@@ -80,11 +142,11 @@ export default function AllLessonsPage() {
 
     return (
         <div className="container mx-auto px-6 py-12">
+            {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <FileText className="w-8 h-8 text-brand-primary" />
                     <h1 className="text-3xl font-bold text-brand-dark">Всі уроки</h1>
-                    <span className="text-gray-400 font-medium">({lessons?.length || 0})</span>
+                    <span className="text-gray-400 font-medium">({displayedLessons}{displayedLessons !== totalLessons ? ` / ${totalLessons}` : ''})</span>
                 </div>
 
                 <button
@@ -92,34 +154,73 @@ export default function AllLessonsPage() {
                         setEditingLesson(null);
                         setIsModalOpen(true);
                     }}
-                    className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white font-semibold rounded-2xl hover:bg-brand-primary/90 transition-all shadow-sm hover:shadow-md"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                 >
                     <Plus className="w-5 h-5" />
-                    Додати урок
+                    <span>Додати урок</span>
                 </button>
             </div>
 
-            {lessons?.length === 0 ? (
-                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-16 text-center">
-                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500 text-lg mb-2">Уроків поки що немає</p>
-                    <p className="text-gray-400 text-sm mb-6">
-                        Створіть перший урок, натиснувши кнопку "Додати урок"
-                    </p>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-8 bg-white p-3 rounded-lg border border-gray-100 shadow-sm items-center">
+                <div className="flex items-center gap-2 text-gray-500 mr-2">
+                    <Filter className="w-5 h-5" />
+                    <span className="font-medium text-sm">Фільтри:</span>
+                </div>
+
+                {/* Course Filter */}
+                <div className="min-w-[250px]">
+                    <MultiSelect
+                        label=""
+                        placeholder="Всі курси"
+                        options={courses?.map(c => ({ value: c.id, label: c.name })) || []}
+                        selectedValues={selectedCourseIds}
+                        onChange={(ids) => {
+                            setSelectedCourseIds(ids);
+                            // Optional: Clear selected modules if they don't belong to selected courses? 
+                            // For now, let's keep it simple and just filter available modules in the dropdown.
+                        }}
+                    />
+                </div>
+
+                {/* Module Filter */}
+                <div className="min-w-[250px]">
+                    <MultiSelect
+                        label=""
+                        placeholder="Всі модулі"
+                        options={filteredModules.map(m => ({ value: m.id, label: m.name }))}
+                        selectedValues={selectedModuleIds}
+                        onChange={setSelectedModuleIds}
+                    />
+                </div>
+
+                {(selectedCourseIds.length > 0 || selectedModuleIds.length > 0) && (
                     <button
                         onClick={() => {
-                            setEditingLesson(null);
-                            setIsModalOpen(true);
+                            setSelectedCourseIds([]);
+                            setSelectedModuleIds([]);
                         }}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white font-semibold rounded-2xl hover:bg-brand-primary/90 transition-all"
+                        className="text-sm text-red-500 hover:text-red-600 font-medium px-2 ml-auto"
                     >
-                        <Plus className="w-5 h-5" />
-                        Створити урок
+                        Скинути всі
                     </button>
+                )}
+            </div>
+
+            {/* Lessons List */}
+            {filteredLessons.length === 0 ? (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-16 text-center">
+                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Filter className="w-8 h-8 text-gray-300" />
+                    </div>
+                    <p className="text-gray-500 text-lg mb-2">Уроків не знайдено</p>
+                    <p className="text-gray-400 text-sm">
+                        Спробуйте змінити параметри фільтрації або створіть новий урок
+                    </p>
                 </div>
             ) : (
-                <div className="flex flex-col space-y-4">
-                    {lessons?.map((lesson) => (
+                <div className="flex flex-col space-y-2">
+                    {filteredLessons.map((lesson) => (
                         <LessonCard
                             key={lesson.id}
                             lesson={lesson}
