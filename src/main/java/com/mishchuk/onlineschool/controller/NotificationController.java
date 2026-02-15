@@ -105,6 +105,7 @@ public class NotificationController {
                 entity.getType(),
                 entity.isRead(),
                 entity.getCreatedAt(),
-                entity.getButtonUrl());
+                entity.getButtonUrl()
+        );
     }
 }

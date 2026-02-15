@@ -92,9 +92,9 @@ export default function AllCoursesPage() {
         }
     };
 
-    const handleModalSubmit = (data: CreateCourseDto) => {
+    const handleModalSubmit = async (data: CreateCourseDto) => {
         if (editingCourse) {
-            updateMutation.mutate({
+            await updateMutation.mutateAsync({
                 id: editingCourse.id,
                 dto: {
                     ...data,
@@ -102,7 +102,7 @@ export default function AllCoursesPage() {
                 }
             });
         } else {
-            createMutation.mutate(data);
+            await createMutation.mutateAsync(data);
         }
     };
 

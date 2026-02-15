@@ -1,5 +1,6 @@
 package com.mishchuk.onlineschool.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mishchuk.onlineschool.repository.entity.NotificationType;
 
 import java.time.OffsetDateTime;
@@ -11,5 +12,6 @@ public record NotificationDto(
                 String message,
                 NotificationType type,
                 boolean read,
-                @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime createdAt) {
+                @JsonFormat(shape = JsonFormat.Shape.STRING) OffsetDateTime createdAt,
+                String buttonUrl) {
 }

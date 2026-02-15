@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { X, Upload, File, Loader2 } from 'lucide-react';
+import { X, Upload, File, Loader2, BookOpen, Video, Clock, Layout, FileText, Trash2, AlertCircle } from 'lucide-react';
 import { createLesson, updateLesson } from '../api/lessons';
 import type { CreateLessonDto, Lesson } from '../api/lessons';
 import { uploadFile } from '../api/files';
@@ -127,33 +127,41 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/30 backdrop-blur-md animate-in fade-in duration-200">
+            {/* Glass Panel Modal */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onClose}
-            />
-
-            {/* Modal */}
-            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-3xl z-10">
-                    <h2 className="text-2xl font-bold text-brand-dark">
-                        {isEditing ? 'Редагувати урок' : 'Створити урок'}
-                    </h2>
+                className="glass-panel w-full max-w-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative rounded-lg shadow-xl"
+                style={{ background: 'rgba(255, 255, 255, 0.9)', maxHeight: '90vh' }}
+            >
+                {/* Header Bar - Static, Lighter (bg-white) */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white shrink-0 z-10 relative shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-light/50 text-brand-primary ring-2 ring-white shadow-sm">
+                            <BookOpen className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-brand-dark">
+                                {isEditing ? 'Редагувати урок' : 'Створити урок'}
+                            </h2>
+                            <p className="text-xs text-gray-500 font-medium">
+                                {isEditing ? 'Зміна існуючого контенту' : 'Додавання навчального матеріалу'}
+                            </p>
+                        </div>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
+                        className="p-2 text-gray-400 hover:text-brand-primary hover:bg-gray-100 rounded-lg transition-all"
                     >
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                {/* Form */}
-                <div className="p-6 space-y-6">
+                {/* Body - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar flex flex-col gap-6">
                     {/* Name */}
                     <div>
-                        <label className="block text-sm font-semibold text-brand-dark mb-2">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                            <FileText className="w-4 h-4" />
                             Назва уроку <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -163,16 +171,24 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                 setFormData(prev => ({ ...prev, name: e.target.value }));
                                 setErrors(prev => ({ ...prev, name: '' }));
                             }}
-                            className={`w-full px-4 py-3 rounded-2xl border ${errors.name ? 'border-red-500' : 'border-gray-200'
-                                } focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
+                            className={`w-full px-4 py-3 rounded-lg border bg-white/50 outline-none transition-all focus:ring-2 focus:ring-brand-light focus:bg-white ${errors.name
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-gray-200 focus:border-brand-primary'
+                                }`}
                             placeholder="Введіть назву уроку..."
                         />
-                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                        {errors.name && (
+                            <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
+                                <AlertCircle className="w-3 h-3" />
+                                {errors.name}
+                            </p>
+                        )}
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-semibold text-brand-dark mb-2">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                            <BookOpen className="w-4 h-4" />
                             Опис <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -182,121 +198,154 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                 setErrors(prev => ({ ...prev, description: '' }));
                             }}
                             rows={4}
-                            className={`w-full px-4 py-3 rounded-2xl border ${errors.description ? 'border-red-500' : 'border-gray-200'
-                                } focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
+                            className={`w-full px-4 py-3 rounded-lg border bg-white/50 outline-none transition-all focus:ring-2 focus:ring-brand-light focus:bg-white resize-none ${errors.description
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-gray-200 focus:border-brand-primary'
+                                }`}
                             placeholder="Введіть опис уроку..."
                         />
-                        {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                        {errors.description && (
+                            <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
+                                <AlertCircle className="w-3 h-3" />
+                                {errors.description}
+                            </p>
+                        )}
                     </div>
 
-                    {/* Video URL */}
-                    <div>
-                        <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Посилання на відео
-                        </label>
-                        <input
-                            type="url"
-                            value={formData.videoUrl || ''}
-                            onChange={(e) => {
-                                setFormData(prev => ({ ...prev, videoUrl: e.target.value }));
-                                setErrors(prev => ({ ...prev, videoUrl: '' }));
-                            }}
-                            className={`w-full px-4 py-3 rounded-2xl border ${errors.videoUrl ? 'border-red-500' : 'border-gray-200'
-                                } focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
-                            placeholder="https://youtube.com/watch?v=..."
-                        />
-                        {errors.videoUrl && <p className="text-red-500 text-sm mt-1">{errors.videoUrl}</p>}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Video URL */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Video className="w-4 h-4" />
+                                Посилання на відео
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.videoUrl || ''}
+                                onChange={(e) => {
+                                    setFormData(prev => ({ ...prev, videoUrl: e.target.value }));
+                                    setErrors(prev => ({ ...prev, videoUrl: '' }));
+                                }}
+                                className={`w-full px-4 py-3 rounded-lg border bg-white/50 outline-none transition-all focus:ring-2 focus:ring-brand-light focus:bg-white ${errors.videoUrl
+                                    ? 'border-red-300 focus:border-red-500'
+                                    : 'border-gray-200 focus:border-brand-primary'
+                                    }`}
+                                placeholder="https://youtube.com/watch?v=..."
+                            />
+                            {errors.videoUrl && (
+                                <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
+                                    <AlertCircle className="w-3 h-3" />
+                                    {errors.videoUrl}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Clock className="w-4 h-4" />
+                                Тривалість (хв)
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                value={formData.durationMinutes || ''}
+                                onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    durationMinutes: e.target.value ? parseInt(e.target.value) : undefined
+                                }))}
+                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                placeholder="30"
+                            />
+                        </div>
                     </div>
 
-                    {/* Module Select */}
                     {/* Module Select - Only visible when creating */}
                     {!isEditing && (
                         <div>
-                            <label className="block text-sm font-semibold text-brand-dark mb-2">
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Layout className="w-4 h-4" />
                                 Модуль
                             </label>
-                            <select
-                                value={formData.moduleId || ''}
-                                onChange={(e) => {
-                                    setFormData(prev => ({ ...prev, moduleId: e.target.value }));
-                                    setErrors(prev => ({ ...prev, moduleId: '' }));
-                                }}
-                                className={`w-full px-4 py-3 rounded-2xl border ${errors.moduleId ? 'border-red-500' : 'border-gray-200'
-                                    } focus:outline-none focus:ring-2 focus:ring-brand-primary/20 bg-white`}
-                                disabled={modulesLoading}
-                            >
-                                <option value="">Виберіть модуль...</option>
-                                {modules?.map(module => (
-                                    <option key={module.id} value={module.id}>
-                                        {module.name} {module.courseName && `(${module.courseName})`}
-                                    </option>
-                                ))}
-                            </select>
-                            {errors.moduleId && <p className="text-red-500 text-sm mt-1">{errors.moduleId}</p>}
+                            <div className="relative">
+                                <select
+                                    value={formData.moduleId || ''}
+                                    onChange={(e) => {
+                                        setFormData(prev => ({ ...prev, moduleId: e.target.value }));
+                                        setErrors(prev => ({ ...prev, moduleId: '' }));
+                                    }}
+                                    className={`w-full px-4 py-3 rounded-lg border bg-white/50 outline-none transition-all focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none ${errors.moduleId
+                                        ? 'border-red-300 focus:border-red-500'
+                                        : 'border-gray-200 focus:border-brand-primary'
+                                        }`}
+                                    disabled={modulesLoading}
+                                >
+                                    <option value="">Виберіть модуль...</option>
+                                    {modules?.map(module => (
+                                        <option key={module.id} value={module.id}>
+                                            {module.name} {module.courseName && `(${module.courseName})`}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                    <Layout className="w-4 h-4" />
+                                </div>
+                            </div>
+                            {errors.moduleId && (
+                                <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
+                                    <AlertCircle className="w-3 h-3" />
+                                    {errors.moduleId}
+                                </p>
+                            )}
                         </div>
                     )}
 
-                    {/* Duration */}
+                    {/* Files Upload */}
                     <div>
-                        <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Тривалість (хвилини)
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            value={formData.durationMinutes || ''}
-                            onChange={(e) => setFormData(prev => ({
-                                ...prev,
-                                durationMinutes: e.target.value ? parseInt(e.target.value) : undefined
-                            }))}
-                            className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                            placeholder="30"
-                        />
-                    </div>
-
-                    {/* Files - Only show for new lessons or separate add file logic needed for edit? 
-                        For simplicity, allow adding NEW files in edit mode too. 
-                        Existing files management is a separate concern (maybe in LessonCard or dedicated modal).
-                        User asked to manage content INSIDE lesson, so maybe editing existing files too?
-                        Let's focus on adding new files here. Managing existing files (delete) can be done on the card
-                        or requires a more complex modal. Let's stick to adding new files for now and maybe delete existing 
-                        files from the main view to keep it simple as per request context "edit content inside Lesson".
-                    */}
-                    <div>
-                        <label className="block text-sm font-semibold text-brand-dark mb-2">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                            <Upload className="w-4 h-4" />
                             {isEditing ? 'Додати нові файли' : 'Файли'}
                         </label>
-                        <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center">
-                            <label className="cursor-pointer">
+                        <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50/50 hover:border-brand-primary/50 transition-all cursor-pointer group bg-white/30">
+                            <label className="cursor-pointer block w-full h-full">
                                 <input
                                     type="file"
                                     multiple
                                     onChange={handleFileSelect}
                                     className="hidden"
                                 />
-                                <div className="flex flex-col items-center gap-2">
-                                    <Upload className="w-8 h-8 text-gray-400" />
-                                    <span className="text-sm text-gray-600 font-medium">
-                                        Натисніть, щоб обрати файли
-                                    </span>
-                                    <span className="text-xs text-gray-400">
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="w-12 h-12 rounded-full bg-brand-light/30 flex items-center justify-center group-hover:bg-brand-light/60 transition-colors">
+                                        <Upload className="w-6 h-6 text-brand-primary" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm text-brand-primary font-bold hover:underline">
+                                            Натисніть
+                                        </span>
+                                        <span className="text-sm text-gray-500 font-medium">
+                                            {' '}щоб обрати файли
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-400">
                                         або перетягніть файли сюди
-                                    </span>
+                                    </p>
                                 </div>
                             </label>
                         </div>
 
                         {/* Selected files list */}
                         {selectedFiles.length > 0 && (
-                            <div className="mt-4 space-y-2">
+                            <div className="mt-4 space-y-2 animate-in slide-in-from-top-2 duration-200">
                                 {selectedFiles.map((file, index) => (
                                     <div
                                         key={index}
-                                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
+                                        className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm"
                                     >
-                                        <File className="w-5 h-5 text-brand-primary flex-shrink-0" />
+                                        <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                            <File className="w-4 h-4 text-gray-500" />
+                                        </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-brand-dark truncate">
+                                            <p className="text-sm font-bold text-gray-700 truncate">
                                                 {file.name}
                                             </p>
                                             <p className="text-xs text-gray-500">
@@ -305,9 +354,9 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                         </div>
                                         <button
                                             onClick={() => removeFile(index)}
-                                            className="p-1 rounded-lg hover:bg-gray-200 transition-colors"
+                                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                                         >
-                                            <X className="w-4 h-4 text-gray-500" />
+                                            <Trash2 className="w-4 h-4" />
                                         </button>
                                     </div>
                                 ))}
@@ -316,19 +365,19 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3 rounded-b-3xl">
+                {/* Footer - Static */}
+                <div className="flex gap-4 p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm shrink-0">
                     <button
                         onClick={onClose}
                         disabled={mutation.isPending}
-                        className="px-6 py-3 rounded-2xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
+                        className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
                         Скасувати
                     </button>
                     <button
                         onClick={() => mutation.mutate()}
                         disabled={mutation.isPending}
-                        className="px-6 py-3 rounded-2xl bg-brand-primary text-white font-semibold hover:bg-brand-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                        className="flex-1 py-3 font-bold text-white bg-brand-primary hover:bg-brand-secondary rounded-lg transition-all shadow-lg hover:shadow-xl transform active:scale-95 duration-200 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
                     >
                         {mutation.isPending && (
                             <Loader2 className="w-4 h-4 animate-spin" />

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
+public interface NotificationService {
 NotificationEntity createNotification(UUID recipientId,String title,String message,NotificationType type,String buttonUrl);
 
 // Overload for backward compatibility if needed, or just update all calls
@@ -28,4 +29,6 @@ Page<NotificationEntity>getUserNotifications(UUID userId,Pageable pageable);
 
 void markAsRead(UUID notificationId);
 
-long getUnreadCount(UUID userId);}
+long getUnreadCount(UUID userId);
+
+}
