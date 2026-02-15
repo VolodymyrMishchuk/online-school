@@ -283,18 +283,18 @@ function CourseExpandableCard({
                                             >
                                                 Придбати час
                                             </button>
-                                            {course.nextCourseId && course.promotionalDiscount && (
+                                            {course.nextCourseId && (course.promotionalDiscountPercentage || course.promotionalDiscountAmount) && (
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         // TODO: Implement next course discount logic
-                                                        console.log(`Get ${course.promotionalDiscount}% discount for next course: ${course.nextCourseName}`);
+                                                        console.log(`Get discount for next course: ${course.nextCourseName}`);
                                                     }}
                                                     className="w-full flex items-center justify-center gap-2 bg-[#ec9494] text-white font-bold rounded-xl px-6 py-3 hover:bg-[#e88686] transition-all shadow-md hover:shadow-lg transform active:scale-[0.98] text-sm whitespace-nowrap"
                                                 >
                                                     <div className="flex items-center gap-2">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                                                        -{course.promotionalDiscount}% на {course.nextCourseName}
+                                                        -{course.promotionalDiscountAmount ? `${course.promotionalDiscountAmount}€` : `${course.promotionalDiscountPercentage}%`} на {course.nextCourseName}
                                                     </div>
                                                 </button>
                                             )}

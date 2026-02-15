@@ -28,7 +28,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     const [discountAmount, setDiscountAmount] = useState<number | undefined>(undefined);
     const [discountPercentage, setDiscountPercentage] = useState<number | undefined>(undefined);
     const [accessDuration, setAccessDuration] = useState<number | undefined>(undefined);
-    const [promotionalDiscount, setPromotionalDiscount] = useState<number | undefined>(undefined);
+    const [promotionalDiscountPercentage, setPromotionalDiscountPercentage] = useState<number | undefined>(undefined);
+    const [promotionalDiscountAmount, setPromotionalDiscountAmount] = useState<number | undefined>(undefined);
     const [nextCourseId, setNextCourseId] = useState<string | undefined>(undefined);
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +42,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setDiscountAmount(initialData.discountAmount);
             setDiscountPercentage(initialData.discountPercentage);
             setAccessDuration(initialData.accessDuration);
-            setPromotionalDiscount(initialData.promotionalDiscount);
+            setPromotionalDiscountPercentage(initialData.promotionalDiscountPercentage);
+            setPromotionalDiscountAmount(initialData.promotionalDiscountAmount);
             setNextCourseId(initialData.nextCourseId);
             setSelectedModuleIds(initialModuleIds);
         } else {
@@ -51,7 +53,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setDiscountAmount(undefined);
             setDiscountPercentage(undefined);
             setAccessDuration(undefined);
-            setPromotionalDiscount(undefined);
+            setPromotionalDiscountPercentage(undefined);
+            setPromotionalDiscountAmount(undefined);
             setNextCourseId(undefined);
             setSelectedModuleIds([]);
         }
@@ -68,7 +71,8 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 discountAmount,
                 discountPercentage,
                 accessDuration,
-                promotionalDiscount,
+                promotionalDiscountPercentage,
+                promotionalDiscountAmount,
                 nextCourseId,
                 moduleIds: selectedModuleIds
             });
@@ -163,9 +167,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                         step="0.01"
                                         value={price || ''}
                                         onChange={(e) => setPrice(e.target.value ? parseFloat(e.target.value) : undefined)}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         placeholder="0.00"
                                     />
+                                    <span className="absolute right-4 top-3.5 text-gray-400 font-medium">€</span>
                                 </div>
                                 {price && (discountAmount || discountPercentage) ? (
                                     <div className="mt-2 text-sm font-medium bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-100 inline-block w-full text-center">
@@ -194,7 +199,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                             setDiscountAmount(val);
                                             if (val && val > 0) setDiscountPercentage(undefined);
                                         }}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         placeholder="0.00"
                                     />
                                     <span className="absolute right-4 top-3.5 text-gray-400 font-medium">€</span>
@@ -218,7 +223,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                             setDiscountPercentage(val);
                                             if (val && val > 0) setDiscountAmount(undefined);
                                         }}
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                         placeholder="0"
                                     />
                                     <span className="absolute right-4 top-3.5 text-gray-400 font-medium">%</span>
@@ -249,20 +254,55 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Percent className="w-4 h-4" />
-                                Акційна знижка на наступний курс (%)
+                                Акційна знижка на наступний курс (% або фіксована сума)
                             </label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="100"
-                                value={promotionalDiscount || ''}
-                                onChange={(e) => setPromotionalDiscount(e.target.value ? parseFloat(e.target.value) : undefined)}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                placeholder="Наприклад: 15"
-                            />
-                            <p className="text-xs text-gray-500 mt-1 ml-1">
-                                Знижка для тих, хто завершив цей курс
-                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Promotional Discount Percentage */}
+                                <div>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            value={promotionalDiscountPercentage || ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value ? parseInt(e.target.value) : undefined;
+                                                setPromotionalDiscountPercentage(val);
+                                                if (val && val > 0) setPromotionalDiscountAmount(undefined);
+                                            }}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            placeholder="Наприклад: 15"
+                                        />
+                                        <span className="absolute right-4 top-3.5 text-gray-400 font-medium">%</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 ml-1">
+                                        Знижка у відсотках
+                                    </p>
+                                </div>
+
+                                {/* Promotional Discount Amount */}
+                                <div>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={promotionalDiscountAmount || ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value ? parseFloat(e.target.value) : undefined;
+                                                setPromotionalDiscountAmount(val);
+                                                if (val && val > 0) setPromotionalDiscountPercentage(undefined);
+                                            }}
+                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                            placeholder="Наприклад: 10.00"
+                                        />
+                                        <span className="absolute right-4 top-3.5 text-gray-400 font-medium">€</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1 ml-1">
+                                        Фіксована знижка
+                                    </p>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Next Course Recommendation */}

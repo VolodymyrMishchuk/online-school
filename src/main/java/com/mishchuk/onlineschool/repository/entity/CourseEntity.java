@@ -40,8 +40,11 @@ public class CourseEntity {
     @Column(name = "discount_percentage")
     private Integer discountPercentage;
 
-    @Column(name = "promotional_discount")
-    private java.math.BigDecimal promotionalDiscount;
+    @Column(name = "promotional_discount_percentage")
+    private Integer promotionalDiscountPercentage;
+
+    @Column(name = "promotional_discount_amount")
+    private java.math.BigDecimal promotionalDiscountAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "next_course_id")

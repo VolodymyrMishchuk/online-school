@@ -37,7 +37,19 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public void createCourse(CourseCreateDto dto) {
         log.info("Creating new course: {}", dto.name());
+        if (dto.promotionalDiscountPercentage() != null && dto.promotionalDiscountAmount() != null) {
+            throw new com.mishchuk.onlineschool.exception.BadRequestException(
+                    "Cannot set both promotional discount percentage and amount");
+        }
         CourseEntity entity = courseMapper.toEntity(dto);
+
+        // Ensure mutual exclusivity
+        if (dto.promotionalDiscountPercentage() != null) {
+            entity.setPromotionalDiscountAmount(null);
+        } else if (dto.promotionalDiscountAmount() != null) {
+            entity.setPromotionalDiscountPercentage(null);
+        }
+
         courseRepository.save(entity);
         log.info("Successfully created course with ID: {}", entity.getId());
     }
@@ -87,7 +99,8 @@ public class CourseServiceImpl implements CourseService {
                         baseDto.discountAmount(),
                         baseDto.discountPercentage(),
                         baseDto.accessDuration(),
-                        baseDto.promotionalDiscount(),
+                        baseDto.promotionalDiscountPercentage(),
+                        baseDto.promotionalDiscountAmount(),
                         baseDto.nextCourseId(),
                         baseDto.nextCourseName(),
                         baseDto.createdAt(),
@@ -106,10 +119,22 @@ public class CourseServiceImpl implements CourseService {
     @Transactional
     public void updateCourse(UUID id, CourseUpdateDto dto) {
         log.info("Updating course with ID: {}", id);
+        if (dto.promotionalDiscountPercentage() != null && dto.promotionalDiscountAmount() != null) {
+            throw new com.mishchuk.onlineschool.exception.BadRequestException(
+                    "Cannot set both promotional discount percentage and amount");
+        }
         CourseEntity entity = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
 
         courseMapper.updateEntityFromDto(dto, entity);
+
+        // Ensure mutual exclusivity in DB: if one is set, clear the other
+        if (dto.promotionalDiscountPercentage() != null) {
+            entity.setPromotionalDiscountAmount(null);
+        } else if (dto.promotionalDiscountAmount() != null) {
+            entity.setPromotionalDiscountPercentage(null);
+        }
+
         courseRepository.save(entity);
         log.info("Successfully updated course with ID: {}", id);
     }

@@ -10,7 +10,8 @@ export interface CourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number; // Days
-    promotionalDiscount?: number;
+    promotionalDiscountPercentage?: number;
+    promotionalDiscountAmount?: number;
     nextCourseId?: string;
     nextCourseName?: string;
     isEnrolled?: boolean;
@@ -26,7 +27,8 @@ export interface CreateCourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number;
-    promotionalDiscount?: number;
+    promotionalDiscountPercentage?: number;
+    promotionalDiscountAmount?: number;
     nextCourseId?: string;
     moduleIds?: string[];
 }
@@ -39,7 +41,8 @@ export interface UpdateCourseDto {
     discountAmount?: number;
     discountPercentage?: number;
     accessDuration?: number;
-    promotionalDiscount?: number;
+    promotionalDiscountPercentage?: number;
+    promotionalDiscountAmount?: number;
     nextCourseId?: string;
     moduleIds?: string[];
 }
