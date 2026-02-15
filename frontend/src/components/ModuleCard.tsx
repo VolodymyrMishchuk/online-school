@@ -8,6 +8,7 @@ interface ModuleCardProps {
     lessons: Lesson[];
     courseName?: string;
     durationMinutes?: number;
+    filesCount?: number;
     onEdit: (module: Module, lessons: Lesson[]) => void;
     onDelete: (id: string) => void;
 }
@@ -17,6 +18,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     lessons,
     courseName,
     durationMinutes,
+    filesCount,
     onEdit,
     onDelete,
 }) => {
@@ -36,7 +38,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
 
     return (
         <div
-            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full cursor-pointer hover:shadow-lg ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
+            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full cursor-pointer hover:shadow-lg group ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
             onClick={() => setIsExpanded(!isExpanded)}
         >
             <div className="flex items-start gap-4">
@@ -63,19 +65,27 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
                                     <span className="text-brand-primary/80 mr-2">Уроки:</span>
                                     <span>{lessons.length}</span>
-                                    {durationMinutes !== undefined && durationMinutes > 0 && (
-                                        <>
-                                            <span className="text-gray-300 mx-1">•</span>
-                                            <span>{durationMinutes} хв</span>
-                                        </>
-                                    )}
                                 </div>
                             </div>
                         </div>
 
                         {/* Actions & Expand Icon */}
                         <div className="flex items-center gap-4 text-gray-400 shrink-0">
-                            <div className="flex items-center gap-1">
+                            {(filesCount !== undefined && filesCount > 0) && (
+                                <div className="flex items-center gap-1.5 text-sm font-medium" title={`${filesCount} файлів`}>
+                                    <Paperclip className="w-4 h-4" />
+                                    <span>{filesCount}</span>
+                                </div>
+                            )}
+
+                            {durationMinutes !== undefined && durationMinutes > 0 && (
+                                <div className="flex items-center gap-1.5 text-sm font-medium" title={`${durationMinutes} хв`}>
+                                    <Clock className="w-4 h-4" />
+                                    <span>{durationMinutes} хв</span>
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                 <button
                                     onClick={handleEdit}
                                     className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"

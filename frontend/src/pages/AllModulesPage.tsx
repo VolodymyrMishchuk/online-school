@@ -209,6 +209,7 @@ export const AllModulesPage: React.FC = () => {
                         const moduleLessons = moduleLessonsQueries.data?.[module.id] || [];
                         const courseName = courses.find(c => c.id === module.courseId)?.name || module.courseName;
                         const totalDuration = moduleLessons.reduce((acc, lesson) => acc + (lesson.durationMinutes || 0), 0);
+                        const totalFilesCount = moduleLessons.reduce((acc, lesson) => acc + (lesson.filesCount || 0), 0);
 
                         return (
                             <ModuleCard
@@ -217,6 +218,7 @@ export const AllModulesPage: React.FC = () => {
                                 lessons={moduleLessons}
                                 courseName={courseName}
                                 durationMinutes={totalDuration}
+                                filesCount={totalFilesCount}
                                 onEdit={handleEditModule}
                                 onDelete={handleDelete}
                             />
