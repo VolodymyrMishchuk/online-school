@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, FolderOpen, Filter } from 'lucide-react';
 import { getModules, getModuleLessons, createModule, updateModule, deleteModule } from '../api/modules';
 import type { Module, CreateModuleDto } from '../api/modules';
 import { getUnassignedLessons } from '../api/lessons';
@@ -8,11 +8,13 @@ import type { Lesson } from '../api/lessons';
 import { getCourses } from '../api/courses';
 import { ModuleCard } from '../components/ModuleCard';
 import { ModuleModal } from '../components/ModuleModal';
+import MultiSelect from '../components/MultiSelect';
 
 export const AllModulesPage: React.FC = () => {
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingModule, setEditingModule] = useState<{ module: Module; lessons: Lesson[] } | null>(null);
+    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
 
     // Fetch all courses (for fallback courseId)
     const { data: courses = [] } = useQuery({
@@ -32,8 +34,26 @@ export const AllModulesPage: React.FC = () => {
         queryFn: getUnassignedLessons,
     });
 
+    // Filtering Logic
+    const filteredModules = useMemo(() => {
+        if (!modules) return [];
+        if (selectedCourseIds.length === 0) return modules;
+
+        const explicitCourseIds = selectedCourseIds.filter(id => id !== 'unassigned');
+        const includeUnassigned = selectedCourseIds.includes('unassigned');
+
+        return modules.filter(m => {
+            if (m.courseId) {
+                return explicitCourseIds.includes(m.courseId);
+            }
+            return includeUnassigned;
+        });
+    }, [modules, selectedCourseIds]);
+
     // Fetch lessons for each module
     const moduleLessonsQueries = useQuery({
+        // Use filtered modules effectively? Ideally fetch all or just filter list locally.
+        // Keeping it simple: fetch for all, filter rendering.
         queryKey: ['moduleLessons', modules.map(m => m.id)],
         queryFn: async () => {
             const lessonsMap: Record<string, Lesson[]> = {};
@@ -117,67 +137,91 @@ export const AllModulesPage: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-6 py-12">
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Всі Модулі</h1>
-                    <p className="text-gray-600 mt-1">
-                        Керуйте модулями курсів та уроками
-                    </p>
+                    <h1 className="text-3xl font-bold text-gray-900">Всі модулі</h1>
                 </div>
                 <button
                     onClick={handleCreateModule}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                 >
                     <Plus size={20} />
-                    Додати Модуль
+                    <span>Додати модуль</span>
                 </button>
             </div>
 
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-8 bg-white p-3 rounded-lg border border-gray-100 shadow-sm items-center">
+                <div className="flex items-center gap-2 text-gray-500 mr-2">
+                    <Filter className="w-5 h-5" />
+                    <span className="font-medium text-sm">Фільтри:</span>
+                </div>
+
+                {/* Course Filter */}
+                <div className="min-w-[250px]">
+                    <MultiSelect
+                        label=""
+                        placeholder="Всі курси"
+                        options={[
+                            { value: 'unassigned', label: 'Без курсу' },
+                            ...(courses.map(c => ({ value: c.id, label: c.name })) || [])
+                        ]}
+                        selectedValues={selectedCourseIds}
+                        onChange={setSelectedCourseIds}
+                    />
+                </div>
+
+                {selectedCourseIds.length > 0 && (
+                    <button
+                        onClick={() => setSelectedCourseIds([])}
+                        className="text-sm text-red-500 hover:text-red-600 font-medium px-2 ml-auto"
+                    >
+                        Скинути
+                    </button>
+                )}
+            </div>
+
             {/* Modules Grid */}
-            {modules.length === 0 ? (
-                <div className="text-center py-16">
-                    <div className="text-gray-400 mb-4">
-                        <svg
-                            className="mx-auto h-24 w-24"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={1.5}
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                            />
-                        </svg>
+            {filteredModules.length === 0 ? (
+                <div className="text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                        <FolderOpen className="w-8 h-8 text-gray-300" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                        Ще немає модулів
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">
+                        Модулів не знайдено
                     </h3>
-                    <p className="text-gray-500 mb-6">
-                        Почніть зі створення вашого першого модуля
+                    <p className="text-gray-400 mb-6">
+                        Спробуйте змінити параметри фільтрації або створіть новий модуль
                     </p>
                     <button
                         onClick={handleCreateModule}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
                     >
                         <Plus size={20} />
                         Створити Модуль
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {modules.map((module) => (
-                        <ModuleCard
-                            key={module.id}
-                            module={module}
-                            lessons={moduleLessonsQueries.data?.[module.id] || []}
-                            onEdit={handleEditModule}
-                            onDelete={handleDelete}
-                        />
-                    ))}
+                <div className="flex flex-col space-y-2">
+                    {filteredModules.map((module) => {
+                        const moduleLessons = moduleLessonsQueries.data?.[module.id] || [];
+                        const courseName = courses.find(c => c.id === module.courseId)?.name || module.courseName;
+                        const totalDuration = moduleLessons.reduce((acc, lesson) => acc + (lesson.durationMinutes || 0), 0);
+
+                        return (
+                            <ModuleCard
+                                key={module.id}
+                                module={module}
+                                lessons={moduleLessons}
+                                courseName={courseName}
+                                durationMinutes={totalDuration}
+                                onEdit={handleEditModule}
+                                onDelete={handleDelete}
+                            />
+                        );
+                    })}
                 </div>
             )}
 

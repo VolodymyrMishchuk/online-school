@@ -94,7 +94,16 @@ export default function AllLessonsPage() {
     const filteredModules = useMemo(() => {
         if (!modules) return [];
         if (selectedCourseIds.length === 0) return modules;
-        return modules.filter(m => m.courseId && selectedCourseIds.includes(m.courseId));
+
+        const explicitCourseIds = selectedCourseIds.filter(id => id !== 'unassigned');
+        const includeUnassigned = selectedCourseIds.includes('unassigned');
+
+        return modules.filter(m => {
+            if (m.courseId) {
+                return explicitCourseIds.includes(m.courseId);
+            }
+            return includeUnassigned;
+        });
     }, [modules, selectedCourseIds]);
 
     // Map module ID to course ID for efficient lookup
@@ -110,16 +119,29 @@ export default function AllLessonsPage() {
         if (!lessons) return [];
         return lessons.filter(lesson => {
             // Filter by Course
-            const courseId = moduleCourseMap.get(lesson.moduleId);
             if (selectedCourseIds.length > 0) {
-                if (!courseId || !selectedCourseIds.includes(courseId)) {
+                const courseId = moduleCourseMap.get(lesson.moduleId);
+                const explicitCourseIds = selectedCourseIds.filter(id => id !== 'unassigned');
+                const includeUnassigned = selectedCourseIds.includes('unassigned');
+
+                const matchesExplicit = courseId && explicitCourseIds.includes(courseId);
+                const matchesUnassigned = !courseId && includeUnassigned;
+
+                if (!matchesExplicit && !matchesUnassigned) {
                     return false;
                 }
             }
 
             // Filter by Module
             if (selectedModuleIds.length > 0) {
-                if (!selectedModuleIds.includes(lesson.moduleId)) {
+                const explicitModuleIds = selectedModuleIds.filter(id => id !== 'unassigned');
+                const includeUnassigned = selectedModuleIds.includes('unassigned');
+
+                const matchesExplicit = lesson.moduleId && explicitModuleIds.includes(lesson.moduleId);
+                // Check if lesson has no module (or empty string/null)
+                const matchesUnassigned = !lesson.moduleId && includeUnassigned;
+
+                if (!matchesExplicit && !matchesUnassigned) {
                     return false;
                 }
             }
@@ -139,6 +161,16 @@ export default function AllLessonsPage() {
             </div>
         );
     }
+
+    const courseOptions = [
+        { value: 'unassigned', label: 'Без курсу' },
+        ...(courses?.map(c => ({ value: c.id, label: c.name })) || [])
+    ];
+
+    const moduleOptions = [
+        { value: 'unassigned', label: 'Без модуля' },
+        ...filteredModules.map(m => ({ value: m.id, label: m.name }))
+    ];
 
     return (
         <div className="container mx-auto px-6 py-12">
@@ -173,12 +205,10 @@ export default function AllLessonsPage() {
                     <MultiSelect
                         label=""
                         placeholder="Всі курси"
-                        options={courses?.map(c => ({ value: c.id, label: c.name })) || []}
+                        options={courseOptions}
                         selectedValues={selectedCourseIds}
                         onChange={(ids) => {
                             setSelectedCourseIds(ids);
-                            // Optional: Clear selected modules if they don't belong to selected courses? 
-                            // For now, let's keep it simple and just filter available modules in the dropdown.
                         }}
                     />
                 </div>
@@ -188,7 +218,7 @@ export default function AllLessonsPage() {
                     <MultiSelect
                         label=""
                         placeholder="Всі модулі"
-                        options={filteredModules.map(m => ({ value: m.id, label: m.name }))}
+                        options={moduleOptions}
                         selectedValues={selectedModuleIds}
                         onChange={setSelectedModuleIds}
                     />

@@ -1,11 +1,13 @@
-import React from 'react';
-import { Edit2, Trash2, BookOpen } from 'lucide-react';
+import React, { useState } from 'react';
+import { Edit2, Trash2, Folder, BookOpen, ChevronDown, ChevronUp, Clock, Paperclip } from 'lucide-react';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
 
 interface ModuleCardProps {
     module: Module;
     lessons: Lesson[];
+    courseName?: string;
+    durationMinutes?: number;
     onEdit: (module: Module, lessons: Lesson[]) => void;
     onDelete: (id: string) => void;
 }
@@ -13,90 +15,156 @@ interface ModuleCardProps {
 export const ModuleCard: React.FC<ModuleCardProps> = ({
     module,
     lessons,
+    courseName,
+    durationMinutes,
     onEdit,
     onDelete,
 }) => {
-    const handleDelete = () => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (window.confirm(`Ви впевнені, що хочете видалити "${module.name}"?`)) {
             onDelete(module.id);
         }
     };
 
+    const handleEdit = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onEdit(module, lessons);
+    };
+
     return (
-        <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-                <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1">
-                            {module.name}
-                        </h3>
-                        <p className="text-blue-100 text-sm">
-                            {lessons.length} урок{lessons.length === 1 ? '' : (lessons.length > 1 && lessons.length < 5 ? 'и' : 'ів')}
-                        </p>
+        <div
+            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full cursor-pointer hover:shadow-lg ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
+            onClick={() => setIsExpanded(!isExpanded)}
+        >
+            <div className="flex items-start gap-4">
+                {/* Icon */}
+                <div className="bg-brand-primary/10 p-3 rounded-2xl h-fit shrink-0">
+                    <Folder className="w-6 h-6 text-brand-primary" />
+                </div>
+
+                {/* Main Header Content */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-2">
+                        <div className="flex-1 pr-4">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">
+                                {module.name}
+                            </h3>
+
+                            <div className="flex flex-col gap-1">
+                                {courseName && (
+                                    <p className="text-sm font-medium text-gray-700">
+                                        <span className="text-brand-primary/80 mr-2">Курс:</span>
+                                        {courseName}
+                                    </p>
+                                )}
+                                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                                    <span className="text-brand-primary/80 mr-2">Уроки:</span>
+                                    <span>{lessons.length}</span>
+                                    {durationMinutes !== undefined && durationMinutes > 0 && (
+                                        <>
+                                            <span className="text-gray-300 mx-1">•</span>
+                                            <span>{durationMinutes} хв</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions & Expand Icon */}
+                        <div className="flex items-center gap-4 text-gray-400 shrink-0">
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={handleEdit}
+                                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
+                                    title="Редагувати"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors"
+                                    title="Видалити"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+
+                            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                        </div>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => onEdit(module, lessons)}
-                            className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
-                            title="Редагувати модуль"
-                        >
-                            <Edit2 size={18} className="text-white" />
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            className="p-2 bg-white/20 hover:bg-red-500 rounded-lg transition-colors"
-                            title="Видалити модуль"
-                        >
-                            <Trash2 size={18} className="text-white" />
-                        </button>
+
+                    {/* Expanded Content */}
+                    <div className={`grid transition-all duration-500 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100 mt-6' : 'grid-rows-[0fr] opacity-0'}`}>
+                        <div className="overflow-hidden">
+                            {/* Description */}
+                            {module.description && (
+                                <div className="mb-6">
+                                    <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                        {module.description}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Lessons List */}
+                            <div className="mt-4 pt-6 border-t border-gray-100">
+                                <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide flex items-center gap-2">
+                                    <BookOpen className="w-4 h-4" />
+                                    Список уроків ({lessons.length})
+                                </h4>
+
+                                {lessons.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        {lessons.map((lesson, index) => (
+                                            <div
+                                                key={lesson.id}
+                                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl w-full"
+                                            >
+                                                <span className="text-xs font-medium text-gray-400 w-6 font-mono shrink-0">
+                                                    {(index + 1).toString().padStart(2, '0')}
+                                                </span>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-gray-700 truncate text-sm">
+                                                        {lesson.name}
+                                                    </p>
+
+                                                    {lesson.description && (
+                                                        <p className="text-xs text-gray-400 truncate mt-0.5">
+                                                            {lesson.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* Meta Info */}
+                                                <div className="flex items-center gap-4 shrink-0">
+                                                    {lesson.filesCount !== undefined && lesson.filesCount > 0 && (
+                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title="Файли">
+                                                            <Paperclip className="w-4 h-4" />
+                                                            <span>{lesson.filesCount}</span>
+                                                        </div>
+                                                    )}
+                                                    {lesson.durationMinutes !== undefined && lesson.durationMinutes > 0 && (
+                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title="Тривалість">
+                                                            <Clock className="w-4 h-4" />
+                                                            <span>{lesson.durationMinutes} хв</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 text-gray-400 bg-gray-50/50 rounded-lg border border-dashed border-gray-100">
+                                        <BookOpen size={24} className="mx-auto mb-2 opacity-30" />
+                                        <p className="text-xs font-medium">Уроки ще не призначено</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Body */}
-            <div className="p-4">
-                {/* Description */}
-                <p className="text-gray-600 text-sm mb-4">
-                    {module.description}
-                </p>
-
-                {/* Lessons List */}
-                {lessons.length > 0 ? (
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                            <BookOpen size={16} />
-                            <span>Уроки</span>
-                        </div>
-                        <div className="space-y-1">
-                            {lessons.map((lesson, index) => (
-                                <div
-                                    key={lesson.id}
-                                    className="flex items-start gap-2 p-2 bg-gray-50 rounded-lg"
-                                >
-                                    <span className="text-xs font-medium text-gray-500 mt-0.5">
-                                        {index + 1}.
-                                    </span>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-medium text-gray-900 truncate">
-                                            {lesson.name}
-                                        </div>
-                                        {lesson.description && (
-                                            <div className="text-xs text-gray-500 truncate">
-                                                {lesson.description}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-6 text-gray-400">
-                        <BookOpen size={32} className="mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Уроки ще не призначено</p>
-                    </div>
-                )}
             </div>
         </div>
     );
