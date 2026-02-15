@@ -23,7 +23,7 @@ export default function AllCoursesPage() {
 
     const { data: modules } = useQuery({
         queryKey: ['allModules'],
-        queryFn: getModules
+        queryFn: () => getModules()
     });
 
     const createMutation = useMutation({

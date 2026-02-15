@@ -42,8 +42,8 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     @Async
-    public void sendCoursePurchaseEmail(String to, String userName, String courseName) {
-        log.info("Sending course purchase email to {} for course {}", to, courseName);
+    public void sendCourseAccessGrantedEmail(String to, String userName, String courseName) {
+        log.info("Sending course access granted email to {} for course {}", to, courseName);
         Context context = new Context();
         context.setVariable("userName", userName);
         context.setVariable("courseName", courseName);
@@ -52,7 +52,22 @@ public class EmailServiceImpl implements EmailService {
         String magicLink = frontendUrl + "/magic-login?token=" + token + "&redirect=/dashboard/my-courses";
         context.setVariable("magicLink", magicLink);
 
-        sendHtmlEmail(to, "Вітаємо з покупкою курсу!", "email/course-purchase", context);
+        sendHtmlEmail(to, "Новий курс доступний!", "email/access-granted", context);
+    }
+
+    @Override
+    @Async
+    public void sendCourseAccessRevokedEmail(String to, String userName, String courseName) {
+        log.info("Sending course access revoked email to {} for course {}", to, courseName);
+        Context context = new Context();
+        context.setVariable("userName", userName);
+        context.setVariable("courseName", courseName);
+
+        // We can include a link to catalog or keep it simple
+        String catalogLink = frontendUrl + "/catalog";
+        context.setVariable("catalogLink", catalogLink);
+
+        sendHtmlEmail(to, "Доступ до курсу скасовано", "email/access-revoked", context);
     }
 
     @Override

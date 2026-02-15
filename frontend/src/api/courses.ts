@@ -5,6 +5,8 @@ export interface CourseDto {
     name: string;
     description: string;
     modulesNumber: number;
+    lessonsCount?: number;
+    durationMinutes?: number;
     status: string;
     price?: number;
     discountAmount?: number;
@@ -51,6 +53,11 @@ export const getCourses = async (userId?: string): Promise<CourseDto[]> => {
     const params = userId ? `?userId=${userId}` : '';
     const response = await client.get(`/courses${params}`);
     return response.data || [];
+};
+
+export const getCourse = async (id: string): Promise<CourseDto> => {
+    const response = await client.get(`/courses/${id}`);
+    return response.data;
 };
 
 export const createCourse = async (data: CreateCourseDto): Promise<void> => {

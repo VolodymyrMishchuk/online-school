@@ -34,6 +34,7 @@ public class PersonServiceImpl implements PersonService {
     private final PersonMapper personMapper;
     private final PasswordEncoder passwordEncoder;
     private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -55,6 +56,17 @@ public class PersonServiceImpl implements PersonService {
             emailService.sendWelcomeEmail(entity.getEmail(), entity.getFirstName());
         } catch (Exception e) {
             log.error("Failed to send welcome email to {}", entity.getEmail(), e);
+        }
+
+        // Notify admins about new user
+        try {
+            notificationService.broadcastToAdmins(
+                    "Новий користувач",
+                    "Зареєстровано нового користувача: " + entity.getFirstName() + " " + entity.getLastName() + " ("
+                            + entity.getEmail() + ")",
+                    com.mishchuk.onlineschool.repository.entity.NotificationType.NEW_USER_REGISTRATION);
+        } catch (Exception e) {
+            log.error("Failed to notify admins about new user {}", entity.getEmail(), e);
         }
 
         if (dto.courseIds() != null && !dto.courseIds().isEmpty()) {
@@ -114,6 +126,28 @@ public class PersonServiceImpl implements PersonService {
         try {
             person.setStatus(PersonStatus.valueOf(status));
             personRepository.save(person);
+
+            // Notify User
+            String statusMessage = PersonStatus.BLOCKED.name().equals(status)
+                    ? "Ваш обліковий запис було заблоковано адміністратором. Зверніться до підтримки для деталей."
+                    : "Ваш обліковий запис активовано. Ви можете користуватися всіма функціями платформи.";
+
+            try {
+                notificationService.createNotification(
+                        person.getId(),
+                        "Зміна статусу облікового запису",
+                        statusMessage,
+                        com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+
+                // Notify Admins
+                notificationService.broadcastToAdmins(
+                        "Зміна статусу користувача",
+                        "Статус користувача " + person.getFirstName() + " " + person.getLastName() + " змінено на "
+                                + status,
+                        com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+            } catch (Exception e) {
+                log.error("Failed to send notifications for status change of user {}", person.getEmail(), e);
+            }
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + status);
         }
@@ -138,9 +172,29 @@ public class PersonServiceImpl implements PersonService {
         enrollmentRepository.save(enrollment);
 
         try {
-            emailService.sendCoursePurchaseEmail(person.getEmail(), person.getFirstName(), course.getName());
+            emailService.sendCourseAccessGrantedEmail(person.getEmail(), person.getFirstName(), course.getName());
         } catch (Exception e) {
             log.error("Failed to send course enrollment email to {}", person.getEmail(), e);
+        }
+
+        // Create in-app notification
+        try {
+            notificationService.createNotification(
+                    person.getId(),
+                    "Доступ до курсу відкрито",
+                    "Вам надано доступ до курсу \"" + course.getName() + "\". Успішного навчання!",
+                    com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED,
+                    "/dashboard/my-courses");
+
+            // Notify admins
+            notificationService.broadcastToAdmins(
+                    "Нове зарахування на курс",
+                    "Користувач " + person.getFirstName() + " " + person.getLastName() + " отримав доступ до курсу \""
+                            + course.getName() + "\"",
+                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+        } catch (Exception e) {
+            log.error("Failed to create notifications for enrollment of {} to {}", person.getEmail(), course.getId(),
+                    e);
         }
     }
 
@@ -150,7 +204,37 @@ public class PersonServiceImpl implements PersonService {
         EnrollmentEntity enrollment = enrollmentRepository
                 .findByStudentIdAndCourseId(personId, courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+
+        PersonEntity student = enrollment.getStudent();
+        CourseEntity course = enrollment.getCourse();
+
         enrollmentRepository.delete(enrollment);
+
+        // Send Email
+        try {
+            emailService.sendCourseAccessRevokedEmail(student.getEmail(), student.getFirstName(), course.getName());
+        } catch (Exception e) {
+            log.error("Failed to send access revocation email to {}", student.getEmail(), e);
+        }
+
+        // Notify User
+        try {
+            notificationService.createNotification(
+                    student.getId(),
+                    "Доступ до курсу скасовано",
+                    "Ваш доступ до курсу \"" + course.getName() + "\" було скасовано адміністратором.",
+                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+
+            // Notify Admins
+            notificationService.broadcastToAdmins(
+                    "Доступ до курсу скасовано",
+                    "Адміністратор скасував доступ користувача " + student.getFirstName() + " " + student.getLastName()
+                            + " (" + student.getEmail() + ") до курсу \"" + course.getName() + "\"",
+                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+        } catch (Exception e) {
+            log.error("Failed to send notifications for access revocation of user {} to course {}", student.getEmail(),
+                    course.getId(), e);
+        }
     }
 
     @Override

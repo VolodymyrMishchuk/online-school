@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { type PersonWithEnrollments, type UpdatePersonDto, getRoles, getStatuses } from '../api/users';
+import { X, User, Mail, Phone, Calendar, Shield, Activity, Save, Loader2 } from 'lucide-react';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -49,7 +50,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                 status: user.status || 'ACTIVE',
                 email: user.email || ''
             });
-            setError(null); // Clear error when user changes or modal opens
+            setError(null);
         }
     }, [user, isOpen]);
 
@@ -65,13 +66,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
         setLoading(true);
         setError(null);
         try {
-            // Format date to ISO string (OffsetDateTime) for backend
             const dataToSubmit = { ...formData };
             if (dataToSubmit.bornedAt) {
-                // Input date is YYYY-MM-DD, append time and offset
                 dataToSubmit.bornedAt = `${dataToSubmit.bornedAt}T00:00:00Z`;
             } else {
-                delete dataToSubmit.bornedAt; // Send undefined if empty
+                delete dataToSubmit.bornedAt;
             }
 
             await onSubmit(user.id, dataToSubmit);
@@ -84,126 +83,200 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-md p-6">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Редагувати користувача</h2>
-
-                {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                        {error}
-                    </div>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-white/30 backdrop-blur-md animate-in fade-in duration-200">
+            {/* Glass Panel Modal */}
+            <div
+                className="glass-panel w-full max-w-lg flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 relative rounded-lg shadow-xl"
+                style={{ background: 'rgba(255, 255, 255, 0.95)', maxHeight: '90vh' }}
+            >
+                {/* Header Bar */}
+                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white shrink-0 z-10 relative shadow-sm">
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-light/50 text-brand-primary ring-2 ring-white shadow-sm">
+                            <User className="w-5 h-5" />
+                        </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Ім'я</label>
+                            <h2 className="text-xl font-bold text-brand-dark">Редагувати профіль</h2>
+                            <p className="text-xs text-gray-500 font-medium">Оновлення даних користувача</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="p-2 text-gray-400 hover:text-brand-primary hover:bg-gray-100 rounded-lg transition-all"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Body - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar flex flex-col gap-6">
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                            <Activity className="w-4 h-4" />
+                            {error}
+                        </div>
+                    )}
+
+                    <form id="edit-user-form" onSubmit={handleSubmit} className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <User className="w-4 h-4" />
+                                    Ім'я
+                                </label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                    placeholder="Ім'я"
+                                />
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <User className="w-4 h-4" />
+                                    Прізвище
+                                </label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    required
+                                    className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                    placeholder="Прізвище"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Mail className="w-4 h-4" />
+                                Email
+                            </label>
                             <input
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
+                                type="email"
+                                name="email"
+                                value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                placeholder="example@email.com"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Прізвище</label>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Phone className="w-4 h-4" />
+                                Номер телефону
+                            </label>
                             <input
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
+                                type="tel"
+                                name="phoneNumber"
+                                value={formData.phoneNumber}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                placeholder="+380..."
                             />
                         </div>
-                    </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Номер телефону</label>
-                        <input
-                            type="tel"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            required
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Дата народження</label>
-                        <input
-                            type="date"
-                            name="bornedAt"
-                            value={formData.bornedAt}
-                            onChange={(e) => {
-                                // Keep raw date string for local state
-                                setFormData(prev => ({ ...prev, bornedAt: e.target.value }));
-                            }}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Роль</label>
-                            <select
-                                name="role"
-                                value={formData.role}
-                                onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
-                            >
-                                {roles.map(role => (
-                                    <option key={role} value={role}>{role}</option>
-                                ))}
-                            </select>
+                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                <Calendar className="w-4 h-4" />
+                                Дата народження
+                            </label>
+                            <input
+                                type="date"
+                                name="bornedAt"
+                                value={formData.bornedAt}
+                                onChange={(e) => setFormData(prev => ({ ...prev, bornedAt: e.target.value }))}
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                            />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Статус</label>
-                            <select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white p-2 border"
-                            >
-                                {statuses.map(status => (
-                                    <option key={status} value={status}>{status}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
 
-                    <div className="flex justify-end space-x-3 mt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700"
-                        >
-                            Скасувати
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                        >
-                            {loading ? 'Збереження...' : 'Зберегти'}
-                        </button>
-                    </div>
-                </form>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <Shield className="w-4 h-4" />
+                                    Роль
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none cursor-pointer"
+                                    >
+                                        {roles.map(role => (
+                                            <option key={role} value={role}>{role}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <Activity className="w-4 h-4" />
+                                    Статус
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        name="status"
+                                        value={formData.status}
+                                        onChange={handleChange}
+                                        className={`w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none cursor-pointer font-medium ${formData.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'
+                                            }`}
+                                    >
+                                        {statuses.map(status => (
+                                            <option key={status} value={status}>{status}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {/* Footer - Static */}
+                <div className="flex gap-4 p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm shrink-0">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
+                    >
+                        Скасувати
+                    </button>
+                    <button
+                        type="submit"
+                        form="edit-user-form"
+                        disabled={loading}
+                        className="flex-1 py-3 font-bold text-white bg-brand-primary hover:bg-brand-secondary rounded-lg transition-all shadow-lg hover:shadow-xl transform active:scale-95 duration-200 disabled:opacity-70 disabled:transform-none flex items-center justify-center gap-2"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Збереження...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" />
+                                Зберегти
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
         </div>
     );

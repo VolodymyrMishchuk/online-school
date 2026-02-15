@@ -26,7 +26,7 @@ export default function MyCoursesPage() {
 
     const { data: modules } = useQuery({
         queryKey: ['allModules'],
-        queryFn: getModules
+        queryFn: () => getModules()
     });
 
     // Filter only enrolled courses

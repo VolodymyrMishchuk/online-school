@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Вітаємо з покупкою курсу</title>
+    <title>Доступ до курсу скасовано</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
         }
 
         .header {
-            background-color: #10b981;
+            background-color: #ef4444;
             color: white;
             padding: 10px;
             text-align: center;
@@ -41,7 +41,7 @@
         .button {
             display: inline-block;
             padding: 10px 20px;
-            background-color: #10b981;
+            background-color: #3b82f6;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -53,15 +53,16 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Успішна покупка!</h1>
+            <h1>Доступ скасовано</h1>
         </div>
         <div class="content">
             <p>Вітаємо, <span th:text="${userName}">User</span>!</p>
-            <p>Ви успішно записалися на курс "<span th:text="${courseName}">Java Basic</span>".</p>
-            <p>Ми впевнені, що цей курс допоможе вам здобути нові знання та навички.</p>
-            <p>Доступ до матеріалів курсу вже відкрито.</p>
+            <p>Повідомляємо, що ваш доступ до курсу "<span th:text="${courseName}">Java Basic</span>" було скасовано.
+            </p>
+            <p>Якщо ви вважаєте, що це помилка, будь ласка, зв'яжіться з адміністрацією або перевірте статус свого
+                облікового запису.</p>
             <div style="text-align: center;">
-                <a th:href="${magicLink}" class="button">Перейти до навчання</a>
+                <a th:href="${catalogLink}" class="button">Переглянути каталог курсів</a>
             </div>
         </div>
         <div class="footer">

@@ -18,8 +18,9 @@ export interface CreateModuleDto {
     lessonIds?: string[]; // Optional: lessons to assign to this module
 }
 
-export const getModules = async (): Promise<Module[]> => {
-    const response = await client.get('/modules');
+export const getModules = async (courseId?: string): Promise<Module[]> => {
+    const params = courseId ? `?courseId=${courseId}` : '';
+    const response = await client.get(`/modules${params}`);
     return response.data;
 };
 

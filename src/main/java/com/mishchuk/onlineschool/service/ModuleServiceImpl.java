@@ -73,7 +73,19 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     @Transactional(readOnly = true)
     public List<ModuleDto> getAllModules() {
-        return moduleRepository.findAll().stream()
+        return getAllModules(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ModuleDto> getAllModules(java.util.UUID courseId) {
+        List<ModuleEntity> entities;
+        if (courseId != null) {
+            entities = moduleRepository.findByCourseId(courseId);
+        } else {
+            entities = moduleRepository.findAll();
+        }
+        return entities.stream()
                 .map(moduleMapper::toDto)
                 .toList();
     }

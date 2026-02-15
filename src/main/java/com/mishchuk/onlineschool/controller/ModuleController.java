@@ -33,8 +33,8 @@ public class ModuleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ModuleDto>> getAllModules() {
-        List<ModuleDto> modules = moduleService.getAllModules();
+    public ResponseEntity<List<ModuleDto>> getAllModules(@RequestParam(required = false) UUID courseId) {
+        List<ModuleDto> modules = moduleService.getAllModules(courseId);
         return ResponseEntity.ok(modules);
     }
 

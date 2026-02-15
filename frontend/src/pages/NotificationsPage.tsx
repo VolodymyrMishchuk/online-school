@@ -1,18 +1,15 @@
-
 import { useEffect, useState } from 'react';
 import { getNotifications, markAsRead } from '../api/notifications';
 import type { NotificationDto } from '../api/notifications';
-import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Check, Download, ExternalLink, Plus } from 'lucide-react';
+import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
-import { useNavigate } from 'react-router-dom';
 import { CreateNotificationModal } from '../components/CreateNotificationModal';
 
 export const NotificationsPage: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const navigate = useNavigate();
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -48,12 +45,6 @@ export const NotificationsPage: React.FC = () => {
     const handleNotificationClick = (notification: NotificationDto) => {
         if (!notification.read) {
             handleMarkAsRead(notification.id, { stopPropagation: () => { } } as React.MouseEvent);
-        }
-
-        if (notification.type === 'COURSE_PURCHASED') {
-            navigate('/dashboard/my-courses');
-        } else if (notification.type === 'COURSE_ACCESS_EXTENDED') {
-            navigate('/dashboard/my-courses');
         }
     };
 

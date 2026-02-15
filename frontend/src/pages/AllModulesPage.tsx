@@ -23,7 +23,7 @@ export const AllModulesPage: React.FC = () => {
     // Fetch all modules
     const { data: modules = [], isLoading: modulesLoading } = useQuery({
         queryKey: ['modules'],
-        queryFn: getModules,
+        queryFn: () => getModules(),
     });
 
     // Fetch unassigned lessons

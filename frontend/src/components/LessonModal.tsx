@@ -53,7 +53,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
     // Fetch modules for select
     const { data: modules, isLoading: modulesLoading } = useQuery({
         queryKey: ['modules'],
-        queryFn: getModules,
+        queryFn: () => getModules(),
         enabled: isOpen,
     });
 

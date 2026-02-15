@@ -26,7 +26,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
     // Fetch modules for select
     const { data: modules, isLoading: modulesLoading } = useQuery({
         queryKey: ['modules'],
-        queryFn: getModules,
+        queryFn: () => getModules(),
         enabled: isOpen,
     });
 

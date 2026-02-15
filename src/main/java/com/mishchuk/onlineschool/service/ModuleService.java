@@ -15,6 +15,8 @@ public interface ModuleService {
 
     List<ModuleDto> getAllModules();
 
+    List<ModuleDto> getAllModules(java.util.UUID courseId);
+
     List<LessonDto> getModuleLessons(java.util.UUID moduleId);
 
     void updateModule(java.util.UUID id, ModuleUpdateDto dto);

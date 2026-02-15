@@ -94,6 +94,8 @@ public class CourseServiceImpl implements CourseService {
                         baseDto.name(),
                         baseDto.description(),
                         baseDto.modulesNumber(),
+                        baseDto.lessonsCount(),
+                        baseDto.durationMinutes(),
                         baseDto.status(),
                         baseDto.price(),
                         baseDto.discountAmount(),
