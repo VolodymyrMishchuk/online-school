@@ -51,9 +51,9 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     return (
-        <div className="border border-gray-100 rounded-xl overflow-hidden mb-4 last:mb-0">
+        <div className="border border-gray-100 rounded-lg overflow-hidden mb-2 last:mb-0">
             <div
-                className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50' : 'bg-white'}`}
+                className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50' : 'bg-white'}`}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-4">
@@ -99,7 +99,7 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
             </div>
 
             {isExpanded && (
-                <div className="bg-gray-50 p-4 border-t border-gray-100">
+                <div className="bg-gray-50 p-3 border-t border-gray-100">
                     {lessonsLoading ? (
                         <div className="flex justify-center py-4">
                             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourses } from '../api/courses';
 import { getModules } from '../api/modules';
+import { getLessons } from '../api/lessons';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Book, GraduationCap } from 'lucide-react';
@@ -28,6 +29,7 @@ export default function MyCoursesPage() {
         queryKey: ['allModules'],
         queryFn: () => getModules()
     });
+
 
     // Filter only enrolled courses
     const enrolledCourses = allCourses?.filter(course => course.isEnrolled) || [];
@@ -67,19 +69,21 @@ export default function MyCoursesPage() {
                 </div>
             ) : (
                 <div className="flex flex-col gap-6">
-                    {enrolledCourses.map((course) => (
-                        <CourseExpandableCard
-                            key={course.id}
-                            course={course}
-                            modules={modules || []}
-                            onEdit={() => { }} // Students cannot edit courses
-                            onDelete={() => { }} // Students cannot delete courses
-                            onEnroll={() => { }} // Already enrolled
-                            // Lesson handlers can be undefined for now
-                            onEditLesson={undefined}
-                            onDeleteLesson={undefined}
-                        />
-                    ))}
+                    {enrolledCourses.map((course) => {
+                        return (
+                            <CourseExpandableCard
+                                key={course.id}
+                                course={course}
+                                modules={modules || []}
+                                onEdit={() => { }} // Students cannot edit courses
+                                onDelete={() => { }} // Students cannot delete courses
+                                onEnroll={undefined} // Already enrolled
+                                // Lesson handlers can be undefined for now
+                                onEditLesson={undefined}
+                                onDeleteLesson={undefined}
+                            />
+                        );
+                    })}
                 </div>
             )}
         </div>
