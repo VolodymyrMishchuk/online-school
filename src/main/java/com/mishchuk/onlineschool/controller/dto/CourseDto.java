@@ -23,5 +23,7 @@ public record CourseDto(
         Boolean isEnrolled,
         @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime enrolledAt,
         String enrollmentStatus,
-        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime expiresAt) {
+        String coverImageUrl,
+        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime expiresAt,
+        String averageColor) {
 }

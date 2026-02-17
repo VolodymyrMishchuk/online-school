@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCourses } from '../api/courses';
 import { getModules } from '../api/modules';
-import { getLessons } from '../api/lessons';
+// import { getLessons } from '../api/lessons';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Book, GraduationCap } from 'lucide-react';

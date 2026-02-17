@@ -15,16 +15,18 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
     private final CourseService courseService;
     private final com.mishchuk.onlineschool.repository.PersonRepository personRepository;
 
-    @PostMapping
-    public ResponseEntity<Void> createCourse(@RequestBody CourseCreateDto dto) {
-        courseService.createCourse(dto);
+    @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> createCourse(
+            @RequestPart("course") CourseCreateDto dto,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
+        courseService.createCourse(dto, image);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -69,14 +71,26 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCourse(@PathVariable UUID id, @RequestBody CourseUpdateDto dto) {
+    @PutMapping(value = "/{id}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateCourse(
+            @PathVariable UUID id,
+            @RequestPart("course") CourseUpdateDto dto,
+            @RequestPart(value = "image", required = false) org.springframework.web.multipart.MultipartFile image) {
         try {
-            courseService.updateCourse(id, dto);
+            courseService.updateCourse(id, dto, image);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/{id}/cover")
+    public ResponseEntity<byte[]> getCourseCover(@PathVariable UUID id) {
+        return courseService.getCourseCoverImage(id)
+                .map(bytes -> ResponseEntity.ok()
+                        .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
+                        .body(bytes))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

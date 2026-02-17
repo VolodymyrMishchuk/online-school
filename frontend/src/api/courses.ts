@@ -20,6 +20,8 @@ export interface CourseDto {
     enrolledAt?: string; // ISO string
     enrollmentStatus?: 'ACTIVE' | 'EXPIRED' | 'BLOCKED' | 'PENDING';
     expiresAt?: string;
+    coverImageUrl?: string;
+    averageColor?: string;
 }
 
 export interface CreateCourseDto {
@@ -47,35 +49,54 @@ export interface UpdateCourseDto {
     promotionalDiscountAmount?: number;
     nextCourseId?: string;
     moduleIds?: string[];
+    deleteCoverImage?: boolean;
 }
 
 export const getCourses = async (userId?: string): Promise<CourseDto[]> => {
     const params = userId ? `?userId=${userId}` : '';
-    const response = await client.get(`/courses${params}`);
+    const response = await client.get(`/api/courses${params}`);
     return response.data || [];
 };
 
 export const getCourse = async (id: string): Promise<CourseDto> => {
-    const response = await client.get(`/courses/${id}`);
+    const response = await client.get(`/api/courses/${id}`);
     return response.data;
 };
 
-export const createCourse = async (data: CreateCourseDto): Promise<void> => {
-    await client.post('/courses', data);
+export const createCourse = async (data: CreateCourseDto, image?: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('course', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    if (image) {
+        formData.append('image', image);
+    }
+    await client.post('/api/courses', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 };
 
-export const updateCourse = async (id: string, data: UpdateCourseDto): Promise<void> => {
-    await client.put(`/courses/${id}`, data);
+export const updateCourse = async (id: string, data: UpdateCourseDto, image?: File): Promise<void> => {
+    const formData = new FormData();
+    formData.append('course', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    if (image) {
+        formData.append('image', image);
+    }
+    await client.put(`/api/courses/${id}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
 };
 
 export const deleteCourse = async (id: string): Promise<void> => {
-    await client.delete(`/courses/${id}`);
+    await client.delete(`/api/courses/${id}`);
 };
 
 export const extendAccessForReview = async (courseId: string, video: File): Promise<void> => {
     const formData = new FormData();
     formData.append('video', video);
-    await client.post(`/courses/${courseId}/extend-access`, formData, {
+    await client.post(`/api/courses/${courseId}/extend-access`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },

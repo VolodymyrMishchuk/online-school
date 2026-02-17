@@ -46,6 +46,9 @@ public class CourseEntity {
     @Column(name = "promotional_discount_amount")
     private java.math.BigDecimal promotionalDiscountAmount;
 
+    @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private CourseCoverEntity coverImage;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "next_course_id")
     private CourseEntity nextCourse;

@@ -1,4 +1,4 @@
-import { Settings as SettingsIcon, User, Mail, Lock, Phone, Calendar, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { User, Mail, Lock, Phone, Calendar, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import { getPerson, updatePerson } from '../api/persons';
@@ -6,7 +6,7 @@ import type { PersonDto } from '../api/persons';
 
 export default function SettingsPage() {
     const userId = localStorage.getItem('userId');
-    const [profile, setProfile] = useState<PersonDto | null>(null);
+    const [, setProfile] = useState<PersonDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);

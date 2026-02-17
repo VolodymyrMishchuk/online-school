@@ -9,13 +9,15 @@ interface LessonCardProps {
     lesson: Lesson;
     files?: FileDto[];
     isLocked?: boolean;
+    isTransparent?: boolean;
     onImageClick: (url: string) => void;
     onEdit?: (lesson: Lesson) => void;
     onDelete?: (lessonId: string) => void;
     onFileDelete?: (fileId: string) => void;
 }
 
-export default function LessonCard({ lesson, files = [], isLocked = false, onImageClick, onEdit, onDelete, onFileDelete }: LessonCardProps) {
+export default function LessonCard({ lesson, files = [], isLocked = false, isTransparent = false, onImageClick, onEdit, onDelete, onFileDelete }: LessonCardProps) {
+    // ... (lines 19-65 omitted)
     const [isExpanded, setIsExpanded] = useState(false);
 
     const getFileIcon = (contentType: string) => {
@@ -64,7 +66,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, onIma
 
     return (
         <div
-            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
+            className={`${isTransparent ? 'bg-white/80 border-white/20 backdrop-blur-sm' : 'bg-white border-gray-100'} rounded-lg p-5 shadow-sm border transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
             onClick={() => !isLocked && setIsExpanded(!isExpanded)}
         >
             <div className="flex items-start gap-4">

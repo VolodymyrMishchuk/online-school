@@ -12,7 +12,7 @@ import AllCoursesPage from './pages/AllCoursesPage';
 import AllModulesPage from './pages/AllModulesPage';
 import AllLessonsPage from './pages/AllLessonsPage';
 import MyCoursesPage from './pages/MyCoursesPage';
-import MyModulesPage from './pages/MyModulesPage';
+// import MyModulesPage from './pages/MyModulesPage';
 import MyLessonsPage from './pages/MyLessonsPage';
 import { UsersPage } from './pages/UsersPage';
 import { NotificationsPage } from './pages/NotificationsPage';

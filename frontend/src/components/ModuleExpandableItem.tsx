@@ -14,9 +14,10 @@ interface ModuleExpandableItemProps {
     isLocked?: boolean;
     onEditLesson?: (lesson: Lesson) => void;
     onDeleteLesson?: (lessonId: string) => void;
+    isTransparent?: boolean;
 }
 
-export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson }: ModuleExpandableItemProps) {
+export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson, isTransparent = false }: ModuleExpandableItemProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: lessons, isLoading: lessonsLoading } = useQuery({
@@ -51,9 +52,9 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     return (
-        <div className="border border-gray-100 rounded-lg overflow-hidden mb-2 last:mb-0">
+        <div className={`border rounded-lg overflow-hidden mb-2 last:mb-0 transition-colors ${isTransparent ? 'border-white/20 bg-white/40 backdrop-blur-md' : 'border-gray-100 bg-white'}`}>
             <div
-                className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isExpanded ? 'bg-gray-50' : 'bg-white'}`}
+                className={`flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50/50 transition-colors ${isExpanded ? (isTransparent ? 'bg-white/50' : 'bg-gray-50') : (isTransparent ? 'bg-transparent' : 'bg-white')}`}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-4">
@@ -98,33 +99,36 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                 </div>
             </div>
 
-            {isExpanded && (
-                <div className="bg-gray-50 p-3 border-t border-gray-100">
-                    {lessonsLoading ? (
-                        <div className="flex justify-center py-4">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
-                        </div>
-                    ) : lessons && lessons.length > 0 ? (
-                        <div className="flex flex-col gap-4">
-                            {lessons.map(lesson => (
-                                <LessonCard
-                                    key={lesson.id}
-                                    lesson={lesson}
-                                    files={getLessonFilesById(lesson.id)}
-                                    isLocked={isLocked}
-                                    onImageClick={(url) => setPreviewImage(url)}
-                                    onEdit={onEditLesson}
-                                    onDelete={onDeleteLesson}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-4 text-gray-500 italic">
-                            У цьому модулі поки немає уроків.
-                        </div>
-                    )}
+            <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden">
+                    <div className={`p-3 border-t ${isTransparent ? 'bg-white/30 border-white/20' : 'bg-gray-50 border-gray-100'}`}>
+                        {lessonsLoading ? (
+                            <div className="flex justify-center py-4">
+                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+                            </div>
+                        ) : lessons && lessons.length > 0 ? (
+                            <div className="flex flex-col gap-4">
+                                {lessons.map(lesson => (
+                                    <LessonCard
+                                        key={lesson.id}
+                                        lesson={lesson}
+                                        files={getLessonFilesById(lesson.id)}
+                                        isLocked={isLocked}
+                                        onImageClick={(url) => setPreviewImage(url)}
+                                        onEdit={onEditLesson}
+                                        onDelete={onDeleteLesson}
+                                        isTransparent={isTransparent}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-4 text-gray-500 italic">
+                                У цьому модулі поки немає уроків.
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
+            </div>
 
             {/* Image Preview Modal */}
             <ImagePreviewModal

@@ -3,18 +3,19 @@ package com.mishchuk.onlineschool.service;
 import com.mishchuk.onlineschool.controller.dto.CourseCreateDto;
 import com.mishchuk.onlineschool.controller.dto.CourseDto;
 import com.mishchuk.onlineschool.controller.dto.CourseUpdateDto;
+import com.mishchuk.onlineschool.exception.BadRequestException;
 import com.mishchuk.onlineschool.exception.ResourceNotFoundException;
 import com.mishchuk.onlineschool.mapper.CourseMapper;
 import com.mishchuk.onlineschool.repository.CourseRepository;
+import com.mishchuk.onlineschool.repository.CourseReviewRequestRepository;
 import com.mishchuk.onlineschool.repository.EnrollmentRepository;
-import com.mishchuk.onlineschool.repository.entity.CourseEntity;
-import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
-import com.mishchuk.onlineschool.repository.entity.NotificationType;
+import com.mishchuk.onlineschool.repository.entity.*;
+import com.mishchuk.onlineschool.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.mishchuk.onlineschool.repository.entity.CourseReviewRequestEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,12 +31,12 @@ public class CourseServiceImpl implements CourseService {
     private final EnrollmentRepository enrollmentRepository;
     private final CourseMapper courseMapper;
     private final NotificationService notificationService;
-    private final com.mishchuk.onlineschool.repository.CourseReviewRequestRepository courseReviewRequestRepository;
-    private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+    private final CourseReviewRequestRepository courseReviewRequestRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
-    public void createCourse(CourseCreateDto dto) {
+    public void createCourse(CourseCreateDto dto, MultipartFile coverImage) {
         log.info("Creating new course: {}", dto.name());
         if (dto.promotionalDiscountPercentage() != null && dto.promotionalDiscountAmount() != null) {
             throw new com.mishchuk.onlineschool.exception.BadRequestException(
@@ -50,6 +51,22 @@ public class CourseServiceImpl implements CourseService {
             entity.setPromotionalDiscountPercentage(null);
         }
 
+        if (coverImage != null && !coverImage.isEmpty()) {
+            try {
+                byte[] imageData = coverImage.getBytes();
+                String averageColor = calculateAverageColor(imageData);
+
+                CourseCoverEntity coverEntity = new CourseCoverEntity();
+                coverEntity.setCourse(entity);
+                coverEntity.setImageData(imageData);
+                coverEntity.setAverageColor(averageColor);
+
+                entity.setCoverImage(coverEntity);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Failed to read cover image", e);
+            }
+        }
+
         courseRepository.save(entity);
         log.info("Successfully created course with ID: {}", entity.getId());
     }
@@ -59,6 +76,14 @@ public class CourseServiceImpl implements CourseService {
     public Optional<CourseDto> getCourse(UUID id) {
         return courseRepository.findById(id)
                 .map(courseMapper::toDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<byte[]> getCourseCoverImage(UUID id) {
+        return courseRepository.findById(id)
+                .map(CourseEntity::getCoverImage)
+                .map(CourseCoverEntity::getImageData);
     }
 
     @Override
@@ -110,7 +135,9 @@ public class CourseServiceImpl implements CourseService {
                         true, // isEnrolled
                         enrollment.get().getCreatedAt(),
                         enrollment.get().getStatus(),
-                        enrollment.get().getExpiresAt());
+                        baseDto.coverImageUrl(),
+                        enrollment.get().getExpiresAt(),
+                        baseDto.averageColor());
             }
 
             return baseDto;
@@ -119,10 +146,10 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void updateCourse(UUID id, CourseUpdateDto dto) {
+    public void updateCourse(UUID id, CourseUpdateDto dto, MultipartFile coverImage) {
         log.info("Updating course with ID: {}", id);
         if (dto.promotionalDiscountPercentage() != null && dto.promotionalDiscountAmount() != null) {
-            throw new com.mishchuk.onlineschool.exception.BadRequestException(
+            throw new BadRequestException(
                     "Cannot set both promotional discount percentage and amount");
         }
         CourseEntity entity = courseRepository.findById(id)
@@ -130,11 +157,30 @@ public class CourseServiceImpl implements CourseService {
 
         courseMapper.updateEntityFromDto(dto, entity);
 
-        // Ensure mutual exclusivity in DB: if one is set, clear the other
         if (dto.promotionalDiscountPercentage() != null) {
             entity.setPromotionalDiscountAmount(null);
         } else if (dto.promotionalDiscountAmount() != null) {
             entity.setPromotionalDiscountPercentage(null);
+        }
+
+        if (Boolean.TRUE.equals(dto.deleteCoverImage())) {
+            entity.setCoverImage(null);
+        } else if (coverImage != null && !coverImage.isEmpty()) {
+            try {
+                byte[] imageData = coverImage.getBytes();
+                String averageColor = calculateAverageColor(imageData);
+
+                CourseCoverEntity coverEntity = entity.getCoverImage();
+                if (coverEntity == null) {
+                    coverEntity = new CourseCoverEntity();
+                    coverEntity.setCourse(entity);
+                    entity.setCoverImage(coverEntity);
+                }
+                coverEntity.setImageData(imageData);
+                coverEntity.setAverageColor(averageColor);
+            } catch (java.io.IOException e) {
+                throw new RuntimeException("Failed to read cover image", e);
+            }
         }
 
         courseRepository.save(entity);
@@ -202,6 +248,37 @@ public class CourseServiceImpl implements CourseService {
         } catch (Exception e) {
             log.error("Failed to send access extension email to user {}", userId, e);
             // Don't fail the transaction if email sending fails
+        }
+    }
+
+    private String calculateAverageColor(byte[] imageData) {
+        try (java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(imageData)) {
+            java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(bis);
+            if (image == null)
+                return null;
+
+            long sumR = 0, sumG = 0, sumB = 0;
+            int width = image.getWidth();
+            int height = image.getHeight();
+            long totalPixels = width * height;
+
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    int pixel = image.getRGB(x, y);
+                    sumR += (pixel >> 16) & 0xFF;
+                    sumG += (pixel >> 8) & 0xFF;
+                    sumB += pixel & 0xFF;
+                }
+            }
+
+            int avgR = (int) (sumR / totalPixels);
+            int avgG = (int) (sumG / totalPixels);
+            int avgB = (int) (sumB / totalPixels);
+
+            return String.format("#%02x%02x%02x", avgR, avgG, avgB);
+        } catch (Exception e) {
+            log.warn("Failed to calculate average color", e);
+            return null; // Fallback
         }
     }
 }

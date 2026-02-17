@@ -59,3 +59,9 @@ databaseChangeLog:
   - include:
       file: changesing/021-add-promotional-fields.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/022-alter-courses-table-add-cover-image.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/023-create-course-covers-table.sql
+      relativeToChangelogFile: true

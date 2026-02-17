@@ -30,7 +30,7 @@ export default function AllCoursesPage() {
 
 
     const createMutation = useMutation({
-        mutationFn: createCourse,
+        mutationFn: ({ data, file }: { data: CreateCourseDto; file?: File }) => createCourse(data, file),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['allCourses'] });
             queryClient.invalidateQueries({ queryKey: ['allModules'] }); // Update modules status
@@ -38,7 +38,7 @@ export default function AllCoursesPage() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: (data: { id: string; dto: any }) => updateCourse(data.id, data.dto),
+        mutationFn: ({ id, dto, file }: { id: string; dto: any; file?: File }) => updateCourse(id, dto, file),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['allCourses'] });
             queryClient.invalidateQueries({ queryKey: ['allModules'] }); // Update modules status
@@ -95,17 +95,18 @@ export default function AllCoursesPage() {
         }
     };
 
-    const handleModalSubmit = async (data: CreateCourseDto) => {
+    const handleModalSubmit = async (data: CreateCourseDto, file?: File) => {
         if (editingCourse) {
             await updateMutation.mutateAsync({
                 id: editingCourse.id,
                 dto: {
                     ...data,
                     status: editingCourse.status // Preserve status for now
-                }
+                },
+                file
             });
         } else {
-            await createMutation.mutateAsync(data);
+            await createMutation.mutateAsync({ data, file });
         }
     };
 

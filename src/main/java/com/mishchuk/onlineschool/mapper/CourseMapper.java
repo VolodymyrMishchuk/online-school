@@ -19,6 +19,8 @@ public interface CourseMapper {
     @Mapping(target = "modulesNumber", expression = "java(entity.getModules() != null ? entity.getModules().size() : 0)")
     @Mapping(target = "lessonsCount", expression = "java(calculateLessonsCount(entity))")
     @Mapping(target = "durationMinutes", expression = "java(calculateDuration(entity))")
+    @Mapping(target = "coverImageUrl", expression = "java(entity.getCoverImage() != null ? \"/api/courses/\" + entity.getId() + \"/cover\" : null)")
+    @Mapping(target = "averageColor", source = "coverImage.averageColor")
     CourseDto toDto(CourseEntity entity);
 
     default Integer calculateLessonsCount(CourseEntity entity) {
@@ -47,6 +49,7 @@ public interface CourseMapper {
     @Mapping(target = "nextCourse", ignore = true)
     @Mapping(target = "modulesNumber", ignore = true)
     @Mapping(target = "status", constant = "DRAFT") // Default status for new course
+    @Mapping(target = "coverImage", ignore = true)
     CourseEntity toEntity(CourseCreateDto dto);
 
     @Mapping(target = "id", ignore = true)
@@ -55,5 +58,6 @@ public interface CourseMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "nextCourse", ignore = true)
     @Mapping(target = "modulesNumber", ignore = true)
+    @Mapping(target = "coverImage", ignore = true)
     void updateEntityFromDto(CourseUpdateDto dto, @MappingTarget CourseEntity entity);
 }
