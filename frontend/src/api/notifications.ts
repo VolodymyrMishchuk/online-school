@@ -23,6 +23,10 @@ export const markAsRead = async (id: string): Promise<void> => {
     await client.put(`/notifications/${id}/read`);
 };
 
+export const markAsUnread = async (id: string): Promise<void> => {
+    await client.put(`/notifications/${id}/unread`);
+};
+
 export interface BroadcastRequest {
     title: string;
     message: string;
@@ -49,12 +53,15 @@ export const deleteNotification = async (id: string): Promise<void> => {
 };
 
 export const markAllAsRead = async (): Promise<void> => {
-    // Assuming backend has such endpoint or we loop. 
-    // Given the backend summary, I didn't explicitly see markAllAsRead.
-    // I check usage. Ideally we match backend.
-    // For now, I'll stick to basic get.
-    // Wait, did I implement markAsRead in backend? I just saw NotificationService has create and get.
-    // Let me check NotificationController.java.
+    await client.put('/notifications/read-all');
+};
+
+export const markAllAsUnread = async (): Promise<void> => {
+    await client.put('/notifications/unread-all');
+};
+
+export const deleteAllNotifications = async (): Promise<void> => {
+    await client.delete('/notifications/all');
 };
 
 export const getUnreadCount = async (): Promise<number> => {

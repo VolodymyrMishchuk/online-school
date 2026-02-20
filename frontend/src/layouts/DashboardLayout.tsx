@@ -17,16 +17,16 @@ export default function DashboardLayout() {
         navigate('/');
     };
 
-    useEffect(() => {
-        const fetchUnreadCount = async () => {
-            try {
-                const count = await getUnreadCount();
-                setUnreadCount(count);
-            } catch (error) {
-                console.error('Failed to fetch unread count', error);
-            }
-        };
+    const fetchUnreadCount = async () => {
+        try {
+            const count = await getUnreadCount();
+            setUnreadCount(count);
+        } catch (error) {
+            console.error('Failed to fetch unread count', error);
+        }
+    };
 
+    useEffect(() => {
         fetchUnreadCount();
 
         // Optional: Set up interval to refresh count periodically
@@ -110,7 +110,7 @@ export default function DashboardLayout() {
 
             {/* Main Content */}
             <main ref={mainRef} className="flex-1 overflow-auto relative">
-                <Outlet />
+                <Outlet context={{ refreshUnreadCount: fetchUnreadCount }} />
                 <ScrollToTop scrollContainerRef={mainRef} />
             </main>
         </div>

@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getNotifications, markAsRead, deleteNotification } from '../api/notifications';
+import { createPortal } from 'react-dom';
+import { useOutletContext } from 'react-router-dom';
+import apiClient from '../api/client';
+import { getNotifications, markAsRead, markAsUnread, deleteNotification, markAllAsRead, markAllAsUnread, deleteAllNotifications } from '../api/notifications';
 import type { NotificationDto } from '../api/notifications';
-import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus, Trash2 } from 'lucide-react';
+import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { CreateNotificationModal } from '../components/CreateNotificationModal';
@@ -10,6 +13,11 @@ export const NotificationsPage: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+
+    // Get the refresh function from DashboardLayout context
+    const { refreshUnreadCount } = useOutletContext<{ refreshUnreadCount: () => void }>() || { refreshUnreadCount: () => { } };
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -36,7 +44,8 @@ export const NotificationsPage: React.FC = () => {
         e.stopPropagation();
         try {
             await markAsRead(id);
-            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true, viewAgain: false } as any : n));
+            refreshUnreadCount();
         } catch (error) {
             console.error('Failed to mark as read', error);
         }
@@ -49,14 +58,91 @@ export const NotificationsPage: React.FC = () => {
         try {
             await deleteNotification(id);
             setNotifications(prev => prev.filter(n => n.id !== id));
+            refreshUnreadCount();
         } catch (error) {
             console.error('Failed to delete notification', error);
+        }
+    };
+
+    const handleDownloadClick = async (e: React.MouseEvent, url: string) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        try {
+            const response = await apiClient.get(url, { responseType: 'blob' });
+
+            const blob = new Blob([response.data]);
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = 'video-review.mp4';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+                if (filenameMatch && filenameMatch.length === 2) {
+                    filename = filenameMatch[1];
+                }
+            }
+
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error('Download failed', error);
+            alert('Помилка при завантаженні відео. Спробуйте пізніше.');
         }
     };
 
     const handleNotificationClick = (notification: NotificationDto) => {
         if (!notification.read) {
             handleMarkAsRead(notification.id, { stopPropagation: () => { } } as React.MouseEvent);
+        } else {
+            handleMarkAsUnread(notification.id, { stopPropagation: () => { } } as React.MouseEvent);
+        }
+    };
+
+    const handleMarkAsUnread = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await markAsUnread(id);
+            setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: false, viewAgain: true } as any : n));
+            refreshUnreadCount();
+        } catch (error) {
+            console.error('Failed to mark as unread', error);
+        }
+    };
+
+    const handleMarkAllAsUnread = async () => {
+        try {
+            await markAllAsUnread();
+            setNotifications(prev => prev.map(n => ({ ...n, read: false, viewAgain: n.read ? true : (n as any).viewAgain } as any)));
+            refreshUnreadCount();
+        } catch (error) {
+            console.error('Failed to mark all as unread', error);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, read: true, viewAgain: false } as any)));
+            refreshUnreadCount();
+        } catch (error) {
+            console.error('Failed to mark all as read', error);
+        }
+    };
+
+    const handleDeleteAll = async () => {
+        try {
+            await deleteAllNotifications();
+            setNotifications([]);
+            setIsDeleteAllModalOpen(false);
+            refreshUnreadCount();
+        } catch (error) {
+            console.error('Failed to delete all notifications', error);
         }
     };
 
@@ -113,8 +199,45 @@ export const NotificationsPage: React.FC = () => {
                 </div>
             </div>
 
+            <div className="flex flex-wrap gap-4 mb-8 bg-white p-3 rounded-lg border border-gray-100 shadow-sm items-center">
+                <div className="relative min-w-[250px] flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                        type="text"
+                        placeholder="Пошук..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-brand-primary transition-all shadow-sm"
+                    />
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto ml-auto">
+                    <button
+                        onClick={handleMarkAllAsUnread}
+                        className="flex-1 md:flex-none px-4 py-2 text-sm font-bold text-brand-primary bg-brand-light/20 border border-brand-primary/20 rounded-lg hover:bg-brand-primary hover:text-white transition-colors whitespace-nowrap"
+                    >
+                        Вибрати все
+                    </button>
+                    <button
+                        onClick={handleMarkAllAsRead}
+                        className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
+                    >
+                        Прочитати все
+                    </button>
+                    <button
+                        onClick={() => setIsDeleteAllModalOpen(true)}
+                        className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-colors whitespace-nowrap"
+                    >
+                        Видалити все
+                    </button>
+                </div>
+            </div>
+
             <div className="space-y-2">
-                {notifications.length === 0 ? (
+                {notifications.filter(n =>
+                    n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    n.message.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-lg border border-dashed border-gray-200">
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                             <Bell className="w-8 h-8 text-gray-300" />
@@ -123,7 +246,10 @@ export const NotificationsPage: React.FC = () => {
                         <p className="text-gray-400">Тут будуть показані всі важливі події</p>
                     </div>
                 ) : (
-                    notifications.map(notification => (
+                    notifications.filter(n =>
+                        n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        n.message.toLowerCase().includes(searchQuery.toLowerCase())
+                    ).map(notification => (
                         <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
@@ -165,25 +291,26 @@ export const NotificationsPage: React.FC = () => {
 
                                     {notification.buttonUrl && (
                                         <div className="mt-4">
-                                            <a
-                                                href={notification.buttonUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow"
-                                            >
-                                                {notification.type === 'COURSE_ACCESS_EXTENDED' || notification.type === 'SYSTEM' ? (
-                                                    <>
-                                                        <Download className="w-4 h-4 text-brand-primary" />
-                                                        Завантажити відео
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <ExternalLink className="w-4 h-4 text-brand-primary" />
-                                                        Перейти
-                                                    </>
-                                                )}
-                                            </a>
+                                            {notification.type === 'COURSE_ACCESS_EXTENDED' || notification.type === 'SYSTEM' ? (
+                                                <button
+                                                    onClick={(e) => handleDownloadClick(e, notification.buttonUrl!)}
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow"
+                                                >
+                                                    <Download className="w-4 h-4 text-brand-primary" />
+                                                    Завантажити відео
+                                                </button>
+                                            ) : (
+                                                <a
+                                                    href={notification.buttonUrl}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow"
+                                                >
+                                                    <ExternalLink className="w-4 h-4 text-brand-primary" />
+                                                    Перейти
+                                                </a>
+                                            )}
                                         </div>
                                     )}
 
@@ -191,11 +318,15 @@ export const NotificationsPage: React.FC = () => {
                                         <span>
                                             {format(new Date(notification.createdAt), "d MMMM yyyy HH:mm", { locale: uk })}
                                         </span>
-                                        {notification.read && (
+                                        {(notification as any).viewAgain ? (
+                                            <span className="flex items-center gap-1 text-brand-primary font-medium">
+                                                • Переглянути знову
+                                            </span>
+                                        ) : notification.read ? (
                                             <span className="flex items-center gap-1 text-gray-300">
                                                 • Прочитано
                                             </span>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>
@@ -219,6 +350,46 @@ export const NotificationsPage: React.FC = () => {
                     loadNotifications();
                 }}
             />
+
+            {/* Modal for deleting all notifications */}
+            {isDeleteAllModalOpen && createPortal(
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={(e) => { e.stopPropagation(); setIsDeleteAllModalOpen(false); }}
+                >
+                    <div
+                        className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-red-100 rounded-lg">
+                                    <Trash2 className="w-6 h-6 text-red-600" />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">Видалення</h3>
+                            </div>
+                            <p className="text-gray-600 mt-2 mb-6 text-sm">
+                                Ви впевнені, що хочете видалити <strong>ВСІ</strong> сповіщення? Цю дію неможливо скасувати.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setIsDeleteAllModalOpen(false)}
+                                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
+                                >
+                                    Скасувати
+                                </button>
+                                <button
+                                    onClick={handleDeleteAll}
+                                    className="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/20 transition-all active:scale-95"
+                                >
+                                    Видалити всі
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
         </div>
     );
 };

@@ -127,6 +127,42 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
+    public void markAsUnread(UUID notificationId) {
+        NotificationEntity notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found: " + notificationId));
+
+        notification.setRead(false);
+        notificationRepository.save(notification);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsRead(UUID userId) {
+        java.util.List<NotificationEntity> notifications = notificationRepository
+                .findByRecipientIdOrderByCreatedAtDesc(userId);
+        notifications.forEach(n -> n.setRead(true));
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    @Transactional
+    public void markAllAsUnread(UUID userId) {
+        java.util.List<NotificationEntity> notifications = notificationRepository
+                .findByRecipientIdOrderByCreatedAtDesc(userId);
+        notifications.forEach(n -> n.setRead(false));
+        notificationRepository.saveAll(notifications);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(UUID userId) {
+        java.util.List<NotificationEntity> notifications = notificationRepository
+                .findByRecipientIdOrderByCreatedAtDesc(userId);
+        notificationRepository.deleteAll(notifications);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public long getUnreadCount(UUID userId) {
         return notificationRepository.countByRecipientIdAndIsReadFalse(userId);

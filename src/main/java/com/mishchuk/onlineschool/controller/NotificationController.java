@@ -60,6 +60,16 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{id}/unread")
+    public ResponseEntity<Void> markAsUnread(
+            @PathVariable UUID id,
+            Principal principal) {
+
+        // In a real app we might verify ownership here
+        notificationService.markAsUnread(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(Principal principal) {
         if (principal == null) {
@@ -67,6 +77,36 @@ public class NotificationController {
         }
         PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
         return ResponseEntity.ok(notificationService.getUnreadCount(person.getId()));
+    }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<Void> markAllAsRead(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        notificationService.markAllAsRead(person.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/unread-all")
+    public ResponseEntity<Void> markAllAsUnread(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        notificationService.markAllAsUnread(person.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/all")
+    public ResponseEntity<Void> deleteAll(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        notificationService.deleteAll(person.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
