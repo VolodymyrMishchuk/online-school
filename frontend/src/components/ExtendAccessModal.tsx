@@ -125,7 +125,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                     </div>
 
                     {/* File Upload Area */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 mt-6">
                         <label className="block text-sm font-bold text-gray-900">
                             Ваше відео
                         </label>

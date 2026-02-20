@@ -14,4 +14,7 @@ public interface EnrollmentRepository extends JpaRepository<EnrollmentEntity, UU
     Optional<EnrollmentEntity> findByStudentIdAndCourseId(UUID studentId, UUID courseId);
 
     List<EnrollmentEntity> findByStatus(String status);
+
+    List<EnrollmentEntity> findByStatusAndExpiresAtBetween(String status, java.time.OffsetDateTime start,
+            java.time.OffsetDateTime end);
 }

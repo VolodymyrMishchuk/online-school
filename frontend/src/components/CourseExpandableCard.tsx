@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X } from 'lucide-react';
 import type { CourseDto } from '../api/courses';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
+import { removeCourseAccess } from '../api/users';
 import ModuleExpandableItem from './ModuleExpandableItem';
 import { ExtendAccessModal } from './ExtendAccessModal';
+import { useNavigate } from 'react-router-dom';
 
 interface CourseExpandableCardProps {
     course: CourseDto;
@@ -29,10 +32,13 @@ function CourseExpandableCard({
 }: CourseExpandableCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const navigate = useNavigate();
 
     // Filter modules for this course
     const courseModules = modules.filter(m => m.courseId === course.id);
-    const isLocked = !course.isEnrolled && !isCatalogMode; // Locked if not enrolled, but in catalog mode we usually show structure
+    const isLocked = (!course.isEnrolled && !isCatalogMode) || (course.enrollmentStatus === 'BLOCKED' && !isCatalogMode);
 
     const lessonCount = courseModules.reduce((sum, m) => sum + (m.lessonsNumber || 0), 0);
     const totalMinutes = courseModules.reduce((sum, m) => sum + (m.durationMinutes || 0), 0);
@@ -40,6 +46,96 @@ function CourseExpandableCard({
 
 
     const hasImage = !!course.coverImageUrl;
+
+    const handleDeleteCourse = (e?: React.MouseEvent) => {
+        if (e) e.stopPropagation();
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDeleteCourse = async () => {
+        setIsDeleting(true);
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
+        const userId = user?.userId || localStorage.getItem('userId') || '';
+
+        if (!userId) {
+            setIsDeleting(false);
+            return;
+        }
+
+        try {
+            await removeCourseAccess(userId, course.id);
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to remove course', error);
+            alert('Помилка при видаленні курсу. Спробуйте пізніше.');
+            setIsDeleting(false);
+        }
+    };
+
+    const handleExtendWithPayment = () => {
+        // Placeholder for future logic
+        alert('Ця функція перебуває у стадії розробки.');
+    };
+
+    const handleGetDiscount = () => {
+        if (course.nextCourseId) {
+            navigate(`/dashboard/catalog/${course.nextCourseId}`);
+        }
+    };
+
+    // Helper for pluralization
+    const getNoun = (number: number, one: string, two: string, five: string) => {
+        let n = Math.abs(number);
+        n %= 100;
+        if (n >= 5 && n <= 20) {
+            return five;
+        }
+        n %= 10;
+        if (n === 1) {
+            return one;
+        }
+        if (n >= 2 && n <= 4) {
+            return two;
+        }
+        return five;
+    };
+
+    let expirationText = '';
+    let isExpirationLessThanWeek = false;
+
+    if (course.expiresAt) {
+        const diffMs = new Date(course.expiresAt).getTime() - new Date().getTime();
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+
+        if (diffMs <= 0) {
+            expirationText = 'Доступ завершено';
+            isExpirationLessThanWeek = true;
+        } else if (diffMins < 60) {
+            expirationText = `Курс доступний ще ${diffMins} ${getNoun(diffMins, 'хвилина', 'хвилини', 'хвилин')}`;
+            isExpirationLessThanWeek = true;
+        } else if (diffMins < 48 * 60) {
+            const h = Math.floor(diffMins / 60);
+            expirationText = `Курс доступний ще ${h} ${getNoun(h, 'година', 'години', 'годин')}`;
+            isExpirationLessThanWeek = true;
+        } else {
+            const totalDays = Math.floor(diffMins / (60 * 24));
+            isExpirationLessThanWeek = totalDays < 7;
+            const months = Math.floor(totalDays / 30);
+            const days = totalDays % 30;
+            const parts = [];
+
+            if (months > 0 && totalDays > 31) {
+                parts.push(`${months} ${getNoun(months, 'місяць', 'місяці', 'місяців')}`);
+            }
+
+            const remainingDays = totalDays > 31 ? days : totalDays;
+            if (remainingDays > 0) {
+                parts.push(`${remainingDays} ${getNoun(remainingDays, 'день', 'дні', 'днів')}`);
+            }
+            expirationText = parts.length > 0 ? `Курс доступний ще ${parts.join(' ')}` : 'Курс доступний ще менше дня';
+        }
+    }
 
     return (
         <div
@@ -95,9 +191,18 @@ function CourseExpandableCard({
                                         {course.name}
                                     </h3>
                                     {/* Enrolled Badge or Status */}
-                                    {course.isEnrolled && !isCatalogMode && (
-                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${hasImage ? 'bg-green-500/20 text-green-100 border border-green-500/30 backdrop-blur-sm' : 'bg-green-100 text-green-800'}`}>
-                                            Ви записані
+                                    {course.isEnrolled && !isCatalogMode && course.enrollmentStatus === 'BLOCKED' && (
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${hasImage ? 'bg-red-500/20 text-red-100 border border-red-500/30 backdrop-blur-sm' : 'bg-red-100 text-red-800'}`}>
+                                            Доступ завершено
+                                        </span>
+                                    )}
+                                    {course.expiresAt && !isCatalogMode && course.enrollmentStatus !== 'BLOCKED' && (
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium gap-1 ${isExpirationLessThanWeek
+                                            ? (hasImage ? 'bg-yellow-500/20 text-yellow-100 border border-yellow-500/30 backdrop-blur-sm' : 'bg-yellow-100 text-yellow-800')
+                                            : (hasImage ? 'bg-green-500/20 text-green-100 border border-green-500/30 backdrop-blur-sm' : 'bg-green-100 text-green-800')
+                                            }`}>
+                                            <Clock className="w-3 h-3" />
+                                            {expirationText}
                                         </span>
                                     )}
                                     {course.description && (
@@ -112,23 +217,6 @@ function CourseExpandableCard({
                             <div className={`mt-3 text-sm font-medium ${hasImage ? 'text-gray-100 drop-shadow-md' : 'text-gray-500'}`}>
                                 {(() => {
                                     const parts = [];
-
-                                    // Helper for pluralization
-                                    const getNoun = (number: number, one: string, two: string, five: string) => {
-                                        let n = Math.abs(number);
-                                        n %= 100;
-                                        if (n >= 5 && n <= 20) {
-                                            return five;
-                                        }
-                                        n %= 10;
-                                        if (n === 1) {
-                                            return one;
-                                        }
-                                        if (n >= 2 && n <= 4) {
-                                            return two;
-                                        }
-                                        return five;
-                                    };
 
                                     // Modules
                                     const modulesCount = courseModules.length;
@@ -191,7 +279,7 @@ function CourseExpandableCard({
                                 )}
 
                                 {/* Management Actions */}
-                                {(!course.isEnrolled || isCatalogMode) && (
+                                {isCatalogMode && (
                                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                         <button
                                             onClick={() => onEdit(course)}
@@ -209,8 +297,6 @@ function CourseExpandableCard({
                                         </button>
                                     </div>
                                 )}
-
-                                {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </div>
 
                             {/* Buy Button - Below */}
@@ -227,6 +313,48 @@ function CourseExpandableCard({
                                     <span className="font-medium">Придбати курс</span>
                                 </button>
                             )}
+
+                            {/* Blocked Course Actions */}
+                            {!isCatalogMode && course.isEnrolled && course.enrollmentStatus === 'BLOCKED' && (
+                                <div className="flex flex-col gap-2 w-full mt-4" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        onClick={() => setIsExtendModalOpen(true)}
+                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
+                                    >
+                                        Отримати доступ за відеовідгук
+                                    </button>
+                                    <button
+                                        onClick={handleExtendWithPayment}
+                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-brand-dark bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
+                                    >
+                                        Продовжити курс зі знижкою
+                                    </button>
+                                    {course.nextCourseId && (
+                                        <button
+                                            onClick={handleGetDiscount}
+                                            className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
+                                        >
+                                            Отримати знижку{course.promotionalDiscountPercentage ? ` -${course.promotionalDiscountPercentage}%` : ''}{course.promotionalDiscountAmount ? ` -${course.promotionalDiscountAmount}€` : ''} на {course.nextCourseName || 'наступний курс'}
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={handleDeleteCourse}
+                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors shadow-sm"
+                                    >
+                                        Видалити курс
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Chevron perfectly centered at the bottom of the unexpanded view */}
+                    <div className="flex justify-center w-full mt-2" onClick={(e) => {
+                        e.stopPropagation();
+                        setIsExpanded(!isExpanded);
+                    }}>
+                        <div className={`p-1 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors cursor-pointer ${hasImage ? 'text-gray-300 hover:bg-white/10' : 'text-gray-400'}`}>
+                            {isExpanded ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
                         </div>
                     </div>
                 </div>
@@ -277,7 +405,69 @@ function CourseExpandableCard({
                     }}
                 />
             </div>
-        </div>
+
+            {/* Custom Delete Confirmation Modal using Portal if possible, otherwise just break out */}
+            {isDeleteModalOpen && createPortal(
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/50 backdrop-blur-sm animate-in fade-in duration-200"
+                    onClick={(e) => { e.stopPropagation(); setIsDeleteModalOpen(false); }}
+                >
+                    <div
+                        className="relative w-full max-w-lg bg-white/90 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                            <h2 className="text-xl font-bold text-gray-900">
+                                Підтвердження видалення
+                            </h2>
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8 space-y-6 overflow-y-auto">
+                            <p className="text-gray-700 text-lg">
+                                Ви дійсно бажаєте видалити курс "<span className="font-bold">{course.name}</span>" зі свого кабінету?
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                                Ця дія є незворотною. Після видалення ви втратите доступ до матеріалів курсу.
+                            </p>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                            <button
+                                onClick={() => setIsDeleteModalOpen(false)}
+                                disabled={isDeleting}
+                                className="text-gray-900 font-medium hover:bg-gray-100 rounded-lg px-4 py-2 transition-colors disabled:opacity-50"
+                            >
+                                Скасувати
+                            </button>
+                            <button
+                                onClick={confirmDeleteCourse}
+                                disabled={isDeleting}
+                                className={`
+                                    bg-red-600 text-white font-bold rounded-lg px-6 py-3 shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center min-w-[140px]
+                                    ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700 hover:shadow-red-500/25'}
+                                `}
+                            >
+                                {isDeleting ? (
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    'Видалити курс'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+        </div >
     );
 }
 

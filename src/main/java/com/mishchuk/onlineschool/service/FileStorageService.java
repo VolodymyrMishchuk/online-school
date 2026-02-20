@@ -18,9 +18,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.mishchuk.onlineschool.repository.PersonRepository;
+import com.mishchuk.onlineschool.repository.EnrollmentRepository;
+import com.mishchuk.onlineschool.repository.entity.PersonRole;
+import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +47,8 @@ public class FileStorageService {
     private final LessonRepository lessonRepository;
     private final MinioConfig minioConfig;
     private final FileMapper fileMapper;
+    private final PersonRepository personRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Transactional
     public FileDto uploadFile(
@@ -142,6 +151,10 @@ public class FileStorageService {
 
     // Методи для роботи з файлами уроків
     public List<FileDto> getLessonFiles(UUID lessonId) {
+        if (!hasAccessToLessonFiles(lessonId)) {
+            return List.of(); // Return empty list to avoid leaking information
+        }
+
         List<FileEntity> files = fileRepository.findByLessonId(lessonId);
         return files.stream()
                 .map(fileMapper::toDto)
@@ -149,10 +162,50 @@ public class FileStorageService {
     }
 
     public List<FileDto> getLessonFilesOrdered(UUID lessonId) {
+        if (!hasAccessToLessonFiles(lessonId)) {
+            return List.of();
+        }
+
         List<FileEntity> files = fileRepository.findLessonFilesOrdered(lessonId);
         return files.stream()
                 .map(fileMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private boolean hasAccessToLessonFiles(UUID lessonId) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<PersonEntity> userOpt = personRepository.findByEmail(userEmail);
+
+        if (userOpt.isPresent()) {
+            PersonEntity user = userOpt.get();
+            if (user.getRole() == PersonRole.ADMIN) {
+                return true;
+            }
+
+            LessonEntity lesson = lessonRepository.findById(lessonId).orElse(null);
+            if (lesson != null && lesson.getModule() != null && lesson.getModule().getCourse() != null) {
+                Optional<EnrollmentEntity> enrollmentOpt = enrollmentRepository
+                        .findByStudentIdAndCourseId(user.getId(), lesson.getModule().getCourse().getId());
+
+                if (enrollmentOpt.isPresent()) {
+                    EnrollmentEntity enrollment = enrollmentOpt.get();
+
+                    if ("BLOCKED".equals(enrollment.getStatus())) {
+                        return false;
+                    }
+
+                    if (lesson.getModule().getCourse().getAccessDuration() != null) {
+                        OffsetDateTime expirationDate = enrollment.getCreatedAt()
+                                .plusDays(lesson.getModule().getCourse().getAccessDuration());
+                        if (OffsetDateTime.now().isAfter(expirationDate)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // Inner class for download response

@@ -8,11 +8,13 @@ import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.PersonRepository;
 import com.mishchuk.onlineschool.repository.entity.CourseEntity;
 import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
+import com.mishchuk.onlineschool.repository.entity.NotificationType;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +44,11 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                 EnrollmentEntity entity = enrollmentMapper.toEntity(dto);
                 entity.setStudent(student);
                 entity.setCourse(course);
+
+                if (course.getAccessDuration() != null && course.getAccessDuration() > 0) {
+                        entity.setExpiresAt(OffsetDateTime.now().plusDays(course.getAccessDuration()));
+                }
+
                 enrollmentRepository.save(entity);
 
                 // Send access granted email
@@ -55,14 +62,14 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                                 "Користувач " + student.getFirstName() + " " + student.getLastName() + " ("
                                                 + student.getEmail()
                                                 + ") купив курс \"" + course.getName() + "\"",
-                                com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED);
+                                NotificationType.COURSE_PURCHASED);
 
                 // Notify Student
                 notificationService.createNotification(
                                 student.getId(),
                                 "Успішна покупка!",
                                 "Ви успішно придбали курс \"" + course.getName() + "\". Бажаємо успішного навчання!",
-                                com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED);
+                                NotificationType.COURSE_PURCHASED);
         }
 
         @Override

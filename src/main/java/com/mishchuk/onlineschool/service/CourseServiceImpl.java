@@ -17,6 +17,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -240,7 +244,7 @@ public class CourseServiceImpl implements CourseService {
 
         // Send email notification
         try {
-            java.time.LocalDate newExpiryDate = enrollment.getExpiresAt().toLocalDate();
+            LocalDate newExpiryDate = enrollment.getExpiresAt().toLocalDate();
             emailService.sendAccessExtendedEmail(enrollment.getStudent().getEmail(),
                     enrollment.getStudent().getFirstName(),
                     enrollment.getCourse().getName(),
@@ -252,8 +256,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     private String calculateAverageColor(byte[] imageData) {
-        try (java.io.ByteArrayInputStream bis = new java.io.ByteArrayInputStream(imageData)) {
-            java.awt.image.BufferedImage image = javax.imageio.ImageIO.read(bis);
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(imageData)) {
+            BufferedImage image = ImageIO.read(bis);
             if (image == null)
                 return null;
 
@@ -278,7 +282,7 @@ public class CourseServiceImpl implements CourseService {
             return String.format("#%02x%02x%02x", avgR, avgG, avgB);
         } catch (Exception e) {
             log.warn("Failed to calculate average color", e);
-            return null; // Fallback
+            return null;
         }
     }
 }

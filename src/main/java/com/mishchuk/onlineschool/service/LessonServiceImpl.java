@@ -15,6 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.mishchuk.onlineschool.repository.PersonRepository;
+import com.mishchuk.onlineschool.repository.EnrollmentRepository;
+import com.mishchuk.onlineschool.repository.entity.PersonEntity;
+import com.mishchuk.onlineschool.repository.entity.PersonRole;
+import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
+import java.time.OffsetDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +30,8 @@ public class LessonServiceImpl implements LessonService {
     private final LessonRepository lessonRepository;
     private final ModuleRepository moduleRepository;
     private final LessonMapper lessonMapper;
+    private final PersonRepository personRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @Override
     @Transactional
@@ -42,8 +51,62 @@ public class LessonServiceImpl implements LessonService {
 
     @Override
     public Optional<LessonDto> getLesson(UUID id) {
-        return lessonRepository.findById(id)
-                .map(lessonMapper::toDto);
+        return lessonRepository.findById(id).map(lesson -> {
+            boolean isAccessDenied = !hasAccessToLessonContent(lesson);
+            LessonDto dto = lessonMapper.toDto(lesson);
+
+            if (isAccessDenied) {
+                return new LessonDto(
+                        dto.id(),
+                        dto.moduleId(),
+                        dto.name(),
+                        dto.description(),
+                        null, // Scrubbed videoUrl
+                        dto.durationMinutes(),
+                        dto.moduleName(),
+                        dto.courseName(),
+                        dto.filesCount(),
+                        dto.createdAt(),
+                        dto.updatedAt());
+            }
+
+            return dto;
+        });
+    }
+
+    private boolean hasAccessToLessonContent(LessonEntity lesson) {
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<PersonEntity> userOpt = personRepository.findByEmail(userEmail);
+
+        if (userOpt.isPresent()) {
+            PersonEntity user = userOpt.get();
+            if (user.getRole() == PersonRole.ADMIN) {
+                return true;
+            }
+
+            if (lesson != null && lesson.getModule() != null && lesson.getModule().getCourse() != null) {
+                Optional<EnrollmentEntity> enrollmentOpt = enrollmentRepository
+                        .findByStudentIdAndCourseId(user.getId(), lesson.getModule().getCourse().getId());
+
+                if (enrollmentOpt.isPresent()) {
+                    EnrollmentEntity enrollment = enrollmentOpt.get();
+
+                    if ("BLOCKED".equals(enrollment.getStatus())) {
+                        return false;
+                    }
+
+                    if (lesson.getModule().getCourse().getAccessDuration() != null) {
+                        OffsetDateTime expirationDate = enrollment.getCreatedAt()
+                                .plusDays(lesson.getModule().getCourse().getAccessDuration());
+                        if (OffsetDateTime.now().isAfter(expirationDate)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

@@ -18,8 +18,8 @@ export default function AllCoursesPage() {
     const userId = localStorage.getItem('userId') || '';
 
     const { data: courses, isLoading: coursesLoading } = useQuery({
-        queryKey: ['allCourses', userId],
-        queryFn: () => getCourses(userId)
+        queryKey: ['allCourses'], // No userId dependency for general catalog
+        queryFn: () => getCourses() // Fetch generic courses to decouple from "My Courses" statuses
     });
 
     const { data: modules } = useQuery({

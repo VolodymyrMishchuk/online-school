@@ -26,6 +26,10 @@ tags:
     description: Управління користувачами
   - name: Files
     description: Завантаження та керування файлами
+  - name: Notifications
+    description: Управління сповіщеннями
+  - name: References
+    description: Довідники (ролі, статуси)
 
 security:
   - bearerAuth: []
@@ -125,6 +129,31 @@ paths:
         '401':
           description: Unauthorized
 
+  /api/auth/magic-login:
+    post:
+      tags:
+        - Authentication
+      summary: Вхід за магічним посиланням
+      operationId: magicLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Успішний вхід
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Невалідний токен
+
   /api/auth/forgot-password:
     post:
       tags:
@@ -194,6 +223,14 @@ paths:
       summary: Отримати всі курси
       operationId: getAllCourses
       security: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Фільтр по ID користувача (для отримання курсів конкретного юзера)
       responses:
         '200':
           description: Список курсів
@@ -268,6 +305,51 @@ paths:
       responses:
         '204':
           description: Курс видалено
+
+  /courses/{id}/cover:
+    get:
+      tags:
+        - Courses
+      summary: Отримати обкладинку курсу
+      operationId: getCourseCover
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Зображення обкладинки
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Курс або зображення не знайдено
+
+  /courses/{id}/extend-access:
+    post:
+      tags:
+        - Courses
+      summary: Запит на продовження доступу (за відгук)
+      operationId: extendAccessForReview
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Відео-відгук
+      responses:
+        '200':
+          description: Запит прийнято
+        '400':
+          description: Помилка завантаження
 
   # ==================== Modules ====================
   /modules:
@@ -348,8 +430,40 @@ paths:
         '204':
           description: Модуль видалено
 
+  /modules/{id}/lessons:
+    get:
+      tags:
+        - Modules
+      summary: Отримати уроки модуля
+      operationId: getModuleLessons
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
+
   # ==================== Lessons ====================
   /lessons:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати всі уроки
+      operationId: getAllLessons
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
     post:
       tags:
         - Lessons
@@ -364,6 +478,22 @@ paths:
       responses:
         '201':
           description: Урок створено
+
+  /lessons/unassigned:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати уроки без модуля
+      operationId: getUnassignedLessons
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
 
   /lessons/{id}:
     get:
@@ -410,6 +540,24 @@ paths:
       responses:
         '204':
           description: Урок видалено
+
+  /lessons/{id}/files:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати файли уроку
+      operationId: getLessonFiles
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Список файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
 
   # ==================== Enrollments ====================
   /enrollments:
@@ -530,6 +678,74 @@ paths:
       responses:
         '204':
           description: Користувача видалено
+
+  /persons/with-enrollments:
+    get:
+      tags:
+        - Persons
+      summary: Отримати користувачів з їх реєстраціями
+      operationId: getAllPersonsWithEnrollments
+      responses:
+        '200':
+          description: Список користувачів з деталями
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonWithEnrollmentsDto'
+
+  /persons/{id}/status:
+    patch:
+      tags:
+        - Persons
+      summary: Оновити статус користувача
+      operationId: updatePersonStatus
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+            enum: [ACTIVE, BLOCKED]
+      responses:
+        '204':
+          description: Статус оновлено
+
+  /persons/{id}/enrollments/{courseId}:
+    post:
+      tags:
+        - Persons
+      summary: Додати доступ до курсу
+      operationId: addCourseAccess
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Доступ надано
+    delete:
+      tags:
+        - Persons
+      summary: Забрати доступ до курсу
+      operationId: removeCourseAccess
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Доступ скасовано
 
 
 
@@ -661,6 +877,146 @@ paths:
                 items:
                   $ref: '#/components/schemas/FileDto'
 
+  # ==================== Notifications ====================
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Отримати сповіщення користувача
+      operationId: getUserNotifications
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Список сповіщень
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationDto'
+        '401':
+          description: Unauthorized
+
+  /notifications/unread-count:
+    get:
+      tags:
+        - Notifications
+      summary: Кількість непрочитаних сповіщень
+      operationId: getUnreadCount
+      responses:
+        '200':
+          description: Кількість
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+
+  /notifications/{id}/read:
+    put:
+      tags:
+        - Notifications
+      summary: Позначити як прочитане
+      operationId: markAsRead
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Оновлено
+
+  /notifications/{id}:
+    delete:
+      tags:
+        - Notifications
+      summary: Видалити сповіщення
+      operationId: deleteNotification
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Видалено
+
+  /notifications/broadcast:
+    post:
+      tags:
+        - Notifications
+      summary: Надіслати всім користувачам (Admin only)
+      operationId: broadcastToAll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BroadcastRequest'
+      responses:
+        '200':
+          description: Надіслано
+        '403':
+          description: Forbidden
+
+  /notifications/send-to-users:
+    post:
+      tags:
+        - Notifications
+      summary: Надіслати конкретним користувачам (Admin only)
+      operationId: sendToUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetedNotificationRequest'
+      responses:
+        '200':
+          description: Надіслано
+        '403':
+          description: Forbidden
+
+  # ==================== References ====================
+  /references/roles:
+    get:
+      tags:
+        - References
+      summary: Отримати список ролей
+      operationId: getRoles
+      responses:
+        '200':
+          description: Список ролей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum: [USER, ADMIN]
+
+  /references/statuses:
+    get:
+      tags:
+        - References
+      summary: Отримати список статусів
+      operationId: getStatuses
+      responses:
+        '200':
+          description: Список статусів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum: [ACTIVE, BLOCKED]
+
 # ==================== Components ====================
 components:
   securitySchemes:
@@ -788,6 +1144,11 @@ components:
           type: string
         lastName:
           type: string
+        bornedAt:
+          type: string
+          format: date-time
+        phoneNumber:
+          type: string
         email:
           type: string
           format: email
@@ -797,6 +1158,47 @@ components:
         status:
           type: string
           enum: [ACTIVE, BLOCKED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PersonWithEnrollmentsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bornedAt:
+          type: string
+          format: date-time
+        phoneNumber:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, BLOCKED]
+        enrollments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentDto'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     PersonUpdateDto:
       type: object
@@ -855,6 +1257,10 @@ components:
           type: string
         modulesNumber:
           type: integer
+        lessonsCount:
+          type: integer
+        durationMinutes:
+          type: integer
         status:
           type: string
           enum: [DRAFT, PUBLISHED, ARCHIVED]
@@ -869,6 +1275,36 @@ components:
         accessDuration:
           type: integer
           description: Тривалість доступу в днях
+        promotionalDiscountPercentage:
+          type: integer
+        promotionalDiscountAmount:
+          type: number
+          format: double
+        nextCourseId:
+          type: string
+          format: uuid
+        nextCourseName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        isEnrolled:
+          type: boolean
+        enrolledAt:
+          type: string
+          format: date-time
+        enrollmentStatus:
+          type: string
+        coverImageUrl:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        averageColor:
+          type: string
 
     CourseUpdateDto:
       type: object
@@ -1051,3 +1487,57 @@ components:
         relatedEntityId:
           type: string
           format: uuid
+
+    # ==================== Notification Schemas ====================
+    NotificationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [GENERIC, COURSE_UPDATE, NEW_COURSE, HOMEWORK_REVIEWED, PROMOTION, SUBSCRIPTION_EXPIRING, SYSTEM_ALERT, NEW_USER_REGISTRATION]
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        buttonUrl:
+          type: string
+
+    BroadcastRequest:
+      type: object
+      required:
+        - title
+        - message
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        buttonUrl:
+          type: string
+
+    TargetedNotificationRequest:
+      type: object
+      required:
+        - title
+        - message
+        - userIds
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        userIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        buttonUrl:
+          type: string

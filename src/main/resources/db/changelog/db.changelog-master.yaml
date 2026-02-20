@@ -65,3 +65,6 @@ databaseChangeLog:
   - include:
       file: changesing/023-create-course-covers-table.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/024-fill-enrollment-expiration.sql
+      relativeToChangelogFile: true
