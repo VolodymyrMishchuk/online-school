@@ -26,6 +26,7 @@ public interface LessonMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "files", ignore = true)
     LessonEntity toEntity(LessonCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -34,5 +35,6 @@ public interface LessonMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "files", ignore = true)
     void updateEntity(@MappingTarget LessonEntity entity, LessonUpdateDto dto);
 }

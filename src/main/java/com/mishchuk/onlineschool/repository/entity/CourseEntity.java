@@ -28,8 +28,12 @@ public class CourseEntity {
     @Column(name = "access_duration")
     private Integer accessDuration;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private String status;
+    private CourseStatus status = CourseStatus.DRAFT;
+
+    @Column(name = "version")
+    private String version = "1.0";
 
     @Column(name = "price")
     private java.math.BigDecimal price;

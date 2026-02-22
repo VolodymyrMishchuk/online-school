@@ -20,5 +20,6 @@ public interface EnrollmentMapper {
     @Mapping(target = "status", constant = "ACTIVE")
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "expiresAt", ignore = true)
     EnrollmentEntity toEntity(EnrollmentCreateDto dto);
 }

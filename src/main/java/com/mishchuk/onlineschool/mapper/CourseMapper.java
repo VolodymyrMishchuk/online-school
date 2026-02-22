@@ -50,6 +50,7 @@ public interface CourseMapper {
     @Mapping(target = "nextCourse", ignore = true)
     @Mapping(target = "modulesNumber", ignore = true)
     @Mapping(target = "status", constant = "DRAFT") // Default status for new course
+    @Mapping(target = "version", constant = "1.0") // Default version for new course
     @Mapping(target = "coverImage", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     CourseEntity toEntity(CourseCreateDto dto);
@@ -60,6 +61,8 @@ public interface CourseMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "nextCourse", ignore = true)
     @Mapping(target = "modulesNumber", ignore = true)
+    @Mapping(target = "status", ignore = true) // Do not update status via standard DTO
+    @Mapping(target = "version", ignore = true) // Do not update version via standard DTO
     @Mapping(target = "coverImage", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     void updateEntityFromDto(CourseUpdateDto dto, @MappingTarget CourseEntity entity);

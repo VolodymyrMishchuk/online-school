@@ -35,5 +35,6 @@ public interface ModuleMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "lessonsNumber", ignore = true)
     void updateEntity(@MappingTarget ModuleEntity entity, ModuleUpdateDto dto);
 }

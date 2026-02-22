@@ -25,4 +25,8 @@ public interface CourseService {
     void deleteCourse(UUID id);
 
     void extendAccessForReview(UUID userId, UUID courseId, String videoUrl, String originalFilename);
+
+    void cloneCourse(UUID id);
+
+    void updateCourseStatus(UUID id, com.mishchuk.onlineschool.repository.entity.CourseStatus status);
 }

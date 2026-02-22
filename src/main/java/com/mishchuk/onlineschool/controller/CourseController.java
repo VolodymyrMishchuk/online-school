@@ -136,4 +136,20 @@ public class CourseController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PostMapping("/{id}/clone")
+    public ResponseEntity<Void> cloneCourse(@PathVariable UUID id) {
+        courseService.cloneCourse(id);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> updateCourseStatus(
+            @PathVariable UUID id,
+            @RequestParam com.mishchuk.onlineschool.repository.entity.CourseStatus status) {
+        courseService.updateCourseStatus(id, status);
+        return ResponseEntity.ok().build();
+    }
 }

@@ -8,6 +8,7 @@ export interface CourseDto {
     lessonsCount?: number;
     durationMinutes?: number;
     status: string;
+    version?: string;
     price?: number;
     discountAmount?: number;
     discountPercentage?: number;
@@ -107,4 +108,12 @@ export const extendAccessForReview = async (courseId: string, video: File): Prom
             'Content-Type': 'multipart/form-data',
         },
     });
+};
+
+export const cloneCourse = async (id: string): Promise<void> => {
+    await client.post(`/api/courses/${id}/clone`);
+};
+
+export const updateCourseStatus = async (id: string, status: string): Promise<void> => {
+    await client.patch(`/api/courses/${id}/status?status=${status}`);
 };

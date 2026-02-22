@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X } from 'lucide-react';
+import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X, Settings2 } from 'lucide-react';
 import type { CourseDto } from '../api/courses';
+import { cloneCourse, updateCourseStatus } from '../api/courses';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
 import { removeCourseAccess } from '../api/users';
@@ -37,6 +38,12 @@ function CourseExpandableCard({
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+    const [isStatusUpdating, setIsStatusUpdating] = useState(false);
+    const [isCloning, setIsCloning] = useState(false);
+
+    // New UX states
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [selectedSettingsAction, setSelectedSettingsAction] = useState<string>('');
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -88,6 +95,41 @@ function CourseExpandableCard({
     const handleExtendWithPayment = () => {
         // Placeholder for future logic
         alert('Ця функція перебуває у стадії розробки.');
+    };
+
+    const handleStatusChange = async (newStatus: string) => {
+        if (userRole === 'FAKE_ADMIN' && course.createdBy?.id !== currentUserId) {
+            setIsFakeAdminRestrictionModalOpen(true);
+            return;
+        }
+        try {
+            setIsStatusUpdating(true);
+            await updateCourseStatus(course.id, newStatus);
+            if (onRefresh) onRefresh();
+        } catch (error) {
+            console.error('Failed to change status', error);
+            alert('Помилка при зміні статусу курсу.');
+        } finally {
+            setIsStatusUpdating(false);
+        }
+    };
+
+    const handleClone = async () => {
+        if (userRole === 'FAKE_ADMIN' && course.createdBy?.id !== currentUserId) {
+            setIsFakeAdminRestrictionModalOpen(true);
+            return;
+        }
+        try {
+            setIsCloning(true);
+            await cloneCourse(course.id);
+            alert('Курс успішно клоновано.');
+            if (onRefresh) onRefresh();
+        } catch (error) {
+            console.error('Failed to clone course', error);
+            alert('Помилка при клонуванні курсу.');
+        } finally {
+            setIsCloning(false);
+        }
     };
 
     // Helper for pluralization
@@ -196,6 +238,20 @@ function CourseExpandableCard({
                                     <h3 className={`text-lg font-bold leading-tight mb-1 ${hasImage ? 'text-white drop-shadow-lg' : 'text-gray-900'}`}>
                                         {course.name}
                                     </h3>
+                                    {/* Status Badge */}
+                                    {isAdmin && (
+                                        <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium mr-2 ` +
+                                            (course.status === 'PUBLISHED' ? (hasImage ? 'bg-green-500/20 text-green-100 border border-green-500/30' : 'bg-green-100 text-green-800') :
+                                                course.status === 'ARCHIVED' ? (hasImage ? 'bg-gray-500/20 text-gray-100 border border-gray-500/30' : 'bg-gray-100 text-gray-800') :
+                                                    (hasImage ? 'bg-yellow-500/20 text-yellow-100 border border-yellow-500/30' : 'bg-yellow-100 text-yellow-800'))}>
+                                            {course.status}
+                                        </span>
+                                    )}
+                                    {isAdmin && course.version && (
+                                        <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium mr-2 ${hasImage ? 'bg-blue-500/20 text-blue-100 border border-blue-500/30' : 'bg-blue-100 text-blue-800'}`}>
+                                            v{course.version}
+                                        </span>
+                                    )}
                                     {/* Enrolled Badge or Status */}
                                     {course.isEnrolled && !isCatalogMode && course.enrollmentStatus === 'BLOCKED' && (
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${hasImage ? 'bg-red-500/20 text-red-100 border border-red-500/30 backdrop-blur-sm' : 'bg-red-100 text-red-800'}`}>
@@ -299,6 +355,20 @@ function CourseExpandableCard({
                                             title="Редагувати"
                                         >
                                             <Edit2 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (userRole === 'FAKE_ADMIN' && course.createdBy?.id !== currentUserId) {
+                                                    setIsFakeAdminRestrictionModalOpen(true);
+                                                } else {
+                                                    setIsSettingsModalOpen(true);
+                                                    setSelectedSettingsAction(''); // Reset selection
+                                                }
+                                            }}
+                                            className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-white/20 text-gray-300 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-brand-primary'}`}
+                                            title="Налаштування"
+                                        >
+                                            <Settings2 className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -412,6 +482,105 @@ function CourseExpandableCard({
                     </div>
                 </div>
 
+                {/* Settings Modal */}
+                {isSettingsModalOpen && createPortal(
+                    <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+                        <div
+                            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+                            onClick={() => setIsSettingsModalOpen(false)}
+                        />
+                        <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 border border-gray-100">
+                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h3 className="text-lg font-semibold text-gray-900">Налаштування курсу</h3>
+                                <button
+                                    onClick={() => setIsSettingsModalOpen(false)}
+                                    className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                <div className="space-y-4">
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="settingsAction"
+                                            value="status_PUBLISHED"
+                                            checked={selectedSettingsAction === 'status_PUBLISHED'}
+                                            onChange={(e) => setSelectedSettingsAction(e.target.value)}
+                                            disabled={course.status === 'PUBLISHED'}
+                                            className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
+                                        />
+                                        <span className={`text-sm ${course.status === 'PUBLISHED' ? 'text-gray-400' : 'text-gray-700'}`}>Опублікувати курс</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="settingsAction"
+                                            value="status_DRAFT"
+                                            checked={selectedSettingsAction === 'status_DRAFT'}
+                                            onChange={(e) => setSelectedSettingsAction(e.target.value)}
+                                            disabled={course.status === 'DRAFT'}
+                                            className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
+                                        />
+                                        <span className={`text-sm ${course.status === 'DRAFT' ? 'text-gray-400' : 'text-gray-700'}`}>Перемістити в чернетки</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="settingsAction"
+                                            value="status_ARCHIVED"
+                                            checked={selectedSettingsAction === 'status_ARCHIVED'}
+                                            onChange={(e) => setSelectedSettingsAction(e.target.value)}
+                                            disabled={course.status === 'ARCHIVED'}
+                                            className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
+                                        />
+                                        <span className={`text-sm ${course.status === 'ARCHIVED' ? 'text-gray-400' : 'text-gray-700'}`}>Перемістити в архів</span>
+                                    </label>
+                                    <label className="flex items-center gap-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="settingsAction"
+                                            value="clone"
+                                            checked={selectedSettingsAction === 'clone'}
+                                            onChange={(e) => setSelectedSettingsAction(e.target.value)}
+                                            className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300"
+                                        />
+                                        <span className="text-sm text-gray-700">Створити нову версію (клонувати)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                                <button
+                                    onClick={() => setIsSettingsModalOpen(false)}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Скасувати
+                                </button>
+                                <button
+                                    disabled={!selectedSettingsAction || isStatusUpdating || isCloning}
+                                    onClick={async () => {
+                                        if (selectedSettingsAction === 'status_PUBLISHED') {
+                                            await handleStatusChange('PUBLISHED');
+                                        } else if (selectedSettingsAction === 'status_DRAFT') {
+                                            await handleStatusChange('DRAFT');
+                                        } else if (selectedSettingsAction === 'status_ARCHIVED') {
+                                            await handleStatusChange('ARCHIVED');
+                                        } else if (selectedSettingsAction === 'clone') {
+                                            await handleClone();
+                                        }
+                                        setIsSettingsModalOpen(false);
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isStatusUpdating || isCloning ? 'Обробка...' : 'Застосувати'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>,
+                    document.body
+                )}
+
                 <ExtendAccessModal
                     courseId={course.id}
                     isOpen={isExtendModalOpen}
@@ -438,7 +607,7 @@ function CourseExpandableCard({
                     onClick={(e) => { e.stopPropagation(); setIsDeleteModalOpen(false); }}
                 >
                     <div
-                        className="relative w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh]"
+                        className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-lg shadow-2xl relative animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
@@ -457,10 +626,10 @@ function CourseExpandableCard({
                         {/* Content */}
                         <div className="flex-1 p-8 space-y-6 overflow-y-auto custom-scrollbar">
                             <p className="text-gray-700 text-lg">
-                                Ви дійсно бажаєте видалити курс "<span className="font-bold">{course.name}</span>" зі свого кабінету?
+                                Ви дійсно бажаєте видалити курс "<span className="font-bold">{course.name}</span>"?
                             </p>
                             <p className="text-gray-500 text-sm">
-                                Ця дія є незворотною. Після видалення ви втратите доступ до матеріалів курсу.
+                                Ця дія є незворотною. Після видалення ви та всі учні втратять доступ до матеріалів курсу. Усі файли та уроки будуть назавжди стерті з системи. Кошти автоматично не повертаються.
                             </p>
                         </div>
 

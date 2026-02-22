@@ -64,6 +64,11 @@ export default function AllCoursesPage() {
         }
     });
 
+    const handleRefresh = () => {
+        queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+        queryClient.invalidateQueries({ queryKey: ['allModules'] });
+    };
+
     const handleEnroll = (courseId: string) => {
         const course = courses?.find(c => c.id === courseId);
         if (course?.isEnrolled) {
@@ -162,6 +167,7 @@ export default function AllCoursesPage() {
                             onEditLesson={undefined}
                             onDeleteLesson={undefined}
                             isCatalogMode={true}
+                            onRefresh={handleRefresh}
                         />
                     ))}
                 </div>
