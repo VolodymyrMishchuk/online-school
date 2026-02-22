@@ -11,6 +11,7 @@ interface ModuleCardProps {
     filesCount?: number;
     onEdit: (module: Module, lessons: Lesson[]) => void;
     onDelete: (id: string) => void;
+    isCatalogMode?: boolean;
 }
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({
@@ -21,8 +22,13 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     filesCount,
     onEdit,
     onDelete,
+    isCatalogMode = false,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const userRole = localStorage.getItem('userRole') || 'USER';
+    const isStandardUser = userRole === 'USER' || userRole === 'FAKE_USER';
+    const isAdmin = !isStandardUser;
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -38,8 +44,11 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
 
     return (
         <div
-            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full cursor-pointer hover:shadow-lg group ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
-            onClick={() => setIsExpanded(!isExpanded)}
+            className={`bg-white rounded-lg p-5 shadow-sm border border-gray-100 transition-all duration-300 w-full hover:shadow-lg group ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''} ${isCatalogMode && isStandardUser ? 'cursor-default' : 'cursor-pointer'}`}
+            onClick={() => {
+                if (isCatalogMode && isStandardUser) return;
+                setIsExpanded(!isExpanded);
+            }}
         >
             <div className="flex items-start gap-4">
                 {/* Icon */}
@@ -85,24 +94,28 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                 </div>
                             )}
 
-                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                                <button
-                                    onClick={handleEdit}
-                                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
-                                    title="Редагувати"
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors"
-                                    title="Видалити"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
+                            {isAdmin && (
+                                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                        onClick={handleEdit}
+                                        className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
+                                        title="Редагувати"
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors"
+                                        title="Видалити"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            )}
 
-                            {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            {!(isCatalogMode && isStandardUser) && (
+                                isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />
+                            )}
                         </div>
                     </div>
 

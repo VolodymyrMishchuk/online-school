@@ -7,9 +7,11 @@ interface EditUserModalProps {
     onClose: () => void;
     user: PersonWithEnrollments | null;
     onSubmit: (id: string, data: UpdatePersonDto) => Promise<void>;
+    isReadonlyForFakeAdmin?: boolean;
+    onShowRestriction?: () => void;
 }
 
-export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, onSubmit }) => {
+export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, onSubmit, isReadonlyForFakeAdmin, onShowRestriction }) => {
     const [formData, setFormData] = useState<UpdatePersonDto>({
         firstName: '',
         lastName: '',
@@ -63,6 +65,12 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isReadonlyForFakeAdmin) {
+            if (onShowRestriction) onShowRestriction();
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {

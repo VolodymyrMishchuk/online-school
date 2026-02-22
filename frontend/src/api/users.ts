@@ -22,6 +22,12 @@ export interface PersonWithEnrollments {
     enrollments: EnrollmentDto[];
     createdAt?: string;
     updatedAt?: string;
+    createdBy?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 }
 
 export interface CreatePersonDto {

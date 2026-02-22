@@ -9,12 +9,15 @@ import { getCourses } from '../api/courses';
 import { ModuleCard } from '../components/ModuleCard';
 import { ModuleModal } from '../components/ModuleModal';
 import MultiSelect from '../components/MultiSelect';
+import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
 
 export const AllModulesPage: React.FC = () => {
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingModule, setEditingModule] = useState<{ module: Module; lessons: Lesson[] } | null>(null);
-    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
+    const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+    const userRole = localStorage.getItem('userRole') || 'USER';
+    const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
 
     // Fetch all courses (for fallback courseId)
     const { data: courses = [] } = useQuery({
@@ -33,6 +36,8 @@ export const AllModulesPage: React.FC = () => {
         queryKey: ['unassignedLessons'],
         queryFn: getUnassignedLessons,
     });
+
+    const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
 
     // Filtering Logic
     const filteredModules = useMemo(() => {
@@ -106,6 +111,11 @@ export const AllModulesPage: React.FC = () => {
     };
 
     const handleEditModule = (module: Module, lessons: Lesson[]) => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (userRole === 'FAKE_ADMIN' && module.createdBy?.id !== user.id) {
+            setIsFakeAdminRestrictionModalOpen(true);
+            return;
+        }
         setEditingModule({ module, lessons });
         setIsModalOpen(true);
     };
@@ -119,7 +129,12 @@ export const AllModulesPage: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: string, module: Module) => {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (userRole === 'FAKE_ADMIN' && module.createdBy?.id !== user.id) {
+            setIsFakeAdminRestrictionModalOpen(true);
+            return;
+        }
         deleteMutation.mutate(id);
     };
 
@@ -143,13 +158,15 @@ export const AllModulesPage: React.FC = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">Всі модулі</h1>
                 </div>
-                <button
-                    onClick={handleCreateModule}
-                    className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                    <Plus size={20} />
-                    <span>Додати модуль</span>
-                </button>
+                {isAdmin && (
+                    <button
+                        onClick={handleCreateModule}
+                        className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <Plus size={20} />
+                        <span>Додати модуль</span>
+                    </button>
+                )}
             </div>
 
             {/* Filters */}
@@ -195,13 +212,15 @@ export const AllModulesPage: React.FC = () => {
                     <p className="text-gray-400 mb-6">
                         Спробуйте змінити параметри фільтрації або створіть новий модуль
                     </p>
-                    <button
-                        onClick={handleCreateModule}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
-                    >
-                        <Plus size={20} />
-                        Створити Модуль
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={handleCreateModule}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
+                        >
+                            <Plus size={20} />
+                            Створити Модуль
+                        </button>
+                    )}
                 </div>
             ) : (
                 <div className="flex flex-col space-y-2">
@@ -220,7 +239,8 @@ export const AllModulesPage: React.FC = () => {
                                 durationMinutes={totalDuration}
                                 filesCount={totalFilesCount}
                                 onEdit={handleEditModule}
-                                onDelete={handleDelete}
+                                onDelete={(id) => handleDelete(id, module)}
+                                isCatalogMode={true}
                             />
                         );
                     })}
@@ -245,6 +265,11 @@ export const AllModulesPage: React.FC = () => {
                         }
                         : undefined
                 }
+            />
+
+            <FakeAdminRestrictionModal
+                isOpen={isFakeAdminRestrictionModalOpen}
+                onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
             />
         </div>
     );

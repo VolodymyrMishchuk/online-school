@@ -35,7 +35,6 @@ export function VideoPlayer({ url, title }: VideoPlayerProps) {
         iv_load_policy: '3',         // Hide video annotations
         disablekb: '0',              // Enable keyboard controls
         playsinline: '1',            // Play inline on iOS
-        origin: window.location.origin, // Restrict to current domain
     }).toString();
 
     return (
@@ -50,7 +49,6 @@ export function VideoPlayer({ url, title }: VideoPlayerProps) {
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 onError={() => setError("Помилка завантаження відео")}
-                sandbox="allow-scripts allow-same-origin allow-presentation"
             />
 
             {error && (

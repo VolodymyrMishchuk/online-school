@@ -15,7 +15,8 @@ export default function AllCoursesPage() {
     const [editingCourse, setEditingCourse] = useState<CourseDto | undefined>(undefined);
     const [courseToDelete, setCourseToDelete] = useState<CourseDto | null>(null);
 
-    const userId = localStorage.getItem('userId') || '';
+    const userRole = localStorage.getItem('userRole') || 'USER';
+    const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
 
     const { data: courses, isLoading: coursesLoading } = useQuery({
         queryKey: ['allCourses'], // No userId dependency for general catalog
@@ -70,6 +71,7 @@ export default function AllCoursesPage() {
             return;
         }
 
+        const userId = localStorage.getItem('userId') || '';
         if (userId) {
             enrollMutation.mutate({ studentId: userId, courseId });
         }
@@ -122,26 +124,30 @@ export default function AllCoursesPage() {
         <div className="container mx-auto px-6 py-8">
             <div className="flex justify-between items-center mb-8">
                 <h1 className="text-3xl font-bold text-brand-dark">Всі курси</h1>
-                <button
-                    onClick={handleCreateClick}
-                    className="flex items-center space-x-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                    <Plus size={20} />
-                    <span>Додати курс</span>
-                </button>
+                {isAdmin && (
+                    <button
+                        onClick={handleCreateClick}
+                        className="flex items-center space-x-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                        <Plus size={20} />
+                        <span>Додати курс</span>
+                    </button>
+                )}
             </div>
 
             {courses?.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
                     <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500 mb-6 text-lg">Курсів поки що немає</p>
-                    <button
-                        onClick={handleCreateClick}
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors"
-                    >
-                        <Plus size={20} />
-                        Створити Перший Курс
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={handleCreateClick}
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors"
+                        >
+                            <Plus size={20} />
+                            Створити Перший Курс
+                        </button>
+                    )}
                 </div>
             ) : (
                 <div className="flex flex-col space-y-2">
@@ -153,8 +159,8 @@ export default function AllCoursesPage() {
                             onEdit={handleEditClick}
                             onDelete={handleDeleteClick}
                             onEnroll={handleEnroll}
-                            onEditLesson={() => { }} // TODO: Add lesson edit handler if needed from here
-                            onDeleteLesson={() => { }} // TODO: Add lesson delete handler if needed from here
+                            onEditLesson={undefined}
+                            onDeleteLesson={undefined}
                             isCatalogMode={true}
                         />
                     ))}

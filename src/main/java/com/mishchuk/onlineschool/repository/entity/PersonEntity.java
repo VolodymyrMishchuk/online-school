@@ -45,6 +45,10 @@ public class PersonEntity {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<EnrollmentEntity> enrollments;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private PersonEntity createdBy;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

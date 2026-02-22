@@ -15,9 +15,10 @@ interface ModuleExpandableItemProps {
     onEditLesson?: (lesson: Lesson) => void;
     onDeleteLesson?: (lessonId: string) => void;
     isTransparent?: boolean;
+    isCatalogMode?: boolean;
 }
 
-export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson, isTransparent = false }: ModuleExpandableItemProps) {
+export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson, isTransparent = false, isCatalogMode = false }: ModuleExpandableItemProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: lessons, isLoading: lessonsLoading } = useQuery({
@@ -118,6 +119,7 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                                         onEdit={onEditLesson}
                                         onDelete={onDeleteLesson}
                                         isTransparent={isTransparent}
+                                        isCatalogMode={isCatalogMode}
                                     />
                                 ))}
                             </div>

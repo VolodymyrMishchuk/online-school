@@ -10,9 +10,11 @@ interface ManageAccessModalProps {
     onClose: () => void;
     user: PersonWithEnrollments | null;
     onRefresh: () => void;
+    isReadonlyForFakeAdmin?: boolean;
+    onShowRestriction?: () => void;
 }
 
-export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, onClose, user, onRefresh }) => {
+export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, onClose, user, onRefresh, isReadonlyForFakeAdmin, onShowRestriction }) => {
     const [allCourses, setAllCourses] = useState<CourseDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -43,6 +45,11 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
 
     const handleToggleAccess = async (course: CourseDto, isEnrolled: boolean) => {
         if (!user) return;
+
+        if (isReadonlyForFakeAdmin) {
+            if (onShowRestriction) onShowRestriction();
+            return;
+        }
 
         if (isEnrolled) {
             setConfirmRevokeCourse(course);

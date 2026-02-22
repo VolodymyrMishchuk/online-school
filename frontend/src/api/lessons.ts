@@ -11,6 +11,12 @@ export interface Lesson {
     durationMinutes?: number;
     filesCount?: number;
     orderIndex?: number;
+    createdBy?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 }
 
 export interface CreateLessonDto {

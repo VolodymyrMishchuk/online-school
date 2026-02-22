@@ -1,5 +1,6 @@
 import { User, Mail, Lock, Phone, Calendar, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import { getPerson, updatePerson } from '../api/persons';
 import type { PersonDto } from '../api/persons';
@@ -10,6 +11,7 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const navigate = useNavigate();
 
     // Form State
     const [firstName, setFirstName] = useState('');
@@ -203,11 +205,18 @@ export default function SettingsPage() {
                             </div>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+                        <div className="mt-8 pt-6 border-t border-gray-100 grid grid-cols-2 gap-4">
+                            <button
+                                onClick={() => navigate('/dashboard/my-courses')}
+                                disabled={saving}
+                                className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 font-bold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm hover:shadow-md transform active:scale-95 duration-200"
+                            >
+                                Скасувати
+                            </button>
                             <button
                                 onClick={handleSave}
                                 disabled={saving}
-                                className="flex items-center gap-2 px-6 py-3 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-95 duration-200"
+                                className="flex items-center justify-center gap-2 px-6 py-3 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform active:scale-95 duration-200"
                             >
                                 {saving ? (
                                     <>

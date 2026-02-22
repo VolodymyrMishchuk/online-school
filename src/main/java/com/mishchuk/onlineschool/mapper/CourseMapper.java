@@ -21,6 +21,7 @@ public interface CourseMapper {
     @Mapping(target = "durationMinutes", expression = "java(calculateDuration(entity))")
     @Mapping(target = "coverImageUrl", expression = "java(entity.getCoverImage() != null ? \"/api/courses/\" + entity.getId() + \"/cover\" : null)")
     @Mapping(target = "averageColor", source = "coverImage.averageColor")
+    @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     CourseDto toDto(CourseEntity entity);
 
     default Integer calculateLessonsCount(CourseEntity entity) {
@@ -50,6 +51,7 @@ public interface CourseMapper {
     @Mapping(target = "modulesNumber", ignore = true)
     @Mapping(target = "status", constant = "DRAFT") // Default status for new course
     @Mapping(target = "coverImage", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     CourseEntity toEntity(CourseCreateDto dto);
 
     @Mapping(target = "id", ignore = true)
@@ -59,5 +61,6 @@ public interface CourseMapper {
     @Mapping(target = "nextCourse", ignore = true)
     @Mapping(target = "modulesNumber", ignore = true)
     @Mapping(target = "coverImage", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     void updateEntityFromDto(CourseUpdateDto dto, @MappingTarget CourseEntity entity);
 }

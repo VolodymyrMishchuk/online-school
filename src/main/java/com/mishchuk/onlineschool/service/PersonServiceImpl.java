@@ -48,6 +48,15 @@ public class PersonServiceImpl implements PersonService {
 
         PersonEntity entity = personMapper.toEntity(dto);
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+
+        // Track creator if authenticated (e.g., FAKE_ADMIN or ADMIN creating a user via
+        // UI)
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+                .getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            personRepository.findByEmail(auth.getName()).ifPresent(entity::setCreatedBy);
+        }
+
         personRepository.save(entity);
 
         log.info("Successfully registered user with email: {} and ID: {}", dto.email(), entity.getId());
@@ -100,6 +109,21 @@ public class PersonServiceImpl implements PersonService {
     public void updatePerson(UUID id, PersonUpdateDto dto) {
         PersonEntity entity = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
+
+        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            // FAKE_ADMIN can only edit themselves or users they created
+            if (!entity.getId().equals(currentUser.getId()) &&
+                    (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId()))) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
+
         personMapper.updateEntityFromDto(dto, entity);
         personRepository.save(entity);
     }
@@ -107,6 +131,22 @@ public class PersonServiceImpl implements PersonService {
     @Override
     @Transactional
     public void deletePerson(UUID id) {
+        PersonEntity entity = personRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
+
+        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            // FAKE_ADMIN can only delete users they created (cannot delete themselves)
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only delete their own entities.");
+            }
+        }
+
         personRepository.deleteById(id);
     }
 
@@ -123,6 +163,23 @@ public class PersonServiceImpl implements PersonService {
     public void updatePersonStatus(UUID id, String status) {
         PersonEntity person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
+
+        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Regular users cannot update statuses.");
+        }
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            if (person.getCreatedBy() == null || !person.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
+
         try {
             person.setStatus(PersonStatus.valueOf(status));
             personRepository.save(person);
@@ -160,6 +217,23 @@ public class PersonServiceImpl implements PersonService {
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + personId));
         CourseEntity course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+
+        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
+            if (!person.getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "Users cannot grant access to others.");
+            }
+        } else if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            if (person.getCreatedBy() == null || !person.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
 
         if (enrollmentRepository.findByStudentIdAndCourseId(personId, courseId).isPresent()) {
             throw new IllegalArgumentException("User already enrolled in this course");
@@ -207,6 +281,21 @@ public class PersonServiceImpl implements PersonService {
 
         PersonEntity student = enrollment.getStudent();
         CourseEntity course = enrollment.getCourse();
+
+        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
+            throw new org.springframework.security.access.AccessDeniedException("Regular users cannot revoke access.");
+        }
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            if (student.getCreatedBy() == null || !student.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
 
         enrollmentRepository.delete(enrollment);
 

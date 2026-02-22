@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { extendAccessForReview } from '../api/courses';
 import { X, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -50,27 +51,26 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
-            <div
-                className="relative w-full max-w-2xl my-8 bg-white/90 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+    return createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-white/40 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-xl shadow-2xl relative animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-200/50">
                     <h2 className="text-xl font-bold text-gray-900">
                         Отримай +1 місяць доступу!
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <X size={20} />
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-8 space-y-6 overflow-y-auto">
+                <div className="flex-1 p-8 space-y-6 overflow-y-auto custom-scrollbar">
                     <div className="space-y-4">
                         <div className="-mx-8 -mt-8 mb-6 px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-gray-200/50">
                             <p className="text-gray-700">
@@ -167,7 +167,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                <div className="flex-shrink-0 flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
                     <button
                         onClick={onClose}
                         className="text-gray-900 font-medium hover:bg-gray-100 rounded-lg px-4 py-2 transition-colors"
@@ -186,6 +186,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

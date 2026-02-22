@@ -18,12 +18,14 @@ public interface LessonMapper {
     @Mapping(target = "moduleName", source = "module.name")
     @Mapping(target = "courseName", source = "module.course.name")
     @Mapping(target = "filesCount", expression = "java(entity.getFiles() != null ? entity.getFiles().size() : 0)")
+    @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     LessonDto toDto(LessonEntity entity);
 
     @Mapping(target = "module", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     LessonEntity toEntity(LessonCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -31,5 +33,6 @@ public interface LessonMapper {
     @Mapping(target = "module", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     void updateEntity(@MappingTarget LessonEntity entity, LessonUpdateDto dto);
 }

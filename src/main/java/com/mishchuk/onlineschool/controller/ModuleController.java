@@ -7,6 +7,7 @@ import com.mishchuk.onlineschool.service.ModuleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class ModuleController {
 
     private final ModuleService moduleService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PostMapping
     public ResponseEntity<Void> createModule(@RequestBody ModuleCreateDto dto) {
         moduleService.createModule(dto);
@@ -45,6 +47,7 @@ public class ModuleController {
         return ResponseEntity.ok(lessons);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateModule(@PathVariable UUID id, @RequestBody ModuleUpdateDto dto) {
         try {
@@ -55,6 +58,7 @@ public class ModuleController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
         moduleService.deleteModule(id);

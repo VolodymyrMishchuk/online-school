@@ -20,6 +20,15 @@ import SettingsPage from './pages/SettingsPage';
 
 const queryClient = new QueryClient();
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const userRole = localStorage.getItem('userRole') || 'USER';
+  const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
+  if (!isAdmin) {
+    return <Navigate to="/dashboard/my-courses" replace />;
+  }
+  return <>{children}</>;
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -35,11 +44,11 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Navigate to="/dashboard/my-courses" replace />} />
             <Route path="all-courses" element={<AllCoursesPage />} />
-            <Route path="all-modules" element={<AllModulesPage />} />
-            <Route path="all-lessons" element={<AllLessonsPage />} />
+            <Route path="all-modules" element={<AdminRoute><AllModulesPage /></AdminRoute>} />
+            <Route path="all-lessons" element={<AdminRoute><AllLessonsPage /></AdminRoute>} />
             <Route path="my-courses" element={<MyCoursesPage />} />
             <Route path="my-lessons" element={<MyLessonsPage />} />
-            <Route path="users" element={<UsersPage />} />
+            <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Route>

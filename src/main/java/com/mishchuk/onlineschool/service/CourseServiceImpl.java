@@ -11,11 +11,13 @@ import com.mishchuk.onlineschool.repository.CourseReviewRequestRepository;
 import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.entity.*;
 import com.mishchuk.onlineschool.service.email.EmailService;
+import com.mishchuk.onlineschool.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -37,6 +39,7 @@ public class CourseServiceImpl implements CourseService {
     private final NotificationService notificationService;
     private final CourseReviewRequestRepository courseReviewRequestRepository;
     private final EmailService emailService;
+    private final PersonRepository personRepository;
 
     @Override
     @Transactional
@@ -54,6 +57,9 @@ public class CourseServiceImpl implements CourseService {
         } else if (dto.promotionalDiscountAmount() != null) {
             entity.setPromotionalDiscountPercentage(null);
         }
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        personRepository.findByEmail(userEmail).ifPresent(entity::setCreatedBy);
 
         if (coverImage != null && !coverImage.isEmpty()) {
             try {
@@ -141,7 +147,8 @@ public class CourseServiceImpl implements CourseService {
                         enrollment.get().getStatus(),
                         baseDto.coverImageUrl(),
                         enrollment.get().getExpiresAt(),
-                        baseDto.averageColor());
+                        baseDto.averageColor(),
+                        baseDto.createdBy());
             }
 
             return baseDto;
@@ -158,6 +165,17 @@ public class CourseServiceImpl implements CourseService {
         }
         CourseEntity entity = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
 
         courseMapper.updateEntityFromDto(dto, entity);
 
@@ -197,6 +215,17 @@ public class CourseServiceImpl implements CourseService {
         log.info("Deleting course with ID: {}", id);
         CourseEntity entity = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only delete their own entities.");
+            }
+        }
 
         courseRepository.delete(entity);
         log.info("Successfully deleted course with ID: {}", id);

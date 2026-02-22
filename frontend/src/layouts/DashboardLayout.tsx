@@ -12,6 +12,9 @@ export default function DashboardLayout() {
     const mainRef = useRef<HTMLElement>(null);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const userRole = localStorage.getItem('userRole') || 'USER';
+    const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
+
     const handleLogout = () => {
         localStorage.clear();
         navigate('/');
@@ -36,15 +39,15 @@ export default function DashboardLayout() {
 
     const navItems = [
         { to: '/dashboard/all-courses', icon: BookOpen, label: 'Всі курси' },
-        { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
-        { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
+        ...(isAdmin ? [
+            { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
+            { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
+            { to: '/dashboard/users', icon: Users, label: 'Користувачі' },
+        ] : []),
         { to: '/dashboard/my-courses', icon: GraduationCap, label: 'Мої курси' },
         { to: '/dashboard/notifications', icon: Bell, label: 'Сповіщення' },
         { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },
     ];
-
-    // TEMPORARY: Show Users tab for everyone since roles are not fully implemented yet
-    navItems.push({ to: '/dashboard/users', icon: Users, label: 'Користувачі' });
 
     return (
         <div className="h-screen overflow-hidden flex bg-transparent">

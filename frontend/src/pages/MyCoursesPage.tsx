@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getCourses } from '../api/courses';
 import { getModules } from '../api/modules';
 // import { getLessons } from '../api/lessons';
@@ -12,6 +12,7 @@ export default function MyCoursesPage() {
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
     const userId = user?.userId || localStorage.getItem('userId') || '';
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         if (!userId) {
@@ -19,16 +20,25 @@ export default function MyCoursesPage() {
         }
     }, [userId, navigate]);
 
-    const { data: allCourses, isLoading: coursesLoading } = useQuery({
+    const { data: allCourses, isLoading: coursesLoading, refetch: refetchCourses } = useQuery({
         queryKey: ['allCourses', userId],
         queryFn: () => getCourses(userId),
         enabled: !!userId
     });
 
-    const { data: modules } = useQuery({
+    const { data: modules, refetch: refetchModules } = useQuery({
         queryKey: ['allModules'],
         queryFn: () => getModules()
     });
+
+    const handleRefresh = async () => {
+        await Promise.all([
+            refetchCourses(),
+            refetchModules(),
+            queryClient.invalidateQueries({ queryKey: ['moduleLessons'] }),
+            queryClient.invalidateQueries({ queryKey: ['moduleLessonFiles'] })
+        ]);
+    };
 
 
     // Filter only enrolled courses
@@ -81,6 +91,7 @@ export default function MyCoursesPage() {
                                 // Lesson handlers can be undefined for now
                                 onEditLesson={undefined}
                                 onDeleteLesson={undefined}
+                                onRefresh={handleRefresh}
                             />
                         );
                     })}

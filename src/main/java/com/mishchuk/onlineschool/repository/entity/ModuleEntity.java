@@ -35,6 +35,10 @@ public class ModuleEntity {
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<LessonEntity> lessons;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private PersonEntity createdBy;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

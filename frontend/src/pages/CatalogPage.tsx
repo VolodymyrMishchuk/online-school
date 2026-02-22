@@ -69,7 +69,6 @@ export default function CatalogPage() {
                                         <span>Flexible</span>
                                     </div>
                                 </div>
-
                                 <button
                                     onClick={() => handleEnroll(course.id)}
                                     className="w-full py-3.5 px-4 rounded-full bg-brand-dark text-white font-bold hover:bg-brand-primary transition-all flex items-center justify-center gap-2 group"

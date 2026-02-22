@@ -15,6 +15,7 @@ public interface ModuleMapper {
     @Mapping(target = "courseId", source = "course.id")
     @Mapping(target = "lessonsNumber", expression = "java(entity.getLessons() != null ? entity.getLessons().size() : 0)")
     @Mapping(target = "durationMinutes", expression = "java(entity.getLessons() != null ? entity.getLessons().stream().mapToInt(l -> l.getDurationMinutes() != null ? l.getDurationMinutes() : 0).sum() : 0)")
+    @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     ModuleDto toDto(ModuleEntity entity);
 
     @Mapping(target = "course.id", source = "courseId")
@@ -24,6 +25,7 @@ public interface ModuleMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "lessonsNumber", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     ModuleEntity toEntity(ModuleCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -32,5 +34,6 @@ public interface ModuleMapper {
     @Mapping(target = "lessons", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     void updateEntity(@MappingTarget ModuleEntity entity, ModuleUpdateDto dto);
 }

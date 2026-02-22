@@ -37,6 +37,10 @@ public class LessonEntity {
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FileEntity> files = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private PersonEntity createdBy;
+
     @CreationTimestamp
     @Column(name = "created_at")
     private OffsetDateTime createdAt;

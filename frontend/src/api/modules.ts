@@ -9,6 +9,12 @@ export interface Module {
     orderIndex?: number;
     lessonsNumber?: number;
     durationMinutes?: number;
+    createdBy?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 }
 
 export interface CreateModuleDto {

@@ -22,6 +22,12 @@ export interface CourseDto {
     expiresAt?: string;
     coverImageUrl?: string;
     averageColor?: string;
+    createdBy?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+    };
 }
 
 export interface CreateCourseDto {

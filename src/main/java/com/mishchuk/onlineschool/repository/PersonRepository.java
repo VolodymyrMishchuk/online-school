@@ -10,4 +10,6 @@ public interface PersonRepository extends JpaRepository<PersonEntity, java.util.
     Optional<PersonEntity> findByEmail(String email);
 
     java.util.List<PersonEntity> findAllByRole(com.mishchuk.onlineschool.repository.entity.PersonRole role);
+
+    java.util.List<PersonEntity> findAllByCreatedById(java.util.UUID createdById);
 }

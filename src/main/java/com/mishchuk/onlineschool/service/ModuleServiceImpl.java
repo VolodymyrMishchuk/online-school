@@ -50,6 +50,10 @@ public class ModuleServiceImpl implements ModuleService {
 
         ModuleEntity entity = moduleMapper.toEntity(dto);
         entity.setCourse(course);
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        personRepository.findByEmail(userEmail).ifPresent(entity::setCreatedBy);
+
         ModuleEntity savedModule = moduleRepository.save(entity);
 
         // Assign lessons to this module if provided
@@ -102,7 +106,7 @@ public class ModuleServiceImpl implements ModuleService {
         if (userOpt.isPresent()) {
             PersonEntity user = userOpt.get();
             // Admins have full access
-            if (user.getRole() == PersonRole.ADMIN) {
+            if (user.getRole() == PersonRole.ADMIN || user.getRole() == PersonRole.FAKE_ADMIN) {
                 isAccessDenied = false;
             } else {
                 // For regular users, check enrollment validity
@@ -120,7 +124,11 @@ public class ModuleServiceImpl implements ModuleService {
                         boolean isBlocked = "BLOCKED".equals(enrollment.getStatus());
                         boolean isExpired = false;
 
-                        if (module.getCourse().getAccessDuration() != null) {
+                        if (enrollment.getExpiresAt() != null) {
+                            if (OffsetDateTime.now().isAfter(enrollment.getExpiresAt())) {
+                                isExpired = true;
+                            }
+                        } else if (module.getCourse().getAccessDuration() != null) {
                             OffsetDateTime expirationDate = enrollment.getCreatedAt()
                                     .plusDays(module.getCourse().getAccessDuration());
                             if (OffsetDateTime.now().isAfter(expirationDate)) {
@@ -139,7 +147,7 @@ public class ModuleServiceImpl implements ModuleService {
         List<LessonDto> lessons = lessonService.getLessonsByModule(moduleId);
 
         if (isAccessDenied) {
-            // Scrub sensitive data (videoUrl) but return structure
+            // Scrub sensitive data (videoUrl, filesCount) but return structure
             return lessons.stream()
                     .map(lesson -> new LessonDto(
                             lesson.id(),
@@ -150,9 +158,10 @@ public class ModuleServiceImpl implements ModuleService {
                             lesson.durationMinutes(),
                             lesson.moduleName(),
                             lesson.courseName(),
-                            lesson.filesCount(),
+                            0, // Scrubbed filesCount
                             lesson.createdAt(),
-                            lesson.updatedAt()))
+                            lesson.updatedAt(),
+                            null)) // Scrubbed createdBy - though we could pass it
                     .toList();
         }
 
@@ -164,6 +173,18 @@ public class ModuleServiceImpl implements ModuleService {
     public void updateModule(java.util.UUID id, ModuleUpdateDto dto) {
         ModuleEntity entity = moduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Module not found"));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
+
         moduleMapper.updateEntity(entity, dto);
         moduleRepository.save(entity);
 
@@ -189,6 +210,20 @@ public class ModuleServiceImpl implements ModuleService {
     @Override
     @Transactional
     public void deleteModule(java.util.UUID id) {
+        ModuleEntity entity = moduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Module not found"));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only delete their own entities.");
+            }
+        }
+
         moduleRepository.deleteById(id);
     }
 }

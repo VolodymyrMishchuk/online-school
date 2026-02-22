@@ -8,6 +8,7 @@ import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, E
 import { format } from 'date-fns';
 import { uk } from 'date-fns/locale';
 import { CreateNotificationModal } from '../components/CreateNotificationModal';
+import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
 
 export const NotificationsPage: React.FC = () => {
     const [notifications, setNotifications] = useState<NotificationDto[]>([]);
@@ -15,13 +16,14 @@ export const NotificationsPage: React.FC = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+    const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
 
     // Get the refresh function from DashboardLayout context
     const { refreshUnreadCount } = useOutletContext<{ refreshUnreadCount: () => void }>() || { refreshUnreadCount: () => { } };
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
-    const isAdmin = user?.role === 'ADMIN';
+    const isAdmin = user?.role === 'ADMIN' || user?.role === 'FAKE_ADMIN';
 
     useEffect(() => {
         loadNotifications();
@@ -136,6 +138,11 @@ export const NotificationsPage: React.FC = () => {
     };
 
     const handleDeleteAll = async () => {
+        if (user?.role === 'FAKE_ADMIN') {
+            setIsFakeAdminRestrictionModalOpen(true);
+            setIsDeleteAllModalOpen(false);
+            return;
+        }
         try {
             await deleteAllNotifications();
             setNotifications([]);
@@ -390,6 +397,11 @@ export const NotificationsPage: React.FC = () => {
                 </div>,
                 document.body
             )}
+
+            <FakeAdminRestrictionModal
+                isOpen={isFakeAdminRestrictionModalOpen}
+                onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
+            />
         </div>
     );
 };

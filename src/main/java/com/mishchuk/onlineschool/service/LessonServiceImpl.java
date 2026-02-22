@@ -45,6 +45,9 @@ public class LessonServiceImpl implements LessonService {
             entity.setModule(module);
         }
 
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        personRepository.findByEmail(userEmail).ifPresent(entity::setCreatedBy);
+
         LessonEntity savedLesson = lessonRepository.save(entity);
         return lessonMapper.toDto(savedLesson);
     }
@@ -67,7 +70,8 @@ public class LessonServiceImpl implements LessonService {
                         dto.courseName(),
                         dto.filesCount(),
                         dto.createdAt(),
-                        dto.updatedAt());
+                        dto.updatedAt(),
+                        dto.createdBy());
             }
 
             return dto;
@@ -95,7 +99,11 @@ public class LessonServiceImpl implements LessonService {
                         return false;
                     }
 
-                    if (lesson.getModule().getCourse().getAccessDuration() != null) {
+                    if (enrollment.getExpiresAt() != null) {
+                        if (OffsetDateTime.now().isAfter(enrollment.getExpiresAt())) {
+                            return false;
+                        }
+                    } else if (lesson.getModule().getCourse().getAccessDuration() != null) {
                         OffsetDateTime expirationDate = enrollment.getCreatedAt()
                                 .plusDays(lesson.getModule().getCourse().getAccessDuration());
                         if (OffsetDateTime.now().isAfter(expirationDate)) {
@@ -138,6 +146,18 @@ public class LessonServiceImpl implements LessonService {
     public void updateLesson(UUID id, LessonUpdateDto dto) {
         LessonEntity entity = lessonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lesson not found"));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only modify their own entities.");
+            }
+        }
+
         lessonMapper.updateEntity(entity, dto);
         lessonRepository.save(entity);
     }
@@ -145,6 +165,20 @@ public class LessonServiceImpl implements LessonService {
     @Override
     @Transactional
     public void deleteLesson(UUID id) {
+        LessonEntity entity = lessonRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
+            if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "FAKE_ADMIN can only delete their own entities.");
+            }
+        }
+
         lessonRepository.deleteById(id);
     }
 }

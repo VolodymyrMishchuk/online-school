@@ -9,6 +9,7 @@ import com.mishchuk.onlineschool.service.LessonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,18 +23,21 @@ public class LessonController {
     private final LessonService lessonService;
     private final FileStorageService fileStorageService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PostMapping
     public ResponseEntity<LessonDto> createLesson(@RequestBody LessonCreateDto dto) {
         LessonDto createdLesson = lessonService.createLesson(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdLesson);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @GetMapping
     public ResponseEntity<List<LessonDto>> getAllLessons() {
         List<LessonDto> lessons = lessonService.getAllLessons();
         return ResponseEntity.ok(lessons);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @GetMapping("/unassigned")
     public ResponseEntity<List<LessonDto>> getUnassignedLessons() {
         List<LessonDto> lessons = lessonService.getUnassignedLessons();
@@ -53,6 +57,7 @@ public class LessonController {
         return ResponseEntity.ok(files);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updateLesson(@PathVariable UUID id, @RequestBody LessonUpdateDto dto) {
         try {
@@ -63,6 +68,7 @@ public class LessonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable UUID id) {
         lessonService.deleteLesson(id);

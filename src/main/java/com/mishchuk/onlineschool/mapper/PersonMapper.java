@@ -12,8 +12,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", uses = { EnrollmentMapper.class })
 public interface PersonMapper {
+    @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     PersonDto toDto(PersonEntity entity);
 
+    @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto toDtoWithEnrollments(PersonEntity entity);
 
     @Mapping(target = "id", ignore = true)
@@ -22,6 +24,7 @@ public interface PersonMapper {
     @Mapping(target = "enrollments", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     PersonEntity toEntity(PersonCreateDto dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -30,5 +33,6 @@ public interface PersonMapper {
     @Mapping(target = "enrollments", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
     void updateEntityFromDto(PersonUpdateDto dto, @MappingTarget PersonEntity entity);
 }

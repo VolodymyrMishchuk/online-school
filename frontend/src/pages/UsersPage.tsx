@@ -15,6 +15,7 @@ import type { CourseDto } from '../api/courses';
 import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
 import { ManageAccessModal } from '../components/ManageAccessModal';
+import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
 import * as Icons from 'lucide-react';
 
 export const UsersPage: React.FC = () => {
@@ -30,6 +31,12 @@ export const UsersPage: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [blockedSort, setBlockedSort] = useState<'top' | 'bottom' | null>(null);
     const [adminSort, setAdminSort] = useState<'top' | 'bottom' | null>(null);
+    const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    const userStr = localStorage.getItem('user');
+    const currentUser = userStr ? JSON.parse(userStr) : null;
+    const currentUserId = currentUser?.userId || localStorage.getItem('userId') || '';
+    const userRole = localStorage.getItem('userRole') || 'USER';
 
     const fetchData = async () => {
         setLoading(true);
@@ -648,7 +655,13 @@ export const UsersPage: React.FC = () => {
                                         <Icons.Edit2 size={18} />
                                     </button>
                                     <button
-                                        onClick={() => handleDeleteUser(user.id)}
+                                        onClick={() => {
+                                            if (userRole === 'FAKE_ADMIN' && user.createdBy?.id !== currentUserId) {
+                                                setIsFakeAdminRestrictionModalOpen(true);
+                                            } else {
+                                                handleDeleteUser(user.id);
+                                            }
+                                        }}
                                         className="text-red-600 hover:text-red-900"
                                         title="Видалити"
                                     >
@@ -675,6 +688,8 @@ export const UsersPage: React.FC = () => {
                 }}
                 user={selectedUser}
                 onSubmit={handleUpdateUser}
+                isReadonlyForFakeAdmin={selectedUser ? (userRole === 'FAKE_ADMIN' && selectedUser.createdBy?.id !== currentUserId) : false}
+                onShowRestriction={() => setIsFakeAdminRestrictionModalOpen(true)}
             />
 
             <ManageAccessModal
@@ -685,6 +700,13 @@ export const UsersPage: React.FC = () => {
                 }}
                 user={selectedUser}
                 onRefresh={fetchData}
+                isReadonlyForFakeAdmin={selectedUser ? (userRole === 'FAKE_ADMIN' && selectedUser.createdBy?.id !== currentUserId) : false}
+                onShowRestriction={() => setIsFakeAdminRestrictionModalOpen(true)}
+            />
+
+            <FakeAdminRestrictionModal
+                isOpen={isFakeAdminRestrictionModalOpen}
+                onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
             />
         </div>
     );

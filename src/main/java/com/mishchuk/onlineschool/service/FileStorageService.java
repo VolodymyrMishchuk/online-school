@@ -103,6 +103,14 @@ public class FileStorageService {
             FileEntity fileEntity = fileRepository.findById(fileId)
                     .orElseThrow(() -> new ResourceNotFoundException("File not found: " + fileId));
 
+            // Verify access if this file belongs to a lesson
+            if ("LESSON".equalsIgnoreCase(fileEntity.getRelatedEntityType()) && fileEntity.getLesson() != null) {
+                if (!hasAccessToLessonFiles(fileEntity.getLesson().getId())) {
+                    throw new RuntimeException(
+                            "Access denied: You do not have permission to download files for this lesson.");
+                }
+            }
+
             InputStream fileStream = minioService.downloadFile(fileEntity.getMinioObjectName());
 
             return new FileDownloadDto(fileStream, fileEntity);
@@ -178,7 +186,7 @@ public class FileStorageService {
 
         if (userOpt.isPresent()) {
             PersonEntity user = userOpt.get();
-            if (user.getRole() == PersonRole.ADMIN) {
+            if (user.getRole() == PersonRole.ADMIN || user.getRole() == PersonRole.FAKE_ADMIN) {
                 return true;
             }
 
@@ -194,7 +202,11 @@ public class FileStorageService {
                         return false;
                     }
 
-                    if (lesson.getModule().getCourse().getAccessDuration() != null) {
+                    if (enrollment.getExpiresAt() != null) {
+                        if (OffsetDateTime.now().isAfter(enrollment.getExpiresAt())) {
+                            return false;
+                        }
+                    } else if (lesson.getModule().getCourse().getAccessDuration() != null) {
                         OffsetDateTime expirationDate = enrollment.getCreatedAt()
                                 .plusDays(lesson.getModule().getCourse().getAccessDuration());
                         if (OffsetDateTime.now().isAfter(expirationDate)) {

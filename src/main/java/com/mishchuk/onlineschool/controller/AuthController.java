@@ -5,7 +5,6 @@ import com.mishchuk.onlineschool.controller.dto.AuthResponse;
 import com.mishchuk.onlineschool.controller.dto.ChangePasswordRequest;
 import com.mishchuk.onlineschool.controller.dto.ForgotPasswordRequest;
 import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
-import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.ResetPasswordRequest;
 import java.util.UUID;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
@@ -14,6 +13,7 @@ import com.mishchuk.onlineschool.security.CustomUserDetailsService;
 import com.mishchuk.onlineschool.security.JwtUtils;
 import com.mishchuk.onlineschool.service.PersonService;
 import com.mishchuk.onlineschool.service.RefreshTokenService;
+import com.mishchuk.onlineschool.scheduler.DemoCleanupScheduler;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -47,6 +47,7 @@ public class AuthController {
         private final com.mishchuk.onlineschool.service.email.EmailService emailService;
         private final com.mishchuk.onlineschool.service.PasswordResetService passwordResetService;
         private final com.mishchuk.onlineschool.service.NotificationService notificationService;
+        private final DemoCleanupScheduler demoCleanupScheduler;
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(
@@ -168,6 +169,14 @@ public class AuthController {
                 if (refreshToken != null) {
                         try {
                                 RefreshTokenEntity tokenEntity = refreshTokenService.findByToken(refreshToken);
+
+                                com.mishchuk.onlineschool.controller.dto.PersonDto person = personService
+                                                .getPerson(tokenEntity.getPersonId()).orElse(null);
+                                if (person != null && ("FAKE_ADMIN".equals(person.role())
+                                                || "FAKE_USER".equals(person.role()))) {
+                                        demoCleanupScheduler.cleanupDataForUser(person.id());
+                                }
+
                                 refreshTokenService.deleteByPersonId(tokenEntity.getPersonId());
                                 log.info("User logged out successfully");
                         } catch (Exception e) {

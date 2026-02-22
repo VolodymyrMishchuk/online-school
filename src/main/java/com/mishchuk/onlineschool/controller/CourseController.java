@@ -3,12 +3,11 @@ package com.mishchuk.onlineschool.controller;
 import com.mishchuk.onlineschool.controller.dto.CourseCreateDto;
 import com.mishchuk.onlineschool.controller.dto.CourseDto;
 import com.mishchuk.onlineschool.controller.dto.CourseUpdateDto;
-import com.mishchuk.onlineschool.security.CustomUserDetailsService;
 import com.mishchuk.onlineschool.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +21,7 @@ public class CourseController {
     private final CourseService courseService;
     private final com.mishchuk.onlineschool.repository.PersonRepository personRepository;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PostMapping(consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createCourse(
             @RequestPart("course") CourseCreateDto dto,
@@ -71,6 +71,7 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PutMapping(value = "/{id}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateCourse(
             @PathVariable UUID id,
@@ -93,6 +94,7 @@ public class CourseController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);

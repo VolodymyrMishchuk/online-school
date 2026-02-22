@@ -7,7 +7,7 @@ import type { Lesson } from '../api/lessons';
 import { removeCourseAccess } from '../api/users';
 import ModuleExpandableItem from './ModuleExpandableItem';
 import { ExtendAccessModal } from './ExtendAccessModal';
-import { useNavigate } from 'react-router-dom';
+import { FakeAdminRestrictionModal } from './FakeAdminRestrictionModal';
 
 interface CourseExpandableCardProps {
     course: CourseDto;
@@ -17,6 +17,7 @@ interface CourseExpandableCardProps {
     onEditLesson?: (lesson: Lesson) => void;
     onDeleteLesson?: (lessonId: string) => void;
     onEnroll?: (courseId: string) => void;
+    onRefresh?: () => void;
     isCatalogMode?: boolean;
 }
 
@@ -28,13 +29,18 @@ function CourseExpandableCard({
     onEditLesson,
     onDeleteLesson,
     onEnroll,
+    onRefresh,
     isCatalogMode = false
 }: CourseExpandableCardProps) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const navigate = useNavigate();
+    const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const currentUserId = user?.userId || localStorage.getItem('userId') || '';
 
     // Filter modules for this course
     const courseModules = modules.filter(m => m.courseId === course.id);
@@ -43,7 +49,9 @@ function CourseExpandableCard({
     const lessonCount = courseModules.reduce((sum, m) => sum + (m.lessonsNumber || 0), 0);
     const totalMinutes = courseModules.reduce((sum, m) => sum + (m.durationMinutes || 0), 0);
 
-
+    const userRole = localStorage.getItem('userRole') || 'USER';
+    const isStandardUser = userRole === 'USER' || userRole === 'FAKE_USER';
+    const isAdmin = !isStandardUser;
 
     const hasImage = !!course.coverImageUrl;
 
@@ -65,7 +73,11 @@ function CourseExpandableCard({
 
         try {
             await removeCourseAccess(userId, course.id);
-            window.location.reload();
+            if (onRefresh) {
+                onRefresh();
+            } else {
+                window.location.reload();
+            }
         } catch (error) {
             console.error('Failed to remove course', error);
             alert('Помилка при видаленні курсу. Спробуйте пізніше.');
@@ -76,12 +88,6 @@ function CourseExpandableCard({
     const handleExtendWithPayment = () => {
         // Placeholder for future logic
         alert('Ця функція перебуває у стадії розробки.');
-    };
-
-    const handleGetDiscount = () => {
-        if (course.nextCourseId) {
-            navigate(`/dashboard/catalog/${course.nextCourseId}`);
-        }
     };
 
     // Helper for pluralization
@@ -279,17 +285,29 @@ function CourseExpandableCard({
                                 )}
 
                                 {/* Management Actions */}
-                                {isCatalogMode && (
+                                {isCatalogMode && isAdmin && (
                                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                                         <button
-                                            onClick={() => onEdit(course)}
+                                            onClick={() => {
+                                                if (userRole === 'FAKE_ADMIN' && course.createdBy?.id !== currentUserId) {
+                                                    setIsFakeAdminRestrictionModalOpen(true);
+                                                } else {
+                                                    onEdit(course);
+                                                }
+                                            }}
                                             className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-white/20 text-gray-300 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-brand-primary'}`}
                                             title="Редагувати"
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </button>
                                         <button
-                                            onClick={() => onDelete(course)}
+                                            onClick={() => {
+                                                if (userRole === 'FAKE_ADMIN' && course.createdBy?.id !== currentUserId) {
+                                                    setIsFakeAdminRestrictionModalOpen(true);
+                                                } else {
+                                                    onDelete(course);
+                                                }
+                                            }}
                                             className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-red-500/20 text-gray-300 hover:text-red-400' : 'hover:bg-red-50 text-gray-500 hover:text-red-50'}`}
                                             title="Видалити"
                                         >
@@ -329,14 +347,12 @@ function CourseExpandableCard({
                                     >
                                         Продовжити курс зі знижкою
                                     </button>
-                                    {course.nextCourseId && (
-                                        <button
-                                            onClick={handleGetDiscount}
-                                            className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
-                                        >
-                                            Отримати знижку{course.promotionalDiscountPercentage ? ` -${course.promotionalDiscountPercentage}%` : ''}{course.promotionalDiscountAmount ? ` -${course.promotionalDiscountAmount}€` : ''} на {course.nextCourseName || 'наступний курс'}
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => alert('Ця функція перебуває у стадії розробки.')}
+                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
+                                    >
+                                        Отримати знижку -10€ на СУПЕР новий курс
+                                    </button>
                                     <button
                                         onClick={handleDeleteCourse}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors shadow-sm"
@@ -382,6 +398,7 @@ function CourseExpandableCard({
                                             onEditLesson={onEditLesson}
                                             onDeleteLesson={onDeleteLesson}
                                             isTransparent={hasImage}
+                                            isCatalogMode={isCatalogMode}
                                         />
                                     ))}
                                 </div>
@@ -401,36 +418,44 @@ function CourseExpandableCard({
                     onClose={() => setIsExtendModalOpen(false)}
                     onSuccess={() => {
                         setIsExtendModalOpen(false);
-                        window.location.reload();
+                        if (onRefresh) {
+                            onRefresh();
+                        } else {
+                            window.location.reload();
+                        }
                     }}
+                />
+
+                <FakeAdminRestrictionModal
+                    isOpen={isFakeAdminRestrictionModalOpen}
+                    onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
                 />
             </div>
 
-            {/* Custom Delete Confirmation Modal using Portal if possible, otherwise just break out */}
             {isDeleteModalOpen && createPortal(
                 <div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-white/50 backdrop-blur-sm animate-in fade-in duration-200"
+                    className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-white/40 backdrop-blur-sm animate-in fade-in duration-200"
                     onClick={(e) => { e.stopPropagation(); setIsDeleteModalOpen(false); }}
                 >
                     <div
-                        className="relative w-full max-w-lg bg-white/90 backdrop-blur-md rounded-lg shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+                        className="relative w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                        <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-200/50">
                             <h2 className="text-xl font-bold text-gray-900">
                                 Підтвердження видалення
                             </h2>
                             <button
                                 onClick={() => setIsDeleteModalOpen(false)}
-                                className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                             >
                                 <X size={20} />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="p-8 space-y-6 overflow-y-auto">
+                        <div className="flex-1 p-8 space-y-6 overflow-y-auto custom-scrollbar">
                             <p className="text-gray-700 text-lg">
                                 Ви дійсно бажаєте видалити курс "<span className="font-bold">{course.name}</span>" зі свого кабінету?
                             </p>
@@ -440,7 +465,7 @@ function CourseExpandableCard({
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50 bg-white/30 backdrop-blur-sm">
+                        <div className="flex-shrink-0 flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50">
                             <button
                                 onClick={() => setIsDeleteModalOpen(false)}
                                 disabled={isDeleting}
