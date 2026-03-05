@@ -4,6 +4,7 @@ import { X, Image as ImageIcon, Phone, Instagram, Send as TelegramIcon, MessageC
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { createAppeal } from '../api/appeals';
+import { AppealSuccessModal } from '../components/AppealSuccessModal';
 
 const CONTACT_METHODS = [
     { id: 'MOBILE', label: 'Мобільний телефон', icon: Phone, color: 'text-emerald-500' },
@@ -18,6 +19,7 @@ type ContactMethodType = typeof CONTACT_METHODS[number]['id'];
 export default function UserAppealPage() {
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
     const [contactMethod, setContactMethod] = useState<ContactMethodType>('MOBILE');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -154,8 +156,7 @@ export default function UserAppealPage() {
             });
 
             await createAppeal(formData);
-            alert('Звернення успішно відправлено!');
-            navigate('/dashboard/all-courses'); // or my-courses
+            setIsSuccessModalOpen(true);
         } catch (error) {
             alert('Не вдалося відправити звернення.');
             console.error('Submit error', error);
@@ -410,6 +411,11 @@ export default function UserAppealPage() {
                     </div>
                 </div>
             </div>
+
+            <AppealSuccessModal
+                isOpen={isSuccessModalOpen}
+                onClose={() => setIsSuccessModalOpen(false)}
+            />
         </div>
     );
 }
