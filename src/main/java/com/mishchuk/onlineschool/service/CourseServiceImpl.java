@@ -99,13 +99,24 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseDto> getAllCourses() {
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        PersonEntity currentUser = personRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            String userEmail = auth.getName();
+            Optional<PersonEntity> currentUserOpt = personRepository.findByEmail(userEmail);
+            if (currentUserOpt.isPresent()) {
+                PersonEntity currentUser = currentUserOpt.get();
+                if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.ADMIN ||
+                        currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+                    isAdmin = true;
+                }
+            }
+        }
 
         List<CourseEntity> allCourses = courseRepository.findAll();
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
+        if (!isAdmin) {
             allCourses = allCourses.stream()
                     .filter(c -> c.getStatus() == com.mishchuk.onlineschool.repository.entity.CourseStatus.PUBLISHED)
                     .collect(Collectors.toList());

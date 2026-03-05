@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare } from 'lucide-react';
 
 import { useEffect, useState, useRef } from 'react';
 import { getUnreadCount } from '../api/notifications';
@@ -21,6 +21,9 @@ export default function DashboardLayout() {
     };
 
     const fetchUnreadCount = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
         try {
             const count = await getUnreadCount();
             setUnreadCount(count);
@@ -43,7 +46,10 @@ export default function DashboardLayout() {
             { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
             { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
             { to: '/dashboard/users', icon: Users, label: 'Користувачі' },
-        ] : []),
+            { to: '/dashboard/appeals', icon: MessageSquare, label: 'Звернення' },
+        ] : [
+            { to: '/dashboard/appeal', icon: MessageSquare, label: 'Звернутися' }
+        ]),
         { to: '/dashboard/my-courses', icon: GraduationCap, label: 'Мої курси' },
         { to: '/dashboard/notifications', icon: Bell, label: 'Сповіщення' },
         { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },

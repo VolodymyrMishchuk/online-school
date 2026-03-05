@@ -2,6 +2,7 @@ import type { CourseDto, CreateCourseDto } from '../api/courses';
 import type { Module } from '../api/modules';
 import { X, BookOpen, Layers, CheckCircle, Euro, Percent, Clock, Tag, ArrowRight, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { API_URL } from '../api/client';
 
 interface CourseModalProps {
     isOpen: boolean;
@@ -50,7 +51,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setPromotionalDiscountAmount(initialData.promotionalDiscountAmount);
             setNextCourseId(initialData.nextCourseId);
             setSelectedModuleIds(initialModuleIds);
-            setPreviewUrl(initialData.coverImageUrl);
+            setPreviewUrl(initialData.coverImageUrl ? `${API_URL}${initialData.coverImageUrl}` : undefined);
             setDeleteCover(false);
         } else {
             // ... existing resets ...

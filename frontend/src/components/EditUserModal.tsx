@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { type PersonWithEnrollments, type UpdatePersonDto, getRoles, getStatuses } from '../api/users';
 import { X, User, Mail, Phone, Calendar, Shield, Activity, Save, Loader2 } from 'lucide-react';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -25,6 +27,18 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
     const [error, setError] = useState<string | null>(null);
     const [roles, setRoles] = useState<string[]>([]);
     const [statuses, setStatuses] = useState<string[]>([]);
+    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
+
+    useEffect(() => {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.country_code) {
+                    setDefaultCountry(data.country_code);
+                }
+            })
+            .catch(err => console.error('Error fetching country:', err));
+    }, []);
 
     useEffect(() => {
         const fetchEnums = async () => {
@@ -68,6 +82,11 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
 
         if (isReadonlyForFakeAdmin) {
             if (onShowRestriction) onShowRestriction();
+            return;
+        }
+
+        if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+            setError('Please enter a valid phone number');
             return;
         }
 
@@ -180,14 +199,29 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                                 <Phone className="w-4 h-4" />
                                 Номер телефону
                             </label>
-                            <input
-                                type="tel"
-                                name="phoneNumber"
+                            <style>{`
+                                .phone-input-override-modal .PhoneInputInput {
+                                    border: none;
+                                    outline: none;
+                                    background: transparent;
+                                    width: 100%;
+                                    color: inherit;
+                                    height: 100%;
+                                }
+                                .phone-input-override-modal .PhoneInputCountry {
+                                    margin-right: 0.5rem;
+                                }
+                                .phone-input-override-modal .PhoneInputCountrySelect {
+                                    outline: none;
+                                }
+                            `}</style>
+                            <PhoneInput
+                                international
+                                defaultCountry={defaultCountry}
                                 value={formData.phoneNumber}
-                                onChange={handleChange}
-                                required
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                onChange={(val) => setFormData({ ...formData, phoneNumber: val || '' })}
                                 placeholder="+380..."
+                                className="phone-input-override-modal w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-light focus-within:bg-white transition-all outline-none"
                             />
                         </div>
 

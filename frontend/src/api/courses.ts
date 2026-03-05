@@ -61,12 +61,12 @@ export interface UpdateCourseDto {
 
 export const getCourses = async (userId?: string): Promise<CourseDto[]> => {
     const params = userId ? `?userId=${userId}` : '';
-    const response = await client.get(`/api/courses${params}`);
+    const response = await client.get(`/courses${params}`);
     return response.data || [];
 };
 
 export const getCourse = async (id: string): Promise<CourseDto> => {
-    const response = await client.get(`/api/courses/${id}`);
+    const response = await client.get(`/courses/${id}`);
     return response.data;
 };
 
@@ -76,7 +76,7 @@ export const createCourse = async (data: CreateCourseDto, image?: File): Promise
     if (image) {
         formData.append('image', image);
     }
-    await client.post('/api/courses', formData, {
+    await client.post('/courses', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -89,7 +89,7 @@ export const updateCourse = async (id: string, data: UpdateCourseDto, image?: Fi
     if (image) {
         formData.append('image', image);
     }
-    await client.put(`/api/courses/${id}`, formData, {
+    await client.put(`/courses/${id}`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -97,13 +97,13 @@ export const updateCourse = async (id: string, data: UpdateCourseDto, image?: Fi
 };
 
 export const deleteCourse = async (id: string): Promise<void> => {
-    await client.delete(`/api/courses/${id}`);
+    await client.delete(`/courses/${id}`);
 };
 
 export const extendAccessForReview = async (courseId: string, video: File): Promise<void> => {
     const formData = new FormData();
     formData.append('video', video);
-    await client.post(`/api/courses/${courseId}/extend-access`, formData, {
+    await client.post(`/courses/${courseId}/extend-access`, formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -111,9 +111,9 @@ export const extendAccessForReview = async (courseId: string, video: File): Prom
 };
 
 export const cloneCourse = async (id: string): Promise<void> => {
-    await client.post(`/api/courses/${id}/clone`);
+    await client.post(`/courses/${id}/clone`);
 };
 
 export const updateCourseStatus = async (id: string, status: string): Promise<void> => {
-    await client.patch(`/api/courses/${id}/status?status=${status}`);
+    await client.patch(`/courses/${id}/status?status=${status}`);
 };

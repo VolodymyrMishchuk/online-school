@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { type CreatePersonDto, getRoles } from '../api/users';
 import { getCourses, type CourseDto } from '../api/courses';
 import { UserPlus, X, User, Mail, Phone, Lock, Calendar, Shield, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 interface CreateUserModalProps {
     isOpen: boolean;
@@ -24,6 +26,18 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
     const [roles, setRoles] = useState<string[]>([]);
     const [courses, setCourses] = useState<CourseDto[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
+
+    useEffect(() => {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.country_code) {
+                    setDefaultCountry(data.country_code);
+                }
+            })
+            .catch(err => console.error('Error fetching country:', err));
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,6 +101,13 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+            setError('Please enter a valid phone number');
+            setLoading(false);
+            return;
+        }
+
         try {
             // Format date to ISO string if present
             const submitData = { ...formData };
@@ -195,14 +216,29 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                                     <Phone className="w-4 h-4" />
                                     Номер телефону
                                 </label>
-                                <input
-                                    type="tel"
-                                    name="phoneNumber"
+                                <style>{`
+                                    .phone-input-override-modal .PhoneInputInput {
+                                        border: none;
+                                        outline: none;
+                                        background: transparent;
+                                        width: 100%;
+                                        color: inherit;
+                                        height: 100%;
+                                    }
+                                    .phone-input-override-modal .PhoneInputCountry {
+                                        margin-right: 0.5rem;
+                                    }
+                                    .phone-input-override-modal .PhoneInputCountrySelect {
+                                        outline: none;
+                                    }
+                                `}</style>
+                                <PhoneInput
+                                    international
+                                    defaultCountry={defaultCountry}
                                     value={formData.phoneNumber}
-                                    onChange={handleChange}
-                                    required
+                                    onChange={(val) => setFormData({ ...formData, phoneNumber: val || '' })}
                                     placeholder="+380..."
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
+                                    className="phone-input-override-modal w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-light focus-within:bg-white transition-all outline-none"
                                 />
                             </div>
                         </div>

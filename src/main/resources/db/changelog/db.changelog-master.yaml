@@ -77,3 +77,6 @@ databaseChangeLog:
   - include:
       file: changesing/027-add-course-version-and-status.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/028-create-appeals-table.sql
+      relativeToChangelogFile: true

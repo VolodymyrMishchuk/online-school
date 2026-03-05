@@ -19,7 +19,7 @@ public interface CourseMapper {
     @Mapping(target = "modulesNumber", expression = "java(entity.getModules() != null ? entity.getModules().size() : 0)")
     @Mapping(target = "lessonsCount", expression = "java(calculateLessonsCount(entity))")
     @Mapping(target = "durationMinutes", expression = "java(calculateDuration(entity))")
-    @Mapping(target = "coverImageUrl", expression = "java(entity.getCoverImage() != null ? \"/api/courses/\" + entity.getId() + \"/cover\" : null)")
+    @Mapping(target = "coverImageUrl", expression = "java(entity.getCoverImage() != null ? \"/courses/\" + entity.getId() + \"/cover\" : null)")
     @Mapping(target = "averageColor", source = "coverImage.averageColor")
     @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     CourseDto toDto(CourseEntity entity);

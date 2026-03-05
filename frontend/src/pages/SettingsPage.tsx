@@ -1,6 +1,8 @@
 import { User, Mail, Lock, Phone, Calendar, Save, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import { getPerson, updatePerson } from '../api/persons';
 import type { PersonDto } from '../api/persons';
@@ -21,6 +23,18 @@ export default function SettingsPage() {
     const [bornedAt, setBornedAt] = useState('');
 
     const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
+
+    useEffect(() => {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.country_code) {
+                    setDefaultCountry(data.country_code);
+                }
+            })
+            .catch(err => console.error('Error fetching country:', err));
+    }, []);
 
     useEffect(() => {
         if (userId) {
@@ -53,6 +67,12 @@ export default function SettingsPage() {
 
     const handleSave = async () => {
         if (!userId) return;
+
+        if (phoneNumber && !isValidPhoneNumber(phoneNumber)) {
+            setMessage({ type: 'error', text: 'Будь ласка, введіть коректний номер телефону' });
+            return;
+        }
+
         setSaving(true);
         setMessage(null);
 
@@ -167,12 +187,28 @@ export default function SettingsPage() {
                                         <Phone className="w-4 h-4" />
                                         Номер телефону
                                     </label>
-                                    <input
-                                        type="tel"
+                                    <style>{`
+                                        .phone-input-override .PhoneInputInput {
+                                            border: none;
+                                            outline: none;
+                                            background: transparent;
+                                            width: 100%;
+                                            color: inherit;
+                                        }
+                                        .phone-input-override .PhoneInputCountry {
+                                            margin-right: 0.5rem;
+                                        }
+                                        .phone-input-override .PhoneInputCountrySelect {
+                                            outline: none;
+                                        }
+                                    `}</style>
+                                    <PhoneInput
+                                        international
+                                        defaultCountry={defaultCountry}
                                         value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value)}
+                                        onChange={(val) => setPhoneNumber(val || '')}
                                         placeholder="+380..."
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light outline-none transition-all bg-white/50 focus:bg-white"
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-light outline-none transition-all bg-white/50 focus-within:bg-white phone-input-override"
                                     />
                                 </div>
                                 <div>

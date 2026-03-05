@@ -17,6 +17,8 @@ import MyLessonsPage from './pages/MyLessonsPage';
 import { UsersPage } from './pages/UsersPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminAppealsPage from './pages/AdminAppealsPage';
+import UserAppealPage from './pages/UserAppealPage';
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ function App() {
             <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="appeals" element={<AdminRoute><AdminAppealsPage /></AdminRoute>} />
+            <Route path="appeal" element={<UserAppealPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

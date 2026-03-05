@@ -20,7 +20,7 @@ export const uploadFile = async (
     formData.append('entityType', entityType);
     formData.append('entityId', entityId);
 
-    const response = await client.post('/api/files/upload', formData, {
+    const response = await client.post('/files/upload', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },
@@ -37,12 +37,12 @@ export const downloadFile = async (fileId: string): Promise<Blob> => {
     // Only use the ID, ignore full URL if passed to keep it clean
     const id = fileId.includes('/') ? fileId.split('/').pop() || fileId : fileId;
 
-    const response = await client.get(`/api/files/${id}`, {
+    const response = await client.get(`/files/${id}`, {
         responseType: 'blob',
     });
     return response.data;
 };
 
 export const deleteFile = async (fileId: string): Promise<void> => {
-    await client.delete(`/api/files/${fileId}`);
+    await client.delete(`/files/${fileId}`);
 };

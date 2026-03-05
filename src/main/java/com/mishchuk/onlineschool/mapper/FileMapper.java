@@ -8,6 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FileMapper {
 
-    @Mapping(target = "downloadUrl", expression = "java(\"/api/files/\" + entity.getId())")
+    @Mapping(target = "downloadUrl", expression = "java(\"/files/\" + entity.getId())")
     FileDto toDto(FileEntity entity);
 }

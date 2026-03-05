@@ -36,7 +36,7 @@ security:
 
 paths:
   # ==================== Authentication ====================
-  /api/auth/register:
+  /auth/register:
     post:
       tags:
         - Authentication
@@ -65,7 +65,7 @@ paths:
         '400':
           description: Невалідні дані
 
-  /api/auth/login:
+  /auth/login:
     post:
       tags:
         - Authentication
@@ -93,7 +93,7 @@ paths:
         '401':
           description: Невірні credentials
 
-  /api/auth/refresh:
+  /auth/refresh:
     post:
       tags:
         - Authentication
@@ -117,7 +117,7 @@ paths:
         '401':
           description: Невалідний refresh token
 
-  /api/auth/logout:
+  /auth/logout:
     post:
       tags:
         - Authentication
@@ -129,7 +129,7 @@ paths:
         '401':
           description: Unauthorized
 
-  /api/auth/magic-login:
+  /auth/magic-login:
     post:
       tags:
         - Authentication
@@ -154,7 +154,7 @@ paths:
         '401':
           description: Невалідний токен
 
-  /api/auth/forgot-password:
+  /auth/forgot-password:
     post:
       tags:
         - Authentication
@@ -173,7 +173,7 @@ paths:
         '400':
           description: Невалідні дані
 
-  /api/auth/reset-password:
+  /auth/reset-password:
     post:
       tags:
         - Authentication
@@ -192,7 +192,7 @@ paths:
         '400':
           description: Невалідний токен або пароль
 
-  /api/auth/change-password:
+  /auth/change-password:
     post:
       tags:
         - Authentication
@@ -750,7 +750,7 @@ paths:
 
 
   # ==================== Files ====================
-  /api/files/upload:
+  /files/upload:
     post:
       tags:
         - Files
@@ -785,7 +785,7 @@ paths:
         '400':
           description: Невалідний файл
 
-  /api/files/{fileId}:
+  /files/{fileId}:
     get:
       tags:
         - Files
@@ -832,7 +832,7 @@ paths:
         '404':
           description: Файл не знайдено
 
-  /api/files/entity/{entityType}/{entityId}:
+  /files/entity/{entityType}/{entityId}:
     get:
       tags:
         - Files
@@ -861,7 +861,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/FileDto'
 
-  /api/files/my-files:
+  /files/my-files:
     get:
       tags:
         - Files
@@ -1480,7 +1480,7 @@ components:
           format: date-time
         downloadUrl:
           type: string
-          example: /api/files/uuid
+          example: /files/uuid
         relatedEntityType:
           type: string
           enum: [COURSE, MODULE, LESSON]

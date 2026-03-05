@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/files")
 @RequiredArgsConstructor
 public class FileController {
 
@@ -33,8 +33,7 @@ public class FileController {
             @RequestParam(required = false) String entityType,
             @RequestParam(required = false) UUID entityId,
             @AuthenticationPrincipal UserDetails userDetails) {
-        // In real implementation, get PersonEntity from userDetails
-        // For now, we'll skip this and you'll need to implement getCurrentUser()
+
         PersonEntity currentUser = null;
         if (userDetails != null) {
             currentUser = getCurrentUser(userDetails);

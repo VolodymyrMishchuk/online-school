@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { register } from '../api/auth';
 import { Heart } from 'lucide-react';
 
@@ -14,10 +16,27 @@ export default function RegisterPage() {
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
+
+    useEffect(() => {
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.country_code) {
+                    setDefaultCountry(data.country_code);
+                }
+            })
+            .catch(err => console.error('Error fetching country:', err));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
+            setError('Please enter a valid phone number');
+            return;
+        }
 
         try {
             // Format date to ISO OffsetDateTime
@@ -106,15 +125,32 @@ export default function RegisterPage() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Phone</label>
-                            <input
-                                type="tel"
-                                name="phoneNumber"
-                                required
-                                className="block w-full px-5 py-3 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all bg-gray-50 focus:bg-white"
-                                placeholder="+1234567890"
-                                value={formData.phoneNumber}
-                                onChange={handleChange}
-                            />
+                            <style>{`
+                                .phone-input-override .PhoneInputInput {
+                                    border: none;
+                                    outline: none;
+                                    background: transparent;
+                                    width: 100%;
+                                    color: inherit;
+                                    height: 100%;
+                                }
+                                .phone-input-override .PhoneInputCountry {
+                                    margin-right: 0.5rem;
+                                }
+                                .phone-input-override .PhoneInputCountrySelect {
+                                    outline: none;
+                                }
+                            `}</style>
+                            <div className="block w-full px-5 py-3 rounded-xl border border-gray-200 text-gray-900 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand-primary/50 focus-within:border-brand-primary transition-all bg-gray-50 focus-within:bg-white">
+                                <PhoneInput
+                                    international
+                                    defaultCountry={defaultCountry}
+                                    value={formData.phoneNumber}
+                                    onChange={(val) => setFormData({ ...formData, phoneNumber: val || '' })}
+                                    placeholder="+1234567890"
+                                    className="phone-input-override w-full"
+                                />
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Birth Date</label>

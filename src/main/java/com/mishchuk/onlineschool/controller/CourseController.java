@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/courses")
 @RequiredArgsConstructor
 public class CourseController {
 

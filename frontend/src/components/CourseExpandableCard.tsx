@@ -9,6 +9,7 @@ import { removeCourseAccess } from '../api/users';
 import ModuleExpandableItem from './ModuleExpandableItem';
 import { ExtendAccessModal } from './ExtendAccessModal';
 import { FakeAdminRestrictionModal } from './FakeAdminRestrictionModal';
+import { API_URL } from '../api/client';
 
 interface CourseExpandableCardProps {
     course: CourseDto;
@@ -197,7 +198,7 @@ function CourseExpandableCard({
                 >
                     <div className="relative w-full">
                         <img
-                            src={course.coverImageUrl}
+                            src={`${API_URL}${course.coverImageUrl}`}
                             alt=""
                             className="w-full object-cover object-top"
                             style={{
