@@ -59,6 +59,43 @@ export const getUsersWithEnrollments = async (): Promise<PersonWithEnrollments[]
     return response.data || [];
 };
 
+export interface PaginatedResponse<T> {
+    content: T[];
+    pageable: any;
+    last: boolean;
+    totalElements: number;
+    totalPages: number;
+    first: boolean;
+    size: number;
+    number: number;
+    sort: any;
+    numberOfElements: number;
+    empty: boolean;
+}
+
+export const getPaginatedUsers = async (
+    page: number = 0,
+    size: number = 20,
+    search?: string,
+    sortKey?: string | null,
+    sortDir?: 'asc' | 'desc' | null,
+    blockedSort?: 'top' | 'bottom' | null,
+    adminSort?: 'top' | 'bottom' | null
+): Promise<PaginatedResponse<PersonWithEnrollments>> => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('size', size.toString());
+
+    if (search) params.append('search', search);
+    if (sortKey) params.append('sortKey', sortKey);
+    if (sortDir) params.append('sortDir', sortDir);
+    if (blockedSort) params.append('blockedSort', blockedSort);
+    if (adminSort) params.append('adminSort', adminSort);
+
+    const response = await client.get(`/persons/paginated?${params.toString()}`);
+    return response.data;
+};
+
 export const updatePersonStatus = async (id: string, status: string): Promise<void> => {
     await client.patch(`/persons/${id}/status?status=${status}`);
 };

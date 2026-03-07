@@ -4,6 +4,8 @@ import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,14 @@ public interface PersonService {
 
     // Users Management
     List<PersonWithEnrollmentsDto> getAllPersonsWithEnrollments();
+
+    Page<PersonWithEnrollmentsDto> getPaginatedPersons(
+            String search,
+            String sortKey,
+            String sortDir,
+            String blockedSort,
+            String adminSort,
+            Pageable pageable);
 
     void updatePersonStatus(UUID id, String status);
 

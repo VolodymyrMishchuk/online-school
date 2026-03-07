@@ -5,6 +5,9 @@ import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
 import com.mishchuk.onlineschool.service.PersonService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +66,23 @@ public class PersonController {
     @GetMapping("/with-enrollments")
     public ResponseEntity<List<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto>> getAllPersonsWithEnrollments() {
         return ResponseEntity.ok(personService.getAllPersonsWithEnrollments());
+    }
+
+    @GetMapping("/paginated")
+    public ResponseEntity<Page<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto>> getPaginatedPersons(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String sortKey,
+            @RequestParam(required = false) String sortDir,
+            @RequestParam(required = false) String blockedSort,
+            @RequestParam(required = false) String adminSort) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto> result =
+                personService.getPaginatedPersons(search, sortKey, sortDir, blockedSort, adminSort, pageable);
+
+        return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/{id}/status")

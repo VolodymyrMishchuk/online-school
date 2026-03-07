@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
-    getUsersWithEnrollments,
+    getPaginatedUsers,
     createPerson,
     updatePerson,
     deletePerson
@@ -31,10 +31,16 @@ export const UsersPage: React.FC = () => {
     const [isManageAccessModalOpen, setIsManageAccessModalOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<PersonWithEnrollments | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
     const [blockedSort, setBlockedSort] = useState<'top' | 'bottom' | null>(null);
     const [adminSort, setAdminSort] = useState<'top' | 'bottom' | null>(null);
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    // Pagination State
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
 
     // Alert & Confirm State
     const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -51,44 +57,85 @@ export const UsersPage: React.FC = () => {
     const currentUserId = currentUser?.userId || localStorage.getItem('userId') || '';
     const userRole = localStorage.getItem('userRole') || 'USER';
 
-    const fetchData = async () => {
-        setLoading(true);
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastUserElementRef = useCallback((node: HTMLTableRowElement) => {
+        if (loading || isFetchingNextPage) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, isFetchingNextPage, hasMore]);
+
+    const fetchUsers = async (pageNum: number, reset: boolean = false) => {
+        if (pageNum === 0) setLoading(true);
+        else setIsFetchingNextPage(true);
+
         try {
-            const [usersData, coursesData] = await Promise.all([
-                getUsersWithEnrollments(),
-                getCourses()
-            ]);
-            setUsers(usersData);
-            setCourses(coursesData);
+            const data = await getPaginatedUsers(
+                pageNum,
+                20,
+                debouncedSearch,
+                sortConfig?.key,
+                sortConfig?.direction,
+                blockedSort,
+                adminSort
+            );
+
+            setUsers(prev => reset ? data.content : [...prev, ...data.content]);
+            setHasMore(!data.last);
 
             // Sync selectedUser with fresh data if modal is open
-            if (selectedUser) {
-                const updatedUser = usersData.find(u => u.id === selectedUser.id);
-                if (updatedUser) {
-                    setSelectedUser(updatedUser);
-                }
+            if (reset && selectedUser) {
+                const updatedUser = data.content.find((u: PersonWithEnrollments) => u.id === selectedUser.id);
+                if (updatedUser) setSelectedUser(updatedUser);
             }
-
             setError(null);
         } catch (err) {
             setError(t('users.loadError', 'Не вдалося завантажити дані.'));
         } finally {
-            setLoading(false);
+            if (pageNum === 0) setLoading(false);
+            else setIsFetchingNextPage(false);
         }
     };
 
+    // Handle debounce for search
     useEffect(() => {
-        fetchData();
-    }, []);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
+    // Reload completely when dependencies change
+    useEffect(() => {
+        setPage(0);
+        setHasMore(true);
+        fetchUsers(0, true);
+        
+        if (courses.length === 0) {
+            getCourses().then(setCourses).catch(console.error);
+        }
+    }, [debouncedSearch, sortConfig, blockedSort, adminSort]); // Only reactive deps
+
+    // Fetch next page when page changes
+    useEffect(() => {
+        if (page > 0) {
+            fetchUsers(page, false);
+        }
+    }, [page]);
 
     const handleCreateUser = async (data: CreatePersonDto) => {
         await createPerson(data);
-        await fetchData();
+        fetchUsers(0, true);
     };
 
     const handleUpdateUser = async (id: string, data: UpdatePersonDto) => {
         await updatePerson(id, data);
-        await fetchData();
+        fetchUsers(0, true);
     };
 
     const handleDeleteUser = (id: string) => {
@@ -99,7 +146,7 @@ export const UsersPage: React.FC = () => {
         if (!userToDelete) return;
         try {
             await deletePerson(userToDelete);
-            await fetchData();
+            await fetchUsers(0, true);
             setUserToDelete(null);
         } catch (err) {
             showAlert(t('users.deleteError', 'Не вдалося видалити користувача.'));
@@ -190,160 +237,13 @@ export const UsersPage: React.FC = () => {
     };
 
     const hasBlockedUsers = users.some(u => u.status === 'BLOCKED');
-    const hasAdminUsers = users.some(u => u.role === 'ADMIN');
+    const hasAdminUsers = users.some(u => u.role === 'ADMIN' || u.role === 'FAKE_ADMIN');
 
     const safeDate = (dateStr?: string | number | Date): number => {
         if (!dateStr) return 0;
         const timestamp = new Date(dateStr).getTime();
         return isNaN(timestamp) ? 0 : timestamp;
     };
-
-    const sortedUsers = React.useMemo(() => {
-        let sortableItems = [...users];
-
-        // First filter
-        sortableItems = sortableItems.filter(user =>
-            (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.firstName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.lastName || '').toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        // Sort by blocked status if active
-        if (blockedSort) {
-            sortableItems.sort((a, b) => {
-                const aBlocked = a.status === 'BLOCKED';
-                const bBlocked = b.status === 'BLOCKED';
-
-                if (aBlocked === bBlocked) return 0;
-
-                if (blockedSort === 'top') {
-                    return aBlocked ? -1 : 1;
-                } else {
-                    return aBlocked ? 1 : -1;
-                }
-            });
-        }
-
-        // Sort by admin role if active
-        if (adminSort) {
-            sortableItems.sort((a, b) => {
-                const aAdmin = a.role === 'ADMIN';
-                const bAdmin = b.role === 'ADMIN';
-
-                if (aAdmin === bAdmin) return 0;
-
-                if (adminSort === 'top') {
-                    return aAdmin ? -1 : 1;
-                } else {
-                    return aAdmin ? 1 : -1;
-                }
-            });
-        }
-
-        // Then apply standard sort within groups
-        if (sortConfig !== null) {
-            sortableItems.sort((a, b) => {
-                // Determine if we need to respect custom sort order first
-                if (blockedSort) {
-                    const aBlocked = a.status === 'BLOCKED';
-                    const bBlocked = b.status === 'BLOCKED';
-                    if (aBlocked !== bBlocked) {
-                        return blockedSort === 'top'
-                            ? (aBlocked ? -1 : 1)
-                            : (aBlocked ? 1 : -1);
-                    }
-                }
-
-                if (adminSort) {
-                    const aAdmin = a.role === 'ADMIN';
-                    const bAdmin = b.role === 'ADMIN';
-                    if (aAdmin !== bAdmin) {
-                        return adminSort === 'top'
-                            ? (aAdmin ? -1 : 1)
-                            : (aAdmin ? 1 : -1);
-                    }
-                }
-
-                let aValue: any = '';
-                let bValue: any = '';
-
-                switch (sortConfig.key) {
-                    case 'name':
-                        aValue = `${a.firstName || ''} ${a.lastName || ''}`.toLowerCase();
-                        bValue = `${b.firstName || ''} ${b.lastName || ''}`.toLowerCase();
-                        break;
-                    case 'contacts':
-                        aValue = (a.email || '').toLowerCase();
-                        bValue = (b.email || '').toLowerCase();
-                        break;
-                    case 'role':
-                        aValue = a.role || '';
-                        bValue = b.role || '';
-                        break;
-                    case 'status':
-                        aValue = a.status || '';
-                        bValue = b.status || '';
-                        break;
-                    case 'createdAt':
-                        aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                        bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-                        break;
-                    case 'enrollments': // Default sort by count
-                        aValue = a.enrollments ? a.enrollments.length : 0;
-                        bValue = b.enrollments ? b.enrollments.length : 0;
-                        break;
-                    case 'enrollment_name':
-                        // Sort by first course name (alphabetical)
-                        aValue = a.enrollments?.[0]?.courseName?.toLowerCase() || '';
-                        bValue = b.enrollments?.[0]?.courseName?.toLowerCase() || '';
-                        break;
-                    case 'enrollment_date':
-                        if (sortConfig.direction === 'asc') {
-                            // ASC: Sort by EARLIEST enrollment (Oldest First)
-                            // Use MAX_SAFE_INTEGER for empty to push them to the bottom
-                            aValue = a.enrollments?.length
-                                ? Math.min(...a.enrollments.map(e => safeDate(e.createdAt)))
-                                : Number.MAX_SAFE_INTEGER;
-                            bValue = b.enrollments?.length
-                                ? Math.min(...b.enrollments.map(e => safeDate(e.createdAt)))
-                                : Number.MAX_SAFE_INTEGER;
-                        } else {
-                            // DESC: Sort by LATEST enrollment (Newest First)
-                            // Use 0 for empty to push them to the bottom
-                            aValue = a.enrollments?.length
-                                ? Math.max(...a.enrollments.map(e => safeDate(e.createdAt)))
-                                : 0;
-                            bValue = b.enrollments?.length
-                                ? Math.max(...b.enrollments.map(e => safeDate(e.createdAt)))
-                                : 0;
-                        }
-                        break;
-                    case 'enrollment_timeLeft':
-                        // Sort by least time remaining (urgent first)
-                        // If no enrollments, treat as Infinity (bottom of list in ASC, top in DESC?)
-                        // Let's standardise: No enrollments = Infinity.
-                        aValue = a.enrollments?.length
-                            ? Math.min(...a.enrollments.map(e => getRemainingTimeMs(e.createdAt, e.courseId)))
-                            : Infinity;
-                        bValue = b.enrollments?.length
-                            ? Math.min(...b.enrollments.map(e => getRemainingTimeMs(e.createdAt, e.courseId)))
-                            : Infinity;
-                        break;
-                    default:
-                        return 0;
-                }
-
-                if (aValue < bValue) {
-                    return sortConfig.direction === 'asc' ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortConfig.direction === 'asc' ? 1 : -1;
-                }
-                return 0;
-            });
-        }
-        return sortableItems;
-    }, [users, sortConfig, searchTerm, blockedSort, adminSort, courses]); // Added courses dependency for time calc
 
     const getSortIcon = (columnKey: string) => {
         if (sortConfig?.key !== columnKey) return <Icons.ArrowUpDown size={14} className="ml-1 text-gray-400" />;
@@ -573,9 +473,11 @@ export const UsersPage: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200/50">
-                        {sortedUsers.map((user) => (
-                            <tr key={user.id} className="hover:bg-white/40 transition-colors">
-                                <td className="px-6 py-2 whitespace-nowrap w-1">
+                        {users.map((user, index) => {
+                            const isLast = index === users.length - 1;
+                            return (
+                                <tr key={user.id} ref={isLast ? lastUserElementRef : null} className="hover:bg-white/40 transition-colors">
+                                    <td className="px-6 py-2 whitespace-nowrap w-1">
                                     <div className="flex items-center gap-2">
                                         <div className="text-sm font-medium text-gray-900">
                                             {user.firstName} {user.lastName}
@@ -585,9 +487,14 @@ export const UsersPage: React.FC = () => {
                                                 ADMIN
                                             </span>
                                         )}
-                                        {user.role === 'INSTRUCTOR' && (
-                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                                INSTRUCTOR
+                                        {user.role === 'FAKE_ADMIN' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-800 border border-orange-200">
+                                                FAKE_ADMIN
+                                            </span>
+                                        )}
+                                        {user.role === 'FAKE_USER' && (
+                                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                                FAKE_USER
                                             </span>
                                         )}
                                         {user.status !== 'ACTIVE' && (
@@ -687,9 +594,15 @@ export const UsersPage: React.FC = () => {
                                     </button>
                                 </td>
                             </tr>
-                        ))}
+                            );
+                        })}
                     </tbody>
                 </table>
+                {isFetchingNextPage && (
+                    <div className="p-4 text-center text-gray-500">
+                        {t('dashboard.loadingMore', 'Завантаження...')}
+                    </div>
+                )}
             </div>
 
             <CreateUserModal
@@ -717,7 +630,7 @@ export const UsersPage: React.FC = () => {
                     setSelectedUser(null);
                 }}
                 user={selectedUser}
-                onRefresh={fetchData}
+                onRefresh={() => fetchUsers(0, true)}
                 isReadonlyForFakeAdmin={selectedUser ? (userRole === 'FAKE_ADMIN' && selectedUser.createdBy?.id !== currentUserId) : false}
                 onShowRestriction={() => setIsFakeAdminRestrictionModalOpen(true)}
             />

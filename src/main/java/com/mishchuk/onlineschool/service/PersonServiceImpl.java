@@ -3,6 +3,7 @@ package com.mishchuk.onlineschool.service;
 import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
+import com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto;
 import com.mishchuk.onlineschool.exception.EmailAlreadyExistsException;
 import com.mishchuk.onlineschool.exception.ResourceNotFoundException;
 import com.mishchuk.onlineschool.mapper.PersonMapper;
@@ -15,6 +16,8 @@ import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import com.mishchuk.onlineschool.repository.entity.PersonStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -156,6 +159,22 @@ public class PersonServiceImpl implements PersonService {
         return personRepository.findAll().stream()
                 .map(personMapper::toDtoWithEnrollments)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PersonWithEnrollmentsDto> getPaginatedPersons(
+            String search,
+            String sortKey,
+            String sortDir,
+            String blockedSort,
+            String adminSort,
+            Pageable pageable) {
+
+        Page<PersonEntity> personsPage = personRepository.findPaginatedUsers(
+                search, sortKey, sortDir, blockedSort, adminSort, pageable);
+
+        return personsPage.map(personMapper::toDtoWithEnrollments);
     }
 
     @Override

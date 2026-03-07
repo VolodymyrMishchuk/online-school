@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, Folder, BookOpen, ChevronDown, ChevronUp, Clock, Paperclip } from 'lucide-react';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
+import type { FileDto } from '../api/files';
 import { ConfirmModal } from './ConfirmModal';
+import LessonCard from './LessonCard';
 
 interface ModuleCardProps {
     module: Module;
@@ -11,6 +13,7 @@ interface ModuleCardProps {
     courseName?: string;
     durationMinutes?: number;
     filesCount?: number;
+    lessonFilesMap?: Record<string, FileDto[]>;
     onEdit: (module: Module, lessons: Lesson[]) => void;
     onDelete: (id: string) => void;
     isCatalogMode?: boolean;
@@ -22,6 +25,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     courseName,
     durationMinutes,
     filesCount,
+    lessonFilesMap = {},
     onEdit,
     onDelete,
     isCatalogMode = false,
@@ -147,40 +151,59 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                 {lessons.length > 0 ? (
                                     <div className="flex flex-col gap-2">
                                         {lessons.map((lesson, index) => (
-                                            <div
-                                                key={lesson.id}
-                                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl w-full"
-                                            >
-                                                <span className="text-xs font-medium text-gray-400 w-6 font-mono shrink-0">
-                                                    {(index + 1).toString().padStart(2, '0')}
-                                                </span>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-medium text-gray-700 truncate text-sm">
-                                                        {lesson.name}
-                                                    </p>
-
-                                                    {lesson.description && (
-                                                        <p className="text-xs text-gray-400 truncate mt-0.5">
-                                                            {lesson.description}
+                                            isAdmin ? (
+                                                <div key={lesson.id} className="w-full flex gap-3">
+                                                    <div className="flex flex-col items-center gap-1 shrink-0 pt-4">
+                                                        <span className="text-sm font-bold text-gray-400 bg-gray-100 rounded-lg w-8 h-8 flex items-center justify-center shadow-inner">
+                                                            {index + 1}
+                                                        </span>
+                                                        <div className="w-px h-full bg-gray-200 rounded-full mt-1"></div>
+                                                    </div>
+                                                    <div className="flex-1 w-full min-w-0">
+                                                        <LessonCard
+                                                            lesson={lesson}
+                                                            files={lessonFilesMap[lesson.id] || []}
+                                                            isTransparent={true}
+                                                            onImageClick={(url) => window.open(url, '_blank')}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    key={lesson.id}
+                                                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl w-full"
+                                                >
+                                                    <span className="text-xs font-medium text-gray-400 w-6 font-mono shrink-0">
+                                                        {(index + 1).toString().padStart(2, '0')}
+                                                    </span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-medium text-gray-700 truncate text-sm">
+                                                            {lesson.name}
                                                         </p>
-                                                    )}
-                                                </div>
 
-                                                <div className="flex items-center gap-4 shrink-0">
-                                                    {lesson.filesCount !== undefined && lesson.filesCount > 0 && (
-                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.files', 'Файли')}>
-                                                            <Paperclip className="w-4 h-4" />
-                                                            <span>{lesson.filesCount}</span>
-                                                        </div>
-                                                    )}
-                                                    {lesson.durationMinutes !== undefined && lesson.durationMinutes > 0 && (
-                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.duration', 'Тривалість')}>
-                                                            <Clock className="w-4 h-4" />
-                                                            <span>{lesson.durationMinutes} {t('moduleCard.minShort', 'хв')}</span>
-                                                        </div>
-                                                    )}
+                                                        {lesson.description && (
+                                                            <p className="text-xs text-gray-400 truncate mt-0.5">
+                                                                {lesson.description}
+                                                            </p>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex items-center gap-4 shrink-0">
+                                                        {lesson.filesCount !== undefined && lesson.filesCount > 0 && (
+                                                            <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.files', 'Файли')}>
+                                                                <Paperclip className="w-4 h-4" />
+                                                                <span>{lesson.filesCount}</span>
+                                                            </div>
+                                                        )}
+                                                        {lesson.durationMinutes !== undefined && lesson.durationMinutes > 0 && (
+                                                            <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.duration', 'Тривалість')}>
+                                                                <Clock className="w-4 h-4" />
+                                                                <span>{lesson.durationMinutes} {t('moduleCard.minShort', 'хв')}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            )
                                         ))}
                                     </div>
                                 ) : (

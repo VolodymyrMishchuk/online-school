@@ -5,6 +5,7 @@ import { getModules, getModuleLessons, createModule, updateModule, deleteModule 
 import type { Module, CreateModuleDto } from '../api/modules';
 import { getUnassignedLessons } from '../api/lessons';
 import type { Lesson } from '../api/lessons';
+import { getLessonFiles, type FileDto } from '../api/files';
 import { getCourses } from '../api/courses';
 import { ModuleCard } from '../components/ModuleCard';
 import { ModuleModal } from '../components/ModuleModal';
@@ -75,6 +76,27 @@ export const AllModulesPage: React.FC = () => {
         enabled: modules.length > 0,
     });
 
+    // Fetch files for all loaded lessons
+    const lessonFilesQueries = useQuery({
+        queryKey: ['lessonFiles', Object.values(moduleLessonsQueries.data || {}).flat().map(l => l.id)],
+        queryFn: async (): Promise<Record<string, FileDto[]>> => {
+            if (!moduleLessonsQueries.data) return {};
+            const allLessons = Object.values(moduleLessonsQueries.data).flat();
+            if (allLessons.length === 0) return {};
+
+            const filesData = await Promise.all(
+                allLessons.map(async (lesson) => ({
+                    lessonId: lesson.id,
+                    files: await getLessonFiles(lesson.id),
+                }))
+            );
+            return Object.fromEntries(
+                filesData.map(({ lessonId, files }) => [lessonId, files])
+            );
+        },
+        enabled: !!moduleLessonsQueries.data,
+    });
+
     // Create module mutation
     const createMutation = useMutation({
         mutationFn: createModule,
@@ -82,6 +104,7 @@ export const AllModulesPage: React.FC = () => {
             queryClient.invalidateQueries({ queryKey: ['modules'] });
             queryClient.invalidateQueries({ queryKey: ['unassignedLessons'] });
             queryClient.invalidateQueries({ queryKey: ['moduleLessons'] });
+            queryClient.invalidateQueries({ queryKey: ['lessonFiles'] });
         },
     });
 
@@ -236,7 +259,8 @@ export const AllModulesPage: React.FC = () => {
                             <ModuleCard
                                 key={module.id}
                                 module={module}
-                                lessons={moduleLessons}
+                                lessons={moduleLessonsQueries.data?.[module.id] || []}
+                                lessonFilesMap={lessonFilesQueries.data || {}}
                                 courseName={courseName}
                                 durationMinutes={totalDuration}
                                 filesCount={totalFilesCount}

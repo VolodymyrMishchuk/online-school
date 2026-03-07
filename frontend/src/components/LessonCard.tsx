@@ -95,7 +95,8 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
     return (
         <div
             className={`${isTransparent ? 'bg-white/80 border-white/20 backdrop-blur-sm' : 'bg-white border-gray-100'} rounded-lg p-5 shadow-sm border transition-all duration-300 w-full ${isLocked ? 'cursor-not-allowed opacity-80' : 'cursor-pointer hover:shadow-lg'} ${isExpanded ? 'ring-2 ring-brand-primary/10' : ''}`}
-            onClick={() => {
+            onClick={(e) => {
+                e.stopPropagation();
                 if (isLocked) return;
                 setIsExpanded(!isExpanded);
             }}
