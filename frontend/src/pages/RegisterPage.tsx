@@ -4,6 +4,7 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { register } from '../api/auth';
 import { Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -14,9 +15,10 @@ export default function RegisterPage() {
         birthDate: '',
         password: ''
     });
-    const [error, setError] = useState('');
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const navigate = useNavigate();
     const [defaultCountry, setDefaultCountry] = useState<any>('UA');
+    const { t, i18n } = useTranslation();
 
     useEffect(() => {
         fetch('https://ipapi.co/json/')
@@ -31,10 +33,10 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
+        setFormErrors({});
 
         if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
+            setFormErrors(prev => ({ ...prev, phoneNumber: t('auth.register.invalidPhone', 'Невірний номер телефону') }));
             return;
         }
 
@@ -48,7 +50,8 @@ export default function RegisterPage() {
                 email: formData.email,
                 phoneNumber: formData.phoneNumber,
                 bornedAt: bornedAt,
-                password: formData.password
+                password: formData.password,
+                language: i18n.language
             });
 
             // Зберігаємо токен та дані користувача
@@ -60,7 +63,7 @@ export default function RegisterPage() {
             navigate('/dashboard');
         } catch (err: any) {
             const message = err.response?.data?.message || err.message;
-            setError(message);
+            setFormErrors({ general: message });
         }
     };
 
@@ -76,33 +79,33 @@ export default function RegisterPage() {
                         <Heart className="w-8 h-8 text-brand-secondary fill-brand-secondary" />
                     </Link>
                     <h2 className="text-3xl font-bold text-brand-dark">
-                        Create Account
+                        {t('auth.register.title', 'Приєднуйтесь до нас')}
                     </h2>
-                    <p className="mt-2 text-gray-500">Join our learning community today</p>
+                    <p className="mt-2 text-gray-500">{t('auth.register.subtitle', 'Створіть акаунт, щоб почати навчання')}</p>
                 </div>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">First Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.firstName', 'Імʼя')}</label>
                             <input
                                 type="text"
                                 name="firstName"
                                 required
                                 className="block w-full px-5 py-3 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all bg-gray-50 focus:bg-white"
-                                placeholder="John"
+                                placeholder={t('auth.register.firstNamePlaceholder', 'John')}
                                 value={formData.firstName}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Last Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.lastName', 'Прізвище')}</label>
                             <input
                                 type="text"
                                 name="lastName"
                                 required
                                 className="block w-full px-5 py-3 rounded-xl border border-gray-200 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-primary/50 focus:border-brand-primary transition-all bg-gray-50 focus:bg-white"
-                                placeholder="Doe"
+                                placeholder={t('auth.register.lastNamePlaceholder', 'Doe')}
                                 value={formData.lastName}
                                 onChange={handleChange}
                             />
@@ -110,7 +113,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Email</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.email', 'Email')}</label>
                         <input
                             type="email"
                             name="email"
@@ -124,7 +127,7 @@ export default function RegisterPage() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Phone</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.phone', 'Номер телефону')}</label>
                             <style>{`
                                 .phone-input-override .PhoneInputInput {
                                     border: none;
@@ -153,7 +156,7 @@ export default function RegisterPage() {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Birth Date</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.birthDate', 'Дата народження')}</label>
                             <input
                                 type="date"
                                 name="birthDate"
@@ -166,7 +169,7 @@ export default function RegisterPage() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.register.password', 'Пароль')}</label>
                         <input
                             type="password"
                             name="password"
@@ -178,20 +181,20 @@ export default function RegisterPage() {
                         />
                     </div>
 
-                    {error && <div className="p-3 rounded-xl bg-red-50 text-red-500 text-sm text-center font-medium">{error}</div>}
+                    {formErrors.general && <div className="p-3 rounded-xl bg-red-50 text-red-500 text-sm text-center font-medium">{formErrors.general}</div>}
 
                     <div>
                         <button
                             type="submit"
                             className="w-full py-3.5 px-4 border border-transparent rounded-full shadow-lg text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary font-bold text-lg transition-all transform hover:-translate-y-0.5"
                         >
-                            Sign Up
+                            {t('auth.register.submit', 'Зареєструватися')}
                         </button>
                     </div>
                 </form>
 
                 <div className="mt-6 text-center text-sm text-gray-500">
-                    Already have an account? <Link to="/login" className="font-medium text-brand-primary hover:text-brand-secondary">Sign in</Link>
+                    {t('auth.register.hasAccount', 'Вже маєте акаунт?')} <Link to="/login" className="font-medium text-brand-primary hover:text-brand-secondary">{t('auth.register.signIn', 'Увійти')}</Link>
                 </div>
             </div>
         </div>

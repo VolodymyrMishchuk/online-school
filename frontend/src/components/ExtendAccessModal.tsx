@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { extendAccessForReview } from '../api/courses';
 import { X, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ExtendAccessModalProps {
     courseId: string;
@@ -17,6 +18,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
     onClose,
     onSuccess
 }) => {
+    const { t } = useTranslation();
     const [file, setFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
 
     const handleSubmit = async () => {
         if (!file) {
-            setError('Будь ласка, завантажте відео-відгук');
+            setError(t('extendAccess.uploadError', 'Будь ласка, завантажте відео-відгук'));
             return;
         }
 
@@ -45,7 +47,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
             onClose();
         } catch (err) {
             console.error(err);
-            setError('Сталася помилка під час відправки. Спробуйте пізніше.');
+            setError(t('extendAccess.submitError', 'Сталася помилка під час відправки. Спробуйте пізніше.'));
         } finally {
             setIsSubmitting(false);
         }
@@ -59,7 +61,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                 {/* Header */}
                 <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-200/50">
                     <h2 className="text-xl font-bold text-gray-900">
-                        Отримай +1 місяць доступу!
+                        {t('extendAccess.title', 'Отримай +1 місяць доступу!')}
                     </h2>
                     <button
                         onClick={onClose}
@@ -74,7 +76,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                     <div className="space-y-4">
                         <div className="-mx-8 -mt-8 mb-6 px-8 py-4 bg-white/50 backdrop-blur-sm border-b border-gray-200/50">
                             <p className="text-gray-700">
-                                Вітаю! Ти можеш отримати додатковий місяць доступу, залишивши відгук про передивлений курс.
+                                {t('extendAccess.description', 'Вітаю! Ти можеш отримати додатковий місяць доступу, залишивши відгук про передивлений курс.')}
                             </p>
                         </div>
 
@@ -85,8 +87,8 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                                     <span className="font-bold text-sm">1</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-gray-900 font-bold text-sm mb-1">Запиши відео-відгук</h3>
-                                    <p className="text-xs text-gray-600">Розкажи про свої враження від курсу, що сподобалось, а що можна покращити.</p>
+                                    <h3 className="text-gray-900 font-bold text-sm mb-1">{t('extendAccess.step1Title', 'Запиши відео-відгук')}</h3>
+                                    <p className="text-xs text-gray-600">{t('extendAccess.step1Desc', 'Розкажи про свої враження від курсу, що сподобалось, а що можна покращити.')}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 border border-gray-200/50">
@@ -94,8 +96,8 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                                     <span className="font-bold text-sm">2</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-gray-900 font-bold text-sm mb-1">Завантаж відео</h3>
-                                    <p className="text-xs text-gray-600">Завантаж файл з відео у форму нижче.</p>
+                                    <h3 className="text-gray-900 font-bold text-sm mb-1">{t('extendAccess.step2Title', 'Завантаж відео')}</h3>
+                                    <p className="text-xs text-gray-600">{t('extendAccess.step2Desc', 'Завантаж файл з відео у форму нижче.')}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-3 rounded-lg bg-white/50 border border-gray-200/50">
@@ -103,8 +105,8 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                                     <span className="font-bold text-sm">3</span>
                                 </div>
                                 <div>
-                                    <h3 className="text-gray-900 font-bold text-sm mb-1">Отримай доступ</h3>
-                                    <p className="text-xs text-gray-600">Доступ буде продовжено автоматично одразу після відправки як подяка за твій час.</p>
+                                    <h3 className="text-gray-900 font-bold text-sm mb-1">{t('extendAccess.step3Title', 'Отримай доступ')}</h3>
+                                    <p className="text-xs text-gray-600">{t('extendAccess.step3Desc', 'Доступ буде продовжено автоматично одразу після відправки як подяка за твій час.')}</p>
                                 </div>
                             </div>
                         </div>
@@ -120,14 +122,14 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                                 allowFullScreen
                             ></iframe>
                         </div>
-                        <p className="text-xs text-center text-gray-500">Приклад відео-відгуку</p>
+                        <p className="text-xs text-center text-gray-500">{t('extendAccess.exampleVideo', 'Приклад відео-відгуку')}</p>
 
                     </div>
 
                     {/* File Upload Area */}
                     <div className="space-y-2 mt-6">
                         <label className="block text-sm font-bold text-gray-900">
-                            Ваше відео
+                            {t('extendAccess.yourVideo', 'Ваше відео')}
                         </label>
                         <div className={`
               border-2 border-dashed rounded-lg p-8 
@@ -146,13 +148,13 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                                     <>
                                         <CheckCircle className="w-10 h-10 text-green-500 mb-3" />
                                         <p className="text-sm font-medium text-gray-900 break-all max-w-xs">{file.name}</p>
-                                        <p className="text-xs text-gray-500 mt-1">Натисніть щоб замінити</p>
+                                        <p className="text-xs text-gray-500 mt-1">{t('extendAccess.clickToReplace', 'Натисніть щоб замінити')}</p>
                                     </>
                                 ) : (
                                     <>
                                         <Upload className="w-10 h-10 text-gray-400 mb-3" />
-                                        <p className="text-sm font-medium text-gray-900">Натисніть для завантаження</p>
-                                        <p className="text-xs text-gray-500 mt-1">MP4, MOV до 50MB</p>
+                                        <p className="text-sm font-medium text-gray-900">{t('extendAccess.clickToUpload', 'Натисніть для завантаження')}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{t('extendAccess.uploadLimits', 'MP4, MOV до 50MB')}</p>
                                     </>
                                 )}
                             </label>
@@ -172,7 +174,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
                         onClick={onClose}
                         className="text-gray-900 font-medium hover:bg-gray-100 rounded-lg px-4 py-2 transition-colors"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         onClick={handleSubmit}
@@ -182,7 +184,7 @@ export const ExtendAccessModal: React.FC<ExtendAccessModalProps> = ({
               ${isSubmitting || !file ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}
             `}
                     >
-                        {isSubmitting ? 'Відправка...' : 'Відправити'}
+                        {isSubmitting ? t('common.sending', 'Відправка...') : t('common.submit', 'Відправити')}
                     </button>
                 </div>
             </div>

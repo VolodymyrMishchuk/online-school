@@ -4,6 +4,7 @@ import type { PersonWithEnrollments } from '../api/users';
 import { getCourses } from '../api/courses';
 import type { CourseDto } from '../api/courses';
 import { X, Search, BookOpen, Layers, CheckCircle, AlertCircle, Loader2, Trash2, PlusCircle, Shield, AlertTriangle, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ManageAccessModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface ManageAccessModalProps {
 }
 
 export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, onClose, user, onRefresh, isReadonlyForFakeAdmin, onShowRestriction }) => {
+    const { t } = useTranslation();
     const [allCourses, setAllCourses] = useState<CourseDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
             setAllCourses(data);
         } catch (err) {
             console.error(err);
-            setError('Не вдалося завантажити курси.');
+            setError(t('manageAccess.loadError', 'Не вдалося завантажити курси.'));
         } finally {
             setLoading(false);
         }
@@ -80,7 +82,11 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
             }
             onRefresh();
         } catch (err) {
-            setError(`Не вдалося ${isRevoking ? 'забрати' : 'додати'} доступ.`);
+            setError(
+                isRevoking
+                    ? t('manageAccess.revokeError', 'Не вдалося забрати доступ.')
+                    : t('manageAccess.grantError', 'Не вдалося додати доступ.')
+            );
         } finally {
             setActionLoading(null);
         }
@@ -108,7 +114,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                             <Shield className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-brand-dark">Управління доступом</h2>
+                            <h2 className="text-xl font-bold text-brand-dark">{t('manageAccess.title', 'Управління доступом')}</h2>
                             <p className="text-xs text-gray-500 font-medium">
                                 {user.firstName} {user.lastName}
                             </p>
@@ -127,7 +133,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                     <div className="relative">
                         <input
                             type="text"
-                            placeholder="Пошук курсу..."
+                            placeholder={t('manageAccess.searchPlaceholder', 'Пошук курсу...')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 bg-white outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-light transition-all text-sm"
@@ -148,12 +154,12 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                     {loading ? (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-3">
                             <Loader2 className="w-8 h-8 animate-spin text-brand-primary" />
-                            <p className="text-sm">Завантаження курсів...</p>
+                            <p className="text-sm">{t('manageAccess.loadingCourses', 'Завантаження курсів...')}</p>
                         </div>
                     ) : filteredCourses.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-2">
                             <BookOpen className="w-10 h-10 opacity-20" />
-                            <p className="text-sm">Курсів не знайдено</p>
+                            <p className="text-sm">{t('manageAccess.noCoursesFound', 'Курсів не знайдено')}</p>
                         </div>
                     ) : (
                         <div className="space-y-3">
@@ -183,10 +189,10 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                                                             const count = course.modulesNumber || 0;
                                                             const lastDigit = count % 10;
                                                             const lastTwoDigits = count % 100;
-                                                            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${count} модулів`;
-                                                            if (lastDigit === 1) return `${count} модуль`;
-                                                            if (lastDigit >= 2 && lastDigit <= 4) return `${count} модулі`;
-                                                            return `${count} модулів`;
+                                                            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${count} ${t('common.modulesCount.many', 'модулів')}`;
+                                                            if (lastDigit === 1) return `${count} ${t('common.modulesCount.one', 'модуль')}`;
+                                                            if (lastDigit >= 2 && lastDigit <= 4) return `${count} ${t('common.modulesCount.few', 'модулі')}`;
+                                                            return `${count} ${t('common.modulesCount.many', 'модулів')}`;
                                                         })()}
                                                     </span>
                                                     <span className="flex items-center gap-1">
@@ -195,10 +201,10 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                                                             const count = course.lessonsCount || 0;
                                                             const lastDigit = count % 10;
                                                             const lastTwoDigits = count % 100;
-                                                            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${count} уроків`;
-                                                            if (lastDigit === 1) return `${count} урок`;
-                                                            if (lastDigit >= 2 && lastDigit <= 4) return `${count} уроки`;
-                                                            return `${count} уроків`;
+                                                            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return `${count} ${t('common.lessonsCount.many', 'уроків')}`;
+                                                            if (lastDigit === 1) return `${count} ${t('common.lessonsCount.one', 'урок')}`;
+                                                            if (lastDigit >= 2 && lastDigit <= 4) return `${count} ${t('common.lessonsCount.few', 'уроки')}`;
+                                                            return `${count} ${t('common.lessonsCount.many', 'уроків')}`;
                                                         })()}
                                                     </span>
                                                     <span className="flex items-center gap-1">
@@ -210,9 +216,9 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
 
                                                             let timeString = "";
                                                             if (hours > 0) {
-                                                                timeString += `${hours} год `;
+                                                                timeString += `${hours} ${t('common.hoursShort', 'год')} `;
                                                             }
-                                                            timeString += `${mins} хв`;
+                                                            timeString += `${mins} ${t('common.minutesShort', 'хв')}`;
                                                             return timeString.trim();
                                                         })()}
                                                     </span>
@@ -220,7 +226,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                                                     {isEnrolled && (
                                                         <span className="flex items-center gap-1 font-medium text-green-600 bg-green-100/50 px-2 py-0.5 rounded-full ml-1">
                                                             <CheckCircle className="w-3 h-3" />
-                                                            Доступ відкрито
+                                                            {t('manageAccess.accessGranted', 'Доступ відкрито')}
                                                         </span>
                                                     )}
                                                 </div>
@@ -236,7 +242,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                                                     ? 'bg-white border border-red-100 text-red-500 hover:bg-red-50 hover:border-red-200 hover:shadow-sm'
                                                     : 'bg-brand-primary text-white hover:bg-brand-secondary hover:shadow-md hover:scale-105 active:scale-95'
                                                 }`}
-                                            title={isEnrolled ? "Забрати доступ" : "Надати доступ"}
+                                            title={isEnrolled ? t('manageAccess.revokeAccessBtn', "Забрати доступ") : t('manageAccess.grantAccessBtn', "Надати доступ")}
                                         >
                                             {isLoading ? (
                                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -260,7 +266,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                         onClick={onClose}
                         className="px-6 py-2.5 font-bold text-gray-700 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg transition-all shadow-sm hover:shadow"
                     >
-                        Закрити
+                        {t('common.closeBtn', 'Закрити')}
                     </button>
                 </div>
             </div>
@@ -273,23 +279,22 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
                             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
                                 <AlertTriangle className="w-6 h-6" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 mb-2">Забрати доступ?</h3>
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">{t('manageAccess.revokeConfirmTitle', 'Забрати доступ?')}</h3>
                             <p className="text-gray-500 text-sm mb-6">
-                                Ви впевнені, що хочете забрати доступ до курсу <span className="font-semibold text-gray-900">"{confirmRevokeCourse.name}"</span>?
-                                Користувач втратить можливість переглядати матеріали цього курсу.
+                                {t('manageAccess.revokeConfirmMessage', 'Ви впевнені, що хочете забрати доступ до курсу "{{courseName}}"? Користувач втратить можливість переглядати матеріали цього курсу.', { courseName: confirmRevokeCourse.name })}
                             </p>
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setConfirmRevokeCourse(null)}
                                     className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
                                 >
-                                    Скасувати
+                                    {t('common.cancelBtn', 'Скасувати')}
                                 </button>
                                 <button
                                     onClick={handleConfirmRevoke}
                                     className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-red-200"
                                 >
-                                    Забрати доступ
+                                    {t('manageAccess.revokeBtn', 'Забрати доступ')}
                                 </button>
                             </div>
                         </div>

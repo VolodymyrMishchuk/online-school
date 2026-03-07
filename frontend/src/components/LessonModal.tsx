@@ -5,6 +5,8 @@ import { createLesson, updateLesson } from '../api/lessons';
 import type { CreateLessonDto, Lesson } from '../api/lessons';
 import { uploadFile } from '../api/files';
 import { getModules } from '../api/modules';
+import { useTranslation } from 'react-i18next';
+import { ConfirmModal } from './ConfirmModal';
 
 interface LessonModalProps {
     isOpen: boolean;
@@ -14,6 +16,7 @@ interface LessonModalProps {
 }
 
 export default function LessonModal({ isOpen, onClose, onSuccess, initialData }: LessonModalProps) {
+    const { t } = useTranslation();
     const isEditing = !!initialData;
     const [formData, setFormData] = useState<CreateLessonDto>({
         name: '',
@@ -24,6 +27,15 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
     });
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     // Reset form when modal opens or initialData changes
     useEffect(() => {
@@ -62,14 +74,14 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
         mutationFn: async () => {
             // Validate
             const newErrors: Record<string, string> = {};
-            if (!formData.name.trim()) newErrors.name = "Назва обов'язкова";
-            if (!formData.description.trim()) newErrors.description = "Опис обов'язковий";
+            if (!formData.name.trim()) newErrors.name = t('lessonModal.errors.nameRequired', "Назва обов'язкова");
+            if (!formData.description.trim()) newErrors.description = t('lessonModal.errors.descriptionRequired', "Опис обов'язковий");
 
             if (formData.videoUrl && formData.videoUrl.trim()) {
                 try {
                     new URL(formData.videoUrl);
                 } catch {
-                    newErrors.videoUrl = "Невалідний URL";
+                    newErrors.videoUrl = t('lessonModal.errors.invalidUrl', "Невалідний URL");
                 }
             }
 
@@ -103,7 +115,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
         },
         onError: (error: any) => {
             if (error.message !== 'Validation failed') {
-                alert(`Помилка ${isEditing ? 'оновлення' : 'створення'} уроку: ` + (error.response?.data?.message || error.message));
+                showAlert(t('lessonModal.errors.submitError', 'Помилка {{action}} уроку: ', { action: isEditing ? t('common.updating', 'оновлення') : t('common.creating', 'створення') }) + (error.response?.data?.message || error.message));
             }
         },
     });
@@ -141,10 +153,10 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-brand-dark">
-                                {isEditing ? 'Редагувати урок' : 'Створити урок'}
+                                {isEditing ? t('lessonModal.editLesson', 'Редагувати урок') : t('lessonModal.createLesson', 'Створити урок')}
                             </h2>
                             <p className="text-xs text-gray-500 font-medium">
-                                {isEditing ? 'Зміна існуючого контенту' : 'Додавання навчального матеріалу'}
+                                {isEditing ? t('lessonModal.editDescription', 'Зміна існуючого контенту') : t('lessonModal.createDescription', 'Додавання навчального матеріалу')}
                             </p>
                         </div>
                     </div>
@@ -162,7 +174,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                     <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                             <FileText className="w-4 h-4" />
-                            Назва уроку <span className="text-red-500">*</span>
+                            {t('lessonModal.lessonName', 'Назва уроку')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -175,7 +187,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-gray-200 focus:border-brand-primary'
                                 }`}
-                            placeholder="Введіть назву уроку..."
+                            placeholder={t('lessonModal.lessonNamePlaceholder', 'Введіть назву уроку...')}
                         />
                         {errors.name && (
                             <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
@@ -189,7 +201,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                     <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                             <BookOpen className="w-4 h-4" />
-                            Опис <span className="text-red-500">*</span>
+                            {t('lessonModal.description', 'Опис')} <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={formData.description}
@@ -202,7 +214,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                 ? 'border-red-300 focus:border-red-500'
                                 : 'border-gray-200 focus:border-brand-primary'
                                 }`}
-                            placeholder="Введіть опис уроку..."
+                            placeholder={t('lessonModal.descriptionPlaceholder', 'Введіть опис уроку...')}
                         />
                         {errors.description && (
                             <p className="flex items-center gap-1 text-red-500 text-xs mt-1 ml-1">
@@ -217,7 +229,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Video className="w-4 h-4" />
-                                Посилання на відео
+                                {t('lessonModal.videoUrl', 'Посилання на відео')}
                             </label>
                             <input
                                 type="url"
@@ -244,7 +256,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Clock className="w-4 h-4" />
-                                Тривалість (хв)
+                                {t('lessonModal.duration', 'Тривалість (хв)')}
                             </label>
                             <input
                                 type="number"
@@ -265,7 +277,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Layout className="w-4 h-4" />
-                                Модуль
+                                {t('lessonModal.module', 'Модуль')}
                             </label>
                             <div className="relative">
                                 <select
@@ -280,7 +292,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                         }`}
                                     disabled={modulesLoading}
                                 >
-                                    <option value="">Виберіть модуль...</option>
+                                    <option value="">{t('lessonModal.selectModule', 'Виберіть модуль...')}</option>
                                     {modules?.map(module => (
                                         <option key={module.id} value={module.id}>
                                             {module.name} {module.courseName && `(${module.courseName})`}
@@ -304,7 +316,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                     <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                             <Upload className="w-4 h-4" />
-                            {isEditing ? 'Додати нові файли' : 'Файли'}
+                            {isEditing ? t('lessonModal.addNewFiles', 'Додати нові файли') : t('lessonModal.files', 'Файли')}
                         </label>
                         <div className="border border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50/50 hover:border-brand-primary/50 transition-all cursor-pointer group bg-white/30">
                             <label className="cursor-pointer block w-full h-full">
@@ -320,14 +332,14 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                                     </div>
                                     <div>
                                         <span className="text-sm text-brand-primary font-bold hover:underline">
-                                            Натисніть
+                                            {t('lessonModal.click', 'Натисніть')}
                                         </span>
                                         <span className="text-sm text-gray-500 font-medium">
-                                            {' '}щоб обрати файли
+                                            {' '} {t('lessonModal.toChooseFiles', 'щоб обрати файли')}
                                         </span>
                                     </div>
                                     <p className="text-xs text-gray-400">
-                                        або перетягніть файли сюди
+                                        {t('lessonModal.orDragFiles', 'або перетягніть файли сюди')}
                                     </p>
                                 </div>
                             </label>
@@ -372,7 +384,7 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                         disabled={mutation.isPending}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         onClick={() => mutation.mutate()}
@@ -383,11 +395,21 @@ export default function LessonModal({ isOpen, onClose, onSuccess, initialData }:
                             <Loader2 className="w-4 h-4 animate-spin" />
                         )}
                         {mutation.isPending
-                            ? (isEditing ? 'Зберігаємо...' : 'Створюємо...')
-                            : (isEditing ? 'Зберегти зміни' : 'Створити урок')}
+                            ? (isEditing ? t('common.saving', 'Зберігаємо...') : t('common.creating', 'Створюємо...'))
+                            : (isEditing ? t('lessonModal.saveChanges', 'Зберегти зміни') : t('lessonModal.createLessonBtn', 'Створити урок'))}
                     </button>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.error', 'Помилка')}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
+            />
         </div>
     );
 }

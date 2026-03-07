@@ -8,12 +8,24 @@ import { CourseModal } from '../components/CourseModal';
 import CourseExpandableCard from '../components/CourseExpandableCard';
 import { BookOpen, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function AllCoursesPage() {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState<CourseDto | undefined>(undefined);
     const [courseToDelete, setCourseToDelete] = useState<CourseDto | null>(null);
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     const userRole = localStorage.getItem('userRole') || 'USER';
     const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
@@ -72,7 +84,7 @@ export default function AllCoursesPage() {
     const handleEnroll = (courseId: string) => {
         const course = courses?.find(c => c.id === courseId);
         if (course?.isEnrolled) {
-            alert('Ви вже придбали цей курс!');
+            showAlert(t('allCourses.alreadyEnrolled', 'Ви вже придбали цей курс!'));
             return;
         }
 
@@ -120,7 +132,7 @@ export default function AllCoursesPage() {
     if (coursesLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="text-brand-primary font-medium">Завантаження курсів...</div>
+                <div className="text-brand-primary font-medium">{t('allCourses.loading', 'Завантаження курсів...')}</div>
             </div>
         );
     }
@@ -128,14 +140,14 @@ export default function AllCoursesPage() {
     return (
         <div className="container mx-auto px-6 py-8">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-brand-dark">Всі курси</h1>
+                <h1 className="text-3xl font-bold text-brand-dark">{t('allCourses.title', 'Всі курси')}</h1>
                 {isAdmin && (
                     <button
                         onClick={handleCreateClick}
                         className="flex items-center space-x-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <Plus size={20} />
-                        <span>Додати курс</span>
+                        <span>{t('allCourses.addCourseBtn', 'Додати курс')}</span>
                     </button>
                 )}
             </div>
@@ -143,14 +155,14 @@ export default function AllCoursesPage() {
             {courses?.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
                     <BookOpen size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500 mb-6 text-lg">Курсів поки що немає</p>
+                    <p className="text-gray-500 mb-6 text-lg">{t('allCourses.noCourses', 'Курсів поки що немає')}</p>
                     {isAdmin && (
                         <button
                             onClick={handleCreateClick}
                             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors"
                         >
                             <Plus size={20} />
-                            Створити Перший Курс
+                            {t('allCourses.createFirstCourseBtn', 'Створити Перший Курс')}
                         </button>
                     )}
                 </div>
@@ -187,36 +199,26 @@ export default function AllCoursesPage() {
                 }
             />
 
-            {/* Delete Confirmation Modal */}
-            {courseToDelete && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                        <h3 className="text-xl font-bold text-gray-800 mb-4">
-                            Видалити курс "{courseToDelete.name}"?
-                        </h3>
-                        <div className="mb-6 text-gray-600">
-                            <p className="mb-2">Ви впевнені, що хочете видалити цей курс?</p>
-                            <p className="text-red-600 font-medium bg-red-50 p-3 rounded-lg border border-red-100">
-                                ⚠️ Увага: Ця дія також видалить всі модулі та уроки, які входять до складу цього курсу!
-                            </p>
-                        </div>
-                        <div className="flex justify-end gap-3">
-                            <button
-                                onClick={() => setCourseToDelete(null)}
-                                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                            >
-                                Скасувати
-                            </button>
-                            <button
-                                onClick={confirmDelete}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                Видалити
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ConfirmModal
+                isOpen={!!courseToDelete}
+                onClose={() => setCourseToDelete(null)}
+                onConfirm={confirmDelete}
+                title={t('courseExpandableCard.deleteConfirmTitle', 'Підтвердження видалення')}
+                message={t('courseExpandableCard.deleteConfirmMessage', 'Ви дійсно бажаєте видалити курс "{{name}}"?', { name: courseToDelete?.name })}
+                warningMessage={t('courseExpandableCard.deleteWarningMessage', 'Ця дія є незворотною. Після видалення ви та всі учні втратять доступ до матеріалів курсу. Усі файли та уроки будуть назавжди стерті з системи. Кошти автоматично не повертаються.')}
+                confirmText={t('allCourses.deleteBtn', 'Видалити')}
+                cancelText={t('allCourses.cancelBtn', 'Скасувати')}
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.notification', 'Сповіщення')}
+                message={alertMessage}
+                isAlert={true}
+                type="info"
+            />
         </div>
     );
 }

@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileText, Paperclip, ChevronDown, ChevronUp, Clock, FileIcon, FileImage, Pencil, Trash2, Lock } from 'lucide-react';
 import type { Lesson } from '../api/lessons';
 import type { FileDto } from '../api/files';
 import { downloadFile, deleteFile } from '../api/files';
 import { VideoPlayer } from './VideoPlayer';
+import { ConfirmModal } from './ConfirmModal';
 
 interface LessonCardProps {
     lesson: Lesson;
@@ -18,8 +20,22 @@ interface LessonCardProps {
 }
 
 export default function LessonCard({ lesson, files = [], isLocked = false, isTransparent = false, onImageClick, onEdit, onDelete, onFileDelete, isCatalogMode = false }: LessonCardProps) {
-    // ... (lines 19-65 omitted)
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    // File deletion confirmation state
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [fileToDelete, setFileToDelete] = useState<{ id: string, name: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    // Alert Modal state
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     const userRole = localStorage.getItem('userRole') || 'USER';
     const isStandardUser = userRole === 'USER' || userRole === 'FAKE_USER';
@@ -31,21 +47,28 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
         return <FileIcon className="w-5 h-5 text-gray-500" />;
     };
 
-    const handleFileDelete = async (fileId: string, fileName: string, e: React.MouseEvent) => {
+    const handleFileDeleteClick = (fileId: string, fileName: string, e: React.MouseEvent) => {
         e.stopPropagation();
+        setFileToDelete({ id: fileId, name: fileName });
+        setIsConfirmModalOpen(true);
+    };
 
-        if (!confirm(`Ви впевнені, що хочете видалити файл "${fileName}"?`)) {
-            return;
-        }
+    const confirmFileDelete = async () => {
+        if (!fileToDelete) return;
 
+        setIsDeleting(true);
         try {
-            await deleteFile(fileId);
+            await deleteFile(fileToDelete.id);
             if (onFileDelete) {
-                onFileDelete(fileId);
+                onFileDelete(fileToDelete.id);
             }
+            setIsConfirmModalOpen(false);
+            setFileToDelete(null);
         } catch (error) {
             console.error('Failed to delete file:', error);
-            alert('Помилка при видаленні файлу');
+            showAlert(t('lessonCard.errors.fileDeleteFailed', 'Помилка при видаленні файлу'));
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -65,7 +88,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
             }
         } catch (error) {
             console.error('Error downloading file:', error);
-            // alert('Помилка при завантаженні файлу. Перевірте, чи ви авторизовані.');
+            showAlert(t('lessonCard.errors.downloadFailed', 'Помилка при завантаженні файлу. Перевірте, чи ви авторизовані.'));
         }
     };
 
@@ -95,19 +118,19 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                             <div className="flex flex-col gap-0.5 text-sm">
                                 {lesson.courseName && (
                                     <p className="text-gray-600 font-medium flex items-center gap-1.5">
-                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary'}`}>Курс:</span> {lesson.courseName}
+                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary'}`}>{t('lessonCard.course', 'Курс')}:</span> {lesson.courseName}
                                     </p>
                                 )}
                                 {lesson.moduleName && (
                                     <p className="text-gray-500 font-medium flex items-center gap-1.5">
-                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary/80'}`}>Модуль:</span> {lesson.moduleName}
+                                        <span className={`${isLocked ? 'text-gray-400' : 'text-brand-primary/80'}`}>{t('lessonCard.module', 'Модуль')}:</span> {lesson.moduleName}
                                     </p>
                                 )}
                             </div>
                         </div>
                         <div className="flex items-center gap-4 text-gray-400 shrink-0">
                             {(files.length > 0 || (lesson.filesCount !== undefined && lesson.filesCount > 0)) && (
-                                <div className="flex items-center gap-1.5" title={`${lesson.filesCount !== undefined ? lesson.filesCount : files.length} файлів`}>
+                                <div className="flex items-center gap-1.5" title={t('lessonCard.filesTooltip', '{{count}} файлів', { count: lesson.filesCount !== undefined ? lesson.filesCount : files.length })}>
                                     <Paperclip className="w-4 h-4" />
                                     <span className="text-sm font-medium">{lesson.filesCount !== undefined ? lesson.filesCount : files.length}</span>
                                 </div>
@@ -126,7 +149,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                                         <button
                                             onClick={() => onEdit(lesson)}
                                             className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
-                                            title="Редагувати"
+                                            title={t('common.editBtn', 'Редагувати')}
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </button>
@@ -135,7 +158,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                                         <button
                                             onClick={() => onDelete(lesson.id)}
                                             className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-50 transition-colors"
-                                            title="Видалити"
+                                            title={t('common.deleteBtn', 'Видалити')}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -175,7 +198,7 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                                         <div className="mt-8 pt-6 border-t border-gray-100">
                                             <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide flex items-center gap-2">
                                                 <Paperclip className="w-4 h-4" />
-                                                Матеріали ({files.length})
+                                                {t('lessonCard.materials', 'Матеріали')} ({files.length})
                                             </h4>
                                             <div className="flex flex-col gap-2">
                                                 {files.map((file) => (
@@ -198,14 +221,14 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                                                                     {file.fileName}
                                                                 </p>
                                                                 <p className="text-xs text-gray-400">
-                                                                    {file.fileSize ? (file.fileSize / 1024 / 1024).toFixed(2) + ' MB' : 'Unknown size'}
+                                                                    {file.fileSize ? (file.fileSize / 1024 / 1024).toFixed(2) + ' MB' : t('lessonCard.unknownSize', 'Unknown size')}
                                                                 </p>
                                                             </div>
                                                         </div>
                                                         <button
-                                                            onClick={(e) => handleFileDelete(file.id, file.fileName, e)}
+                                                            onClick={(e) => handleFileDeleteClick(file.id, file.fileName, e)}
                                                             className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                                            title="Видалити файл"
+                                                            title={t('lessonCard.deleteFile', 'Видалити файл')}
                                                         >
                                                             <Trash2 className="w-4 h-4" />
                                                         </button>
@@ -220,6 +243,31 @@ export default function LessonCard({ lesson, files = [], isLocked = false, isTra
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => {
+                    setIsConfirmModalOpen(false);
+                    setFileToDelete(null);
+                }}
+                onConfirm={confirmFileDelete}
+                title={t('lessonCard.confirmDeleteTitle', 'Підтвердження видалення')}
+                message={t('lessonCard.confirmFileDelete', 'Ви впевнені, що хочете видалити файл "{{fileName}}"?', { fileName: fileToDelete?.name || '' })}
+                confirmText={t('common.deleteBtn', 'Видалити')}
+                cancelText={t('common.cancelBtn', 'Скасувати')}
+                type="danger"
+                isLoading={isDeleting}
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.error', 'Помилка')}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
+            />
         </div>
     );
 }

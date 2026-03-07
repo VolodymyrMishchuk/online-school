@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Edit2, Trash2, Folder, BookOpen, ChevronDown, ChevronUp, Clock, Paperclip } from 'lucide-react';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
+import { ConfirmModal } from './ConfirmModal';
 
 interface ModuleCardProps {
     module: Module;
@@ -24,7 +26,9 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     onDelete,
     isCatalogMode = false,
 }) => {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const userRole = localStorage.getItem('userRole') || 'USER';
     const isStandardUser = userRole === 'USER' || userRole === 'FAKE_USER';
@@ -32,9 +36,11 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
 
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (window.confirm(`Ви впевнені, що хочете видалити "${module.name}"?`)) {
-            onDelete(module.id);
-        }
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        onDelete(module.id);
     };
 
     const handleEdit = (e: React.MouseEvent) => {
@@ -67,12 +73,12 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                             <div className="flex flex-col gap-1">
                                 {courseName && (
                                     <p className="text-sm font-medium text-gray-700">
-                                        <span className="text-brand-primary/80 mr-2">Курс:</span>
+                                        <span className="text-brand-primary/80 mr-2">{t('moduleCard.course', 'Курс')}:</span>
                                         {courseName}
                                     </p>
                                 )}
                                 <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
-                                    <span className="text-brand-primary/80 mr-2">Уроки:</span>
+                                    <span className="text-brand-primary/80 mr-2">{t('moduleCard.lessons', 'Уроки')}:</span>
                                     <span>{lessons.length}</span>
                                 </div>
                             </div>
@@ -81,16 +87,16 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                         {/* Actions & Expand Icon */}
                         <div className="flex items-center gap-4 text-gray-400 shrink-0">
                             {(filesCount !== undefined && filesCount > 0) && (
-                                <div className="flex items-center gap-1.5 text-sm font-medium" title={`${filesCount} файлів`}>
+                                <div className="flex items-center gap-1.5 text-sm font-medium" title={t('moduleCard.filesTooltip', '{{count}} файлів', { count: filesCount })}>
                                     <Paperclip className="w-4 h-4" />
                                     <span>{filesCount}</span>
                                 </div>
                             )}
 
                             {durationMinutes !== undefined && durationMinutes > 0 && (
-                                <div className="flex items-center gap-1.5 text-sm font-medium" title={`${durationMinutes} хв`}>
+                                <div className="flex items-center gap-1.5 text-sm font-medium" title={t('moduleCard.durationTooltip', '{{count}} хв', { count: durationMinutes })}>
                                     <Clock className="w-4 h-4" />
-                                    <span>{durationMinutes} хв</span>
+                                    <span>{durationMinutes} {t('moduleCard.minShort', 'хв')}</span>
                                 </div>
                             )}
 
@@ -99,14 +105,14 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                     <button
                                         onClick={handleEdit}
                                         className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-brand-primary transition-colors"
-                                        title="Редагувати"
+                                        title={t('common.editBtn', 'Редагувати')}
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={handleDelete}
                                         className="p-2 hover:bg-red-50 rounded-lg text-gray-500 hover:text-red-500 transition-colors"
-                                        title="Видалити"
+                                        title={t('common.deleteBtn', 'Видалити')}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>
@@ -135,7 +141,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                             <div className="mt-4 pt-6 border-t border-gray-100">
                                 <h4 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide flex items-center gap-2">
                                     <BookOpen className="w-4 h-4" />
-                                    Список уроків ({lessons.length})
+                                    {t('moduleCard.lessonsList', 'Список уроків')} ({lessons.length})
                                 </h4>
 
                                 {lessons.length > 0 ? (
@@ -160,18 +166,17 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                                     )}
                                                 </div>
 
-                                                {/* Meta Info */}
                                                 <div className="flex items-center gap-4 shrink-0">
                                                     {lesson.filesCount !== undefined && lesson.filesCount > 0 && (
-                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title="Файли">
+                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.files', 'Файли')}>
                                                             <Paperclip className="w-4 h-4" />
                                                             <span>{lesson.filesCount}</span>
                                                         </div>
                                                     )}
                                                     {lesson.durationMinutes !== undefined && lesson.durationMinutes > 0 && (
-                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title="Тривалість">
+                                                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-400" title={t('moduleCard.duration', 'Тривалість')}>
                                                             <Clock className="w-4 h-4" />
-                                                            <span>{lesson.durationMinutes} хв</span>
+                                                            <span>{lesson.durationMinutes} {t('moduleCard.minShort', 'хв')}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -181,7 +186,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                                 ) : (
                                     <div className="text-center py-6 text-gray-400 bg-gray-50/50 rounded-lg border border-dashed border-gray-100">
                                         <BookOpen size={24} className="mx-auto mb-2 opacity-30" />
-                                        <p className="text-xs font-medium">Уроки ще не призначено</p>
+                                        <p className="text-xs font-medium">{t('moduleCard.noLessonsAssigned', 'Уроки ще не призначено')}</p>
                                     </div>
                                 )}
                             </div>
@@ -189,6 +194,15 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
                     </div>
                 </div>
             </div>
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
+                title={t('confirmModal.deleteTitle', 'Підтвердження видалення')}
+                message={t('confirmModal.deleteModuleMessage', 'Ви впевнені, що хочете видалити модуль "{{name}}"? Цю дію неможливо скасувати.', { name: module.name })}
+                confirmText={t('confirmModal.deleteBtn', 'Видалити')}
+                cancelText={t('confirmModal.cancelBtn', 'Скасувати')}
+            />
         </div>
     );
 };

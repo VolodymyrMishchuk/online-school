@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { changePassword, forgotPassword } from '../api/auth';
 import { Eye, EyeOff, Lock, AlertCircle, CheckCircle, Mail, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ChangePasswordModalProps {
     isOpen: boolean;
@@ -9,6 +10,7 @@ interface ChangePasswordModalProps {
 }
 
 export default function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswordModalProps) {
+    const { t } = useTranslation();
     const [view, setView] = useState<'change' | 'forgot' | 'success'>('change');
 
     // Change Password State
@@ -45,22 +47,22 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
         setError('');
 
         if (newPassword !== confirmPassword) {
-            setError('Паролі не співпадають');
+            setError(t('changePassword.passwordsMismatch', 'Паролі не співпадають'));
             return;
         }
 
         if (newPassword.length < 6) {
-            setError('Новий пароль повинен містити щонайменше 6 символів');
+            setError(t('changePassword.minPasswordLength', 'Новий пароль повинен містити щонайменше 6 символів'));
             return;
         }
 
         setLoading(true);
         try {
             await changePassword({ oldPassword, newPassword });
-            setSuccessMessage('Пароль успішно змінено');
+            setSuccessMessage(t('changePassword.passwordChanged', 'Пароль успішно змінено'));
             setView('success');
         } catch (err: any) {
-            setError('Не вдалося змінити пароль. Перевірте старий пароль.');
+            setError(t('changePassword.changeError', 'Не вдалося змінити пароль. Перевірте старий пароль.'));
         } finally {
             setLoading(false);
         }
@@ -71,10 +73,10 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
         setError('');
         try {
             await forgotPassword({ email: userEmail });
-            setSuccessMessage(`Посилання для відновлення надіслано на ${userEmail}`);
+            setSuccessMessage(t('changePassword.resetLinkSentTo', `Посилання для відновлення надіслано на {{email}}`, { email: userEmail }));
             setView('success');
         } catch (err: any) {
-            setError('Не вдалося надіслати посилання. Спробуйте ще раз.');
+            setError(t('changePassword.resetError', 'Не вдалося надіслати посилання. Спробуйте ще раз.'));
         } finally {
             setLoading(false);
         }
@@ -95,9 +97,9 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-brand-dark">
-                                {view === 'change' && 'Зміна паролю'}
-                                {view === 'forgot' && 'Відновлення паролю'}
-                                {view === 'success' && 'Успіх!'}
+                                {view === 'change' && t('changePassword.titleChange', 'Зміна паролю')}
+                                {view === 'forgot' && t('changePassword.titleForgot', 'Відновлення паролю')}
+                                {view === 'success' && t('changePassword.titleSuccess', 'Успіх!')}
                             </h2>
                         </div>
                     </div>
@@ -113,7 +115,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                 <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar flex flex-col gap-6">
                     {view === 'forgot' && (
                         <p className="text-sm text-gray-500">
-                            Це ваша електронна адреса? Ми надішлемо посилання для відновлення туди.
+                            {t('changePassword.forgotDescription', 'Це ваша електронна адреса? Ми надішлемо посилання для відновлення туди.')}
                         </p>
                     )}
 
@@ -121,7 +123,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                         <form id="change-password-form" onSubmit={handleChangePassword} className="space-y-5">
                             {/* Old Password */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">Старий пароль</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">{t('changePassword.oldPassword', 'Старий пароль')}</label>
                                 <div className="relative">
                                     <input
                                         type={showOldPass ? "text" : "password"}
@@ -143,7 +145,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
 
                             {/* New Password */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">Новий пароль</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">{t('changePassword.newPassword', 'Новий пароль')}</label>
                                 <div className="relative">
                                     <input
                                         type={showNewPass ? "text" : "password"}
@@ -165,7 +167,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">Підтвердіть пароль</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">{t('changePassword.confirmPassword', 'Підтвердіть пароль')}</label>
                                 <div className="relative">
                                     <input
                                         type={showConfirmPass ? "text" : "password"}
@@ -191,7 +193,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                     onClick={() => setView('forgot')}
                                     className="text-sm font-bold text-brand-primary hover:text-brand-secondary transition-colors"
                                 >
-                                    Забули пароль?
+                                    {t('changePassword.forgotPasswordLink', 'Забули пароль?')}
                                 </button>
                             </div>
 
@@ -238,7 +240,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                 onClick={handleClose}
                                 className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                             >
-                                Скасувати
+                                {t('common.cancelBtn', 'Скасувати')}
                             </button>
                             <button
                                 type="submit"
@@ -249,9 +251,9 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                 {loading ? (
                                     <div className="flex items-center justify-center gap-2">
                                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                        <span>Збереження...</span>
+                                        <span>{t('common.saving', 'Збереження...')}</span>
                                     </div>
-                                ) : 'Змінити'}
+                                ) : t('changePassword.changeBtn', 'Змінити')}
                             </button>
                         </>
                     )}
@@ -263,7 +265,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                 onClick={() => setView('change')}
                                 className="flex-1 py-3 font-bold text-gray-500 bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm"
                             >
-                                Скасувати
+                                {t('common.cancelBtn', 'Скасувати')}
                             </button>
                             <button
                                 type="button"
@@ -271,7 +273,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                 disabled={loading}
                                 className="flex-1 py-3 font-bold text-white bg-brand-primary hover:bg-brand-secondary rounded-lg transition-all shadow-lg hover:shadow-xl transform active:scale-95 duration-200 disabled:opacity-70"
                             >
-                                {loading ? 'Надсилання...' : 'Надіслати'}
+                                {loading ? t('common.sending', 'Надсилання...') : t('changePassword.sendBtn', 'Надіслати')}
                             </button>
                         </>
                     )}
@@ -281,7 +283,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                             onClick={handleClose}
                             className="w-full py-3 font-bold text-white bg-brand-primary hover:bg-brand-secondary rounded-lg transition-all shadow-lg hover:shadow-xl transform active:scale-95 duration-200"
                         >
-                            Закрити
+                            {t('common.closeBtn', 'Закрити')}
                         </button>
                     )}
                 </div>

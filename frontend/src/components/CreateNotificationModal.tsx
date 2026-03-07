@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
 import { X, Users, Search, Globe, Send, Loader2, Megaphone, Link as LinkIcon, Check, Bell } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getAllPersons } from '../api/persons';
 import type { PersonDto } from '../api/persons';
 import { broadcastNotification, sendTargetedNotification } from '../api/notifications';
@@ -13,6 +14,7 @@ interface CreateNotificationModalProps {
 type TargetType = 'ALL' | 'SPECIFIC';
 
 export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    const { t } = useTranslation();
     const [title, setTitle] = useState('');
     const [message, setMessage] = useState('');
     const [buttonUrl, setButtonUrl] = useState('');
@@ -105,8 +107,8 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                             <Megaphone className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-brand-dark">Створити сповіщення</h2>
-                            <p className="text-xs text-gray-500 font-medium">Для користувачів</p>
+                            <h2 className="text-xl font-bold text-brand-dark">{t('notificationModal.createNotification', 'Створити сповіщення')}</h2>
+                            <p className="text-xs text-gray-500 font-medium">{t('notificationModal.forUsers', 'Для користувачів')}</p>
                         </div>
                     </div>
                     <button
@@ -121,7 +123,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                 <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar flex flex-col gap-6">
                     {/* Target Selection */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">Отримувачі</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">{t('notificationModal.recipients', 'Отримувачі')}</label>
                         <div className="flex gap-2 p-1 bg-white/50 border border-gray-100 rounded-lg w-fit">
                             <button
                                 type="button"
@@ -132,7 +134,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                                     }`}
                             >
                                 <Globe className="w-4 h-4" />
-                                Всім користувачам
+                                {t('notificationModal.targetAll', 'Всім користувачам')}
                             </button>
                             <button
                                 type="button"
@@ -143,7 +145,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                                     }`}
                             >
                                 <Users className="w-4 h-4" />
-                                Вибрати зі списку
+                                {t('notificationModal.targetSpecific', 'Вибрати зі списку')}
                             </button>
                         </div>
                     </div>
@@ -155,7 +157,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                 <input
                                     type="text"
-                                    placeholder="Пошук користувачів..."
+                                    placeholder={t('notificationModal.searchUsersPlaceholder', 'Пошук користувачів...')}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full pl-9 pr-4 py-2.5 bg-white/70 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-brand-primary transition-all"
@@ -166,10 +168,10 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                                 {isLoadingUsers ? (
                                     <div className="text-center py-6 text-gray-500 text-sm flex items-center justify-center gap-2">
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        Завантаження...
+                                        {t('common.loading', 'Завантаження...')}
                                     </div>
                                 ) : filteredUsers.length === 0 ? (
-                                    <div className="text-center py-6 text-gray-500 text-sm">Користувачів не знайдено</div>
+                                    <div className="text-center py-6 text-gray-500 text-sm">{t('notificationModal.noUsersFound', 'Користувачів не знайдено')}</div>
                                 ) : (
                                     filteredUsers.map(user => (
                                         <label
@@ -204,7 +206,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                                 )}
                             </div>
                             <div className="text-xs font-medium text-gray-500 text-right pt-2 border-t border-gray-200/50">
-                                Вибрано: <span className="text-brand-primary font-bold">{selectedUsers.length}</span>
+                                {t('notificationModal.selectedCount', 'Вибрано:')} <span className="text-brand-primary font-bold">{selectedUsers.length}</span>
                             </div>
                         </div>
                     )}
@@ -214,13 +216,13 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Megaphone className="w-4 h-4" />
-                                Заголовок
+                                {t('notificationModal.title', 'Заголовок')}
                             </label>
                             <input
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Введіть заголовок сповіщення"
+                                placeholder={t('notificationModal.titlePlaceholder', 'Введіть заголовок сповіщення')}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
                             />
                         </div>
@@ -229,13 +231,13 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Bell className="w-4 h-4" />
-                                Текст повідомлення
+                                {t('notificationModal.messageText', 'Текст повідомлення')}
                             </label>
                             <textarea
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 rows={4}
-                                placeholder="Введіть текст сповіщення..."
+                                placeholder={t('notificationModal.messagePlaceholder', 'Введіть текст сповіщення...')}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white resize-none"
                             />
                         </div>
@@ -244,7 +246,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <LinkIcon className="w-4 h-4" />
-                                Посилання (опційно)
+                                {t('notificationModal.buttonUrl', 'Посилання (опційно)')}
                             </label>
                             <input
                                 type="text"
@@ -264,7 +266,7 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                         onClick={handleClose}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         type="submit"
@@ -275,12 +277,12 @@ export const CreateNotificationModal: React.FC<CreateNotificationModalProps> = (
                         {isSubmitting ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Відправка...
+                                {t('common.sending', 'Відправка...')}
                             </>
                         ) : (
                             <>
                                 <Send className="w-4 h-4" />
-                                Надіслати
+                                {t('common.send', 'Надіслати')}
                             </>
                         )}
                     </button>

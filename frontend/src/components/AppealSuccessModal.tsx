@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface AppealSuccessModalProps {
     isOpen: boolean;
@@ -8,6 +9,7 @@ interface AppealSuccessModalProps {
 }
 
 export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, onClose }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     if (!isOpen) return null;
@@ -30,7 +32,7 @@ export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, 
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-light/50 text-brand-primary ring-2 ring-white shadow-sm">
                             <CheckCircle className="w-5 h-5 text-green-500" />
                         </div>
-                        <h2 className="text-xl font-bold text-brand-dark">Успіх!</h2>
+                        <h2 className="text-xl font-bold text-brand-dark">{t('appeal.successModalTitle', 'Успіх!')}</h2>
                     </div>
                     <button
                         onClick={handleAcknowledge}
@@ -46,10 +48,10 @@ export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, 
                         <CheckCircle className="w-8 h-8 text-green-500" />
                     </div>
                     <p className="text-gray-700 font-medium text-lg">
-                        Ваше звернення успішно відправлено!
+                        {t('appeal.successModalDesc', 'Ваше звернення успішно відправлено!')}
                     </p>
                     <p className="text-sm text-gray-500">
-                        Ми зв'яжемося з Вами найближчим часом за вказаними контактами.
+                        {t('appeal.successModalSubDesc', 'Ми зв\'яжемося з Вами найближчим часом за вказаними контактами.')}
                     </p>
                 </div>
 
@@ -59,7 +61,7 @@ export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, 
                         onClick={handleAcknowledge}
                         className="w-full py-3 font-bold text-white bg-brand-primary hover:bg-brand-secondary rounded-lg transition-all shadow-lg hover:shadow-xl transform active:scale-95 duration-200"
                     >
-                        Зрозуміло
+                        {t('appeal.successModalButton', 'Зрозуміло')}
                     </button>
                 </div>
             </div>

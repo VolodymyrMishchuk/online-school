@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type PersonWithEnrollments, type UpdatePersonDto, getRoles, getStatuses } from '../api/users';
-import { X, User, Mail, Phone, Calendar, Shield, Activity, Save, Loader2 } from 'lucide-react';
+import { X, User, Mail, Phone, Calendar, Shield, Activity, Save, Loader2, Globe } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -14,6 +15,7 @@ interface EditUserModalProps {
 }
 
 export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, user, onSubmit, isReadonlyForFakeAdmin, onShowRestriction }) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<UpdatePersonDto>({
         firstName: '',
         lastName: '',
@@ -21,7 +23,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
         bornedAt: '',
         role: 'USER',
         status: 'ACTIVE',
-        email: ''
+        email: '',
+        language: 'uk'
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -64,7 +67,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                 bornedAt: user.bornedAt ? user.bornedAt.split('T')[0] : '',
                 role: user.role || 'USER',
                 status: user.status || 'ACTIVE',
-                email: user.email || ''
+                email: user.email || '',
+                language: user.language || 'uk'
             });
             setError(null);
         }
@@ -86,7 +90,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
         }
 
         if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
+            setError(t('common.errors.invalidPhone', 'Будь ласка, введіть коректний номер телефону'));
             return;
         }
 
@@ -103,7 +107,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
             await onSubmit(user.id, dataToSubmit);
             onClose();
         } catch (err) {
-            setError('Не вдалося оновити користувача.');
+            setError(t('editUserModal.errors.updateFailed', 'Не вдалося оновити користувача.'));
         } finally {
             setLoading(false);
         }
@@ -123,8 +127,8 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                             <User className="w-5 h-5" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-brand-dark">Редагувати профіль</h2>
-                            <p className="text-xs text-gray-500 font-medium">Оновлення даних користувача</p>
+                            <h2 className="text-xl font-bold text-brand-dark">{t('editUserModal.editProfile', 'Редагувати профіль')}</h2>
+                            <p className="text-xs text-gray-500 font-medium">{t('editUserModal.updateDescription', 'Оновлення даних користувача')}</p>
                         </div>
                     </div>
                     <button
@@ -149,7 +153,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <User className="w-4 h-4" />
-                                    Ім'я
+                                    {t('common.firstName', "Ім'я")}
                                 </label>
                                 <input
                                     type="text"
@@ -158,13 +162,13 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                    placeholder="Ім'я"
+                                    placeholder={t('common.firstName', "Ім'я")}
                                 />
                             </div>
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <User className="w-4 h-4" />
-                                    Прізвище
+                                    {t('common.lastName', 'Прізвище')}
                                 </label>
                                 <input
                                     type="text"
@@ -173,7 +177,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                                     onChange={handleChange}
                                     required
                                     className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                    placeholder="Прізвище"
+                                    placeholder={t('common.lastName', 'Прізвище')}
                                 />
                             </div>
                         </div>
@@ -181,7 +185,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Mail className="w-4 h-4" />
-                                Email
+                                {t('common.email', 'Email')}
                             </label>
                             <input
                                 type="email"
@@ -197,7 +201,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Phone className="w-4 h-4" />
-                                Номер телефону
+                                {t('common.phoneNumber', 'Номер телефону')}
                             </label>
                             <style>{`
                                 .phone-input-override-modal .PhoneInputInput {
@@ -228,7 +232,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Calendar className="w-4 h-4" />
-                                Дата народження
+                                {t('common.birthDate', 'Дата народження')}
                             </label>
                             <input
                                 type="date"
@@ -243,7 +247,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Shield className="w-4 h-4" />
-                                    Роль
+                                    {t('common.role', 'Роль')}
                                 </label>
                                 <div className="relative">
                                     <select
@@ -266,7 +270,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Activity className="w-4 h-4" />
-                                    Статус
+                                    {t('common.status', 'Статус')}
                                 </label>
                                 <div className="relative">
                                     <select
@@ -287,6 +291,31 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Language */}
+                            <div className="col-span-2">
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <Globe className="w-4 h-4" />
+                                    {t('common.interfaceLanguage', 'Мова інтерфейсу')}
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        name="language"
+                                        value={formData.language}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none cursor-pointer"
+                                    >
+                                        <option value="uk">{t('common.languages.uk', 'Українська')}</option>
+                                        <option value="en">{t('common.languages.en', 'English')}</option>
+                                        <option value="de">{t('common.languages.de', 'Deutsch')}</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -298,7 +327,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                         onClick={onClose}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         type="submit"
@@ -309,12 +338,12 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
                         {loading ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Збереження...
+                                {t('common.saving', 'Збереження...')}
                             </>
                         ) : (
                             <>
                                 <Save className="w-4 h-4" />
-                                Зберегти
+                                {t('common.save', 'Зберегти')}
                             </>
                         )}
                     </button>

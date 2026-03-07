@@ -9,6 +9,7 @@ export interface PersonDto {
     email: string;
     role: string;
     status: string;
+    language: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -22,6 +23,7 @@ export interface PersonUpdateDto {
     password?: string; // Optional
     role?: string; // Optional
     status?: string; // Optional
+    language?: string; // Optional
 }
 
 export const getPerson = async (id: string): Promise<PersonDto> => {

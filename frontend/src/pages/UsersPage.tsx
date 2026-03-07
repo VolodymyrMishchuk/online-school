@@ -16,9 +16,12 @@ import { CreateUserModal } from '../components/CreateUserModal';
 import { EditUserModal } from '../components/EditUserModal';
 import { ManageAccessModal } from '../components/ManageAccessModal';
 import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
+import { ConfirmModal } from '../components/ConfirmModal';
 import * as Icons from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const UsersPage: React.FC = () => {
+    const { t } = useTranslation();
     const [users, setUsers] = useState<PersonWithEnrollments[]>([]);
     const [courses, setCourses] = useState<CourseDto[]>([]);
     const [loading, setLoading] = useState(true);
@@ -32,6 +35,16 @@ export const UsersPage: React.FC = () => {
     const [blockedSort, setBlockedSort] = useState<'top' | 'bottom' | null>(null);
     const [adminSort, setAdminSort] = useState<'top' | 'bottom' | null>(null);
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    // Alert & Confirm State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [userToDelete, setUserToDelete] = useState<string | null>(null);
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     const userStr = localStorage.getItem('user');
     const currentUser = userStr ? JSON.parse(userStr) : null;
@@ -58,7 +71,7 @@ export const UsersPage: React.FC = () => {
 
             setError(null);
         } catch (err) {
-            setError('Не вдалося завантажити дані.');
+            setError(t('users.loadError', 'Не вдалося завантажити дані.'));
         } finally {
             setLoading(false);
         }
@@ -78,14 +91,19 @@ export const UsersPage: React.FC = () => {
         await fetchData();
     };
 
-    const handleDeleteUser = async (id: string) => {
-        if (window.confirm('Ви впевнені, що хочете видалити цього користувача? Цю дію неможливо скасувати.')) {
-            try {
-                await deletePerson(id);
-                await fetchData();
-            } catch (err) {
-                alert('Не вдалося видалити користувача.');
-            }
+    const handleDeleteUser = (id: string) => {
+        setUserToDelete(id);
+    };
+
+    const confirmDeleteUser = async () => {
+        if (!userToDelete) return;
+        try {
+            await deletePerson(userToDelete);
+            await fetchData();
+            setUserToDelete(null);
+        } catch (err) {
+            showAlert(t('users.deleteError', 'Не вдалося видалити користувача.'));
+            setUserToDelete(null);
         }
     };
 
@@ -150,12 +168,12 @@ export const UsersPage: React.FC = () => {
     const calculateTimeLeft = (enrollmentDate?: string, courseId?: string) => {
         const diffTime = getRemainingTimeMs(enrollmentDate, courseId);
 
-        if (diffTime === Infinity) return 'Назавжди';
-        if (diffTime < 0) return 'Минув';
+        if (diffTime === Infinity) return t('users.forever', 'Назавжди');
+        if (diffTime < 0) return t('users.expired', 'Минув');
 
         const diffHours = Math.ceil(diffTime / (1000 * 60 * 60));
         if (diffHours < 48) {
-            return `${diffHours} год`;
+            return `${diffHours}${t('users.hours', ' год')}`;
         }
 
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -163,11 +181,11 @@ export const UsersPage: React.FC = () => {
         const lastTwoDigits = diffDays % 100;
 
         if (lastDigit === 1 && lastTwoDigits !== 11) {
-            return `${diffDays} день`;
+            return `${diffDays}${t('users.day1', ' день')}`;
         } else if ([2, 3, 4].includes(lastDigit) && ![12, 13, 14].includes(lastTwoDigits)) {
-            return `${diffDays} дні`;
+            return `${diffDays}${t('users.day2_4', ' дні')}`;
         } else {
-            return `${diffDays} днів`;
+            return `${diffDays}${t('users.days', ' днів')}`;
         }
     };
 
@@ -334,19 +352,19 @@ export const UsersPage: React.FC = () => {
     };
 
     if (loading && users.length === 0) {
-        return <div className="p-8 text-center text-gray-500">Завантаження...</div>;
+        return <div className="p-8 text-center text-gray-500">{t('dashboard.loading', 'Завантаження...')}</div>;
     }
 
     return (
         <div className="container mx-auto px-6 py-12 space-y-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Управління користувачами</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{t('users.title', 'Управління користувачами')}</h1>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
                     className="flex items-center space-x-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                 >
                     <Icons.Plus size={20} />
-                    <span>Створити користувача</span>
+                    <span>{t('users.createUserBtn', 'Створити користувача')}</span>
                 </button>
             </div>
 
@@ -363,7 +381,7 @@ export const UsersPage: React.FC = () => {
                 </div>
                 <input
                     type="text"
-                    placeholder="Пошук за ім'ям або email..."
+                    placeholder={t('users.searchPlaceholder', "Пошук за ім'ям або email...")}
                     className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -382,7 +400,7 @@ export const UsersPage: React.FC = () => {
                             >
                                 <div className="flex items-center gap-2">
                                     <div className="flex items-center gap-1">
-                                        Ім'я
+                                        {t('users.nameHeader', "Ім'я")}
                                         {getSortIcon('name')}
                                     </div>
 
@@ -396,7 +414,7 @@ export const UsersPage: React.FC = () => {
                                                 }
                                             `}
                                             onClick={toggleBlockedSort}
-                                            title="Сортувати заблокованих"
+                                            title={t('users.sortBlocked', "Сортувати заблокованих")}
                                         >
                                             <span>BLOCKED</span>
 
@@ -411,7 +429,7 @@ export const UsersPage: React.FC = () => {
                                                 <div
                                                     className="pl-1 ml-1 border-l border-red-200/60 hover:text-red-950 flex items-center"
                                                     onClick={clearBlockedSort}
-                                                    title="Скинути сортування"
+                                                    title={t('users.clearSort', "Скинути сортування")}
                                                 >
                                                     <Icons.X size={10} />
                                                 </div>
@@ -429,7 +447,7 @@ export const UsersPage: React.FC = () => {
                                                 }
                                             `}
                                             onClick={toggleAdminSort}
-                                            title="Сортувати адміністраторів"
+                                            title={t('users.sortAdmin', "Сортувати адміністраторів")}
                                         >
                                             <span>ADMIN</span>
 
@@ -444,7 +462,7 @@ export const UsersPage: React.FC = () => {
                                                 <div
                                                     className="pl-1 ml-1 border-l border-purple-200/60 hover:text-purple-950 flex items-center"
                                                     onClick={clearAdminSort}
-                                                    title="Скинути сортування"
+                                                    title={t('users.clearSort', "Скинути сортування")}
                                                 >
                                                     <Icons.X size={10} />
                                                 </div>
@@ -459,7 +477,7 @@ export const UsersPage: React.FC = () => {
                                 onClick={() => handleSort('contacts')}
                             >
                                 <div className="flex items-center gap-1">
-                                    Контакти
+                                    {t('users.contactsHeader', "Контакти")}
                                     {getSortIcon('contacts')}
                                 </div>
                             </th>
@@ -469,7 +487,7 @@ export const UsersPage: React.FC = () => {
                                 onClick={() => handleSort('createdAt')}
                             >
                                 <div className="flex items-center gap-1">
-                                    Реєстрація
+                                    {t('users.registrationHeader', "Реєстрація")}
                                     {getSortIcon('createdAt')}
                                 </div>
                             </th>
@@ -482,7 +500,7 @@ export const UsersPage: React.FC = () => {
                                         className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                                         onClick={() => handleSort('enrollment_name')}
                                     >
-                                        Курси
+                                        {t('users.coursesHeader', "Курси")}
                                         {getSortIcon('enrollment_name')}
                                     </div>
 
@@ -495,9 +513,9 @@ export const UsersPage: React.FC = () => {
                                             }
                                         `}
                                         onClick={(e) => { e.stopPropagation(); handleSort('enrollment_date'); }}
-                                        title="Сортувати за датою початку (придбання)"
+                                        title={t('users.sortByStartDate', "Сортувати за датою початку (придбання)")}
                                     >
-                                        <span>СТАРТ</span>
+                                        <span>{t('users.startParam', "СТАРТ")}</span>
 
                                         {/* Sort Indicators */}
                                         <div className="flex flex-col -space-y-0.5">
@@ -510,7 +528,7 @@ export const UsersPage: React.FC = () => {
                                             <div
                                                 className="pl-1 ml-1 border-l border-green-200/60 hover:text-green-950 flex items-center"
                                                 onClick={(e) => { e.stopPropagation(); setSortConfig(null); }}
-                                                title="Скинути сортування"
+                                                title={t('users.clearSort', "Скинути сортування")}
                                             >
                                                 <Icons.X size={10} />
                                             </div>
@@ -526,9 +544,9 @@ export const UsersPage: React.FC = () => {
                                             }
                                         `}
                                         onClick={(e) => { e.stopPropagation(); handleSort('enrollment_timeLeft'); }}
-                                        title="Сортувати за часом завершення"
+                                        title={t('users.sortByEndDate', "Сортувати за часом завершення")}
                                     >
-                                        <span>КІНЕЦЬ</span>
+                                        <span>{t('users.endParam', "КІНЕЦЬ")}</span>
 
                                         {/* Sort Indicators */}
                                         <div className="flex flex-col -space-y-0.5">
@@ -541,7 +559,7 @@ export const UsersPage: React.FC = () => {
                                             <div
                                                 className="pl-1 ml-1 border-l border-orange-200/60 hover:text-orange-950 flex items-center"
                                                 onClick={(e) => { e.stopPropagation(); setSortConfig(null); }}
-                                                title="Скинути сортування"
+                                                title={t('users.clearSort', "Скинути сортування")}
                                             >
                                                 <Icons.X size={10} />
                                             </div>
@@ -550,7 +568,7 @@ export const UsersPage: React.FC = () => {
                                 </div>
                             </th>
                             <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap w-1">
-                                Дії
+                                {t('users.actionsHeader', "Дії")}
                             </th>
                         </tr>
                     </thead>
@@ -616,11 +634,11 @@ export const UsersPage: React.FC = () => {
                                                     return (
                                                         <div key={enrollment.id} className="inline-flex flex-col px-3 py-1.5 rounded-md bg-white/60 border border-gray-200 shadow-sm">
                                                             <span className="text-xs font-bold text-gray-800 leading-tight block">
-                                                                {enrollment.courseName || 'Курс'}
+                                                                {enrollment.courseName || t('users.courseFallback', 'Курс')}
                                                             </span>
                                                             <span className="text-[10px] text-gray-500 leading-tight block mt-0.5 flex items-center gap-1">
                                                                 <span className={sortConfig?.key === 'enrollment_date' ? 'bg-green-100 text-green-800 px-1 rounded -ml-1' : ''}>
-                                                                    {enrollment.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('uk-UA') : 'Невідомо'}
+                                                                    {enrollment.createdAt ? new Date(enrollment.createdAt).toLocaleDateString('uk-UA') : t('users.unknown', 'Невідомо')}
                                                                 </span>
                                                                 {timeLeft && (
                                                                     <>
@@ -635,7 +653,7 @@ export const UsersPage: React.FC = () => {
                                                     );
                                                 })
                                         ) : (
-                                            <span className="text-sm text-gray-400 font-italic">Немає курсів</span>
+                                            <span className="text-sm text-gray-400 font-italic">{t('users.noCourses', 'Немає курсів')}</span>
                                         )}
                                     </div>
                                 </td>
@@ -643,14 +661,14 @@ export const UsersPage: React.FC = () => {
                                     <button
                                         onClick={() => openManageAccessModal(user)}
                                         className="text-indigo-600 hover:text-indigo-900"
-                                        title="Управління доступом"
+                                        title={t('users.manageAccessBtn', "Управління доступом")}
                                     >
                                         <Icons.BookOpen size={18} />
                                     </button>
                                     <button
                                         onClick={() => openEditModal(user)}
                                         className="text-blue-600 hover:text-blue-900"
-                                        title="Редагувати"
+                                        title={t('users.editBtn', "Редагувати")}
                                     >
                                         <Icons.Edit2 size={18} />
                                     </button>
@@ -663,7 +681,7 @@ export const UsersPage: React.FC = () => {
                                             }
                                         }}
                                         className="text-red-600 hover:text-red-900"
-                                        title="Видалити"
+                                        title={t('users.deleteBtn', "Видалити")}
                                     >
                                         <Icons.Trash2 size={18} />
                                     </button>
@@ -707,6 +725,27 @@ export const UsersPage: React.FC = () => {
             <FakeAdminRestrictionModal
                 isOpen={isFakeAdminRestrictionModalOpen}
                 onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={!!userToDelete}
+                onClose={() => setUserToDelete(null)}
+                onConfirm={confirmDeleteUser}
+                title={t('common.deleteBtn', 'Видалити')}
+                message={t('users.deleteConfirm', 'Ви впевнені, що хочете видалити цього користувача? Цю дію неможливо скасувати.')}
+                confirmText={t('common.deleteBtn', 'Видалити')}
+                cancelText={t('common.cancelBtn', 'Скасувати')}
+                type="danger"
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.error', 'Помилка')}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
             />
         </div>
     );

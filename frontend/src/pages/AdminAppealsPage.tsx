@@ -4,11 +4,14 @@ import { useLocation } from 'react-router-dom';
 import { getAppeals, updateAppealStatus, deleteAppeal } from '../api/appeals';
 import type { AppealResponse, FileDto } from '../api/appeals';
 import { format } from 'date-fns';
-import { uk } from 'date-fns/locale';
+import { uk, enUS, de } from 'date-fns/locale';
 import { Download, CheckCircle, Trash2, Mail, Phone, Instagram, Send, Loader2, MessageSquare, Image as ImageIcon, ZoomIn, ZoomOut, X, Maximize2, ChevronLeft, ChevronRight, Copy, Check, MessageCircle } from 'lucide-react';
 import { downloadFile } from '../api/files';
+import { useTranslation } from 'react-i18next';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 function CopyButton({ text }: { text: string }) {
+    const { t } = useTranslation();
     const [copied, setCopied] = useState(false);
 
     const handleCopy = (e: React.MouseEvent) => {
@@ -22,7 +25,7 @@ function CopyButton({ text }: { text: string }) {
         <button
             onClick={handleCopy}
             className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none flex-shrink-0"
-            title="Копіювати"
+            title={t('adminAppeals.copyBtn', 'Копіювати')}
         >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
         </button>
@@ -30,6 +33,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 function AppealImageGallery({ photos }: { photos: FileDto[] }) {
+    const { t } = useTranslation();
     const [blobUrls, setBlobUrls] = useState<Record<string, string>>({});
     const [isOpen, setIsOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
@@ -145,10 +149,10 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
                         key={photo.id}
                         onClick={(e) => { e.stopPropagation(); setActiveIndex(index); setIsOpen(true); setZoom(1); }}
                         className="relative flex-shrink-0 w-16 h-16 rounded-lg border border-gray-200 overflow-hidden group/img hover:border-brand-primary transition-colors focus:outline-none focus:ring-2 focus:ring-brand-primary/50 cursor-pointer"
-                        title="Натисніть щоб збільшити"
+                        title={t('adminAppeals.clickToZoomTitle', 'Натисніть щоб збільшити')}
                     >
                         {url ? (
-                            <img src={url} alt="Додаток до звернення" className="w-full h-full object-cover" />
+                            <img src={url} alt={t('adminAppeals.appealAttachmentAlt', 'Додаток до звернення')} className="w-full h-full object-cover" />
                         ) : (
                             <div className="absolute inset-0 bg-gray-50 flex items-center justify-center animate-pulse">
                                 <ImageIcon className="w-6 h-6 text-gray-300" />
@@ -174,10 +178,10 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
                         <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0 bg-white z-20">
                             <div className="flex items-center gap-3">
                                 <h3 className="font-bold text-gray-900 truncate">
-                                    {activePhoto?.originalName || 'Зображення'}
+                                    {activePhoto?.originalName || t('adminAppeals.imageFallback', 'Зображення')}
                                 </h3>
                                 <span className="px-2.5 py-1 text-xs font-semibold text-gray-500 bg-gray-100 rounded-full">
-                                    {activeIndex + 1} з {photos.length}
+                                    {activeIndex + 1} {t('adminAppeals.of', 'з')} {photos.length}
                                 </span>
                             </div>
                             <button
@@ -243,21 +247,21 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setZoom(z => Math.max(0.5, z - 0.25)); }}
                                     className="p-3 text-gray-600 hover:bg-gray-100 hover:text-brand-primary transition-colors focus:outline-none"
-                                    title="Зменшити"
+                                    title={t('adminAppeals.zoomOutBtn', 'Зменшити')}
                                 >
                                     <ZoomOut className="w-5 h-5" />
                                 </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setZoom(1); setPosition({ x: 0, y: 0 }); }}
                                     className="px-4 py-2 text-sm font-bold text-gray-700 min-w-[3.5rem] text-center border-x border-gray-100 hover:bg-gray-50 focus:outline-none transition-colors"
-                                    title="Скинути масштаб"
+                                    title={t('adminAppeals.resetZoomBtn', 'Скинути масштаб')}
                                 >
                                     {Math.round(zoom * 100)}%
                                 </button>
                                 <button
                                     onClick={(e) => { e.stopPropagation(); setZoom(z => Math.min(4, z + 0.25)); }}
                                     className="p-3 text-gray-600 hover:bg-gray-100 hover:text-brand-primary transition-colors focus:outline-none"
-                                    title="Збільшити"
+                                    title={t('adminAppeals.zoomInBtn', 'Збільшити')}
                                 >
                                     <ZoomIn className="w-5 h-5" />
                                 </button>
@@ -270,14 +274,14 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
                                 onClick={(e) => { e.stopPropagation(); setIsOpen(false); }}
                                 className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
                             >
-                                Закрити
+                                {t('adminAppeals.closeBtn', 'Закрити')}
                             </button>
                             {photos.length > 1 && (
                                 <button
                                     onClick={handleDownloadAll}
                                     className="px-5 py-2.5 text-sm font-medium text-brand-primary bg-brand-light/20 border border-brand-primary/20 rounded-lg hover:bg-brand-primary hover:text-white transition-colors focus:outline-none"
                                 >
-                                    Завантажити всі ({photos.length})
+                                    {t('adminAppeals.downloadAllPrefix', 'Завантажити всі (')}{photos.length}{t('adminAppeals.downloadAllSuffix', ')')}
                                 </button>
                             )}
                             <button
@@ -286,7 +290,7 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
                                 className="px-5 py-2.5 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary/50 transition-colors inline-flex items-center gap-2 shadow-sm disabled:opacity-50"
                             >
                                 <Download className="w-4 h-4" />
-                                Завантажити це фото
+                                {t('adminAppeals.downloadPhotoBtn', 'Завантажити це фото')}
                             </button>
                         </div>
                     </div>
@@ -298,6 +302,17 @@ function AppealImageGallery({ photos }: { photos: FileDto[] }) {
 }
 
 export default function AdminAppealsPage() {
+    const { t, i18n } = useTranslation();
+
+    const getDateLocale = () => {
+        switch (i18n.language) {
+            case 'en': return enUS;
+            case 'de': return de;
+            case 'uk':
+            default: return uk;
+        }
+    };
+
     const [appeals, setAppeals] = useState<AppealResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -305,6 +320,17 @@ export default function AdminAppealsPage() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const targetId = queryParams.get('id');
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
+
+    const showAlert = (message: string, title = t('common.error', 'Помилка')) => {
+        setAlertMessage(message);
+        setAlertTitle(title);
+        setIsAlertOpen(true);
+    };
 
     const fetchAppeals = async (pageNumber: number) => {
         try {
@@ -314,7 +340,7 @@ export default function AdminAppealsPage() {
             setTotalPages(data.totalPages);
             setPage(data.number);
         } catch (error) {
-            alert('Помилка завантаження звернень');
+            showAlert(t('adminAppeals.loadError', 'Помилка завантаження звернень'));
         } finally {
             setIsLoading(false);
         }
@@ -340,7 +366,7 @@ export default function AdminAppealsPage() {
             await updateAppealStatus(id, newStatus);
             setAppeals(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
         } catch (error) {
-            alert('Помилка оновлення статусу');
+            showAlert(t('adminAppeals.updateStatusError', 'Помилка оновлення статусу'));
         }
     };
 
@@ -350,7 +376,7 @@ export default function AdminAppealsPage() {
             await deleteAppeal(id);
             setAppeals(prev => prev.filter(a => a.id !== id));
         } catch (error) {
-            alert('Помилка видалення звернення');
+            showAlert(t('adminAppeals.deleteError', 'Помилка видалення звернення'));
         }
     };
 
@@ -379,7 +405,7 @@ export default function AdminAppealsPage() {
         <div className="p-8 max-w-7xl mx-auto h-full overflow-auto">
             <div className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Звернення</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{t('adminAppeals.title', 'Звернення')}</h1>
                 </div>
             </div>
 
@@ -412,7 +438,7 @@ export default function AdminAppealsPage() {
                                                 : appeal.userEmail}
                                         </h4>
                                         <p className="text-xs text-gray-400 mt-0.5">
-                                            {format(new Date(appeal.createdAt), 'dd MMMM yyyy, HH:mm', { locale: uk })}
+                                            {format(new Date(appeal.createdAt), 'dd MMMM yyyy, HH:mm', { locale: getDateLocale() })}
                                         </p>
                                     </div>
                                 </div>
@@ -438,7 +464,7 @@ export default function AdminAppealsPage() {
                                     {appeal.photos && appeal.photos.length > 0 && (
                                         <div className="flex-1">
                                             <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
-                                                Прикріплені зображення ({appeal.photos.length})
+                                                {t('adminAppeals.attachmentsPrefix', 'Прикріплені зображення (')}{appeal.photos.length}{t('adminAppeals.attachmentsSuffix', ')')}
                                             </h4>
                                             <AppealImageGallery photos={appeal.photos} />
                                         </div>
@@ -458,14 +484,14 @@ export default function AdminAppealsPage() {
                                             className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-medium hover:bg-emerald-600 transition-all shadow-sm hover:shadow"
                                         >
                                             <CheckCircle className="w-4 h-4" />
-                                            Опрацьовано
+                                            {t('adminAppeals.processedBtn', 'Опрацьовано')}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={(e) => { e.stopPropagation(); handleStatusChange(appeal.id, 'NEW'); }}
                                             className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all shadow-sm hover:shadow"
                                         >
-                                            Повернути статус
+                                            {t('adminAppeals.revertStatusBtn', 'Повернути статус')}
                                         </button>
                                     )}
                                 </div>
@@ -485,7 +511,7 @@ export default function AdminAppealsPage() {
                 {appeals.length === 0 && !isLoading && (
                     <div className="col-span-full py-16 text-center text-gray-400">
                         <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <p>Звернень поки що немає</p>
+                        <p>{t('adminAppeals.noAppeals', 'Звернень поки що немає')}</p>
                     </div>
                 )}
             </div>
@@ -506,6 +532,16 @@ export default function AdminAppealsPage() {
                     ))}
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={alertTitle}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
+            />
         </div>
     );
 }

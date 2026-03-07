@@ -3,8 +3,10 @@ import { getMyEnrollments } from '../api/enrollments';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { PlayCircle, LogOut, Book, Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function StudentDashboard() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     // Get user from local storage
     const userStr = localStorage.getItem('user');
@@ -23,7 +25,7 @@ export default function StudentDashboard() {
     });
 
     if (!user) return null;
-    if (isLoading) return <div className="min-h-screen flex items-center justify-center text-brand-primary font-medium">Loading dashboard...</div>;
+    if (isLoading) return <div className="min-h-screen flex items-center justify-center text-brand-primary font-medium">{t('common.loading', 'Завантаження...')}</div>;
 
     return (
         <div className="min-h-screen bg-gray-50 font-sans">
@@ -34,18 +36,18 @@ export default function StudentDashboard() {
                         <div className="bg-brand-light p-2 rounded-full">
                             <Heart className="w-5 h-5 text-brand-secondary fill-brand-secondary" />
                         </div>
-                        <h1 className="text-xl font-bold text-brand-dark">My Learning Dashboard</h1>
+                        <h1 className="text-xl font-bold text-brand-dark">{t('sidebar.dashboardTitle', 'Дошбоард')}</h1>
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button onClick={() => navigate('/catalog')} className="text-sm font-medium text-gray-500 hover:text-brand-primary transition-colors">Browse Catalog</button>
+                        <button onClick={() => navigate('/catalog')} className="text-sm font-medium text-gray-500 hover:text-brand-primary transition-colors">{t('course.catalogTitle', 'Каталог курсів')}</button>
                         <div className="h-4 w-px bg-gray-200"></div>
                         <button
                             onClick={() => { localStorage.clear(); navigate('/'); }}
                             className="flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
                         >
                             <LogOut className="w-4 h-4" />
-                            Logout
+                            {t('sidebar.logout', 'Вийти')}
                         </button>
                     </div>
                 </div>
@@ -53,7 +55,7 @@ export default function StudentDashboard() {
 
             <div className="container mx-auto px-6 py-12">
                 <div className="flex items-end gap-2 mb-8">
-                    <h2 className="text-3xl font-bold text-brand-dark">Your Courses</h2>
+                    <h2 className="text-3xl font-bold text-brand-dark">{t('course.myCoursesTitle', 'Мої курси')}</h2>
                     <span className="text-gray-400 font-medium mb-1">({enrollments?.length || 0})</span>
                 </div>
 
@@ -62,14 +64,14 @@ export default function StudentDashboard() {
                         <div className="w-20 h-20 bg-brand-light/50 rounded-full flex items-center justify-center mx-auto mb-6">
                             <Book className="w-10 h-10 text-brand-secondary" />
                         </div>
-                        <h3 className="text-2xl font-bold text-brand-dark mb-2">Start Your Learning Journey</h3>
-                        <p className="text-gray-500 max-w-md mx-auto mb-8">You haven't enrolled in any courses yet. Browse our catalog to find a course that inspires you.</p>
+                        <h3 className="text-2xl font-bold text-brand-dark mb-2">{t('course.catalogSubtitle', 'Оберіть курс, який вам підходить')}</h3>
+                        <p className="text-gray-500 max-w-md mx-auto mb-8">{t('course.noCourses', 'Курсів не знайдено')}</p>
 
                         <button
                             onClick={() => navigate('/catalog')}
                             className="px-8 py-3 rounded-full bg-brand-primary text-white font-bold hover:bg-brand-secondary transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
                         >
-                            Browse Catalog
+                            {t('course.catalogTitle', 'Каталог курсів')}
                         </button>
                     </div>
                 ) : (
@@ -82,14 +84,14 @@ export default function StudentDashboard() {
                                     </span>
                                 </div>
 
-                                <h3 className="text-xl font-bold text-brand-dark mb-2">Course ID: {enrollment.courseId}</h3>
+                                <h3 className="text-xl font-bold text-brand-dark mb-2">{t('course.details', 'Деталі курсу')}: {enrollment.courseId}</h3>
                                 <div className="h-1 w-full bg-gray-100 rounded-full overflow-hidden mb-6 mt-auto">
                                     <div className="h-full bg-brand-secondary w-0 group-hover:w-1/3 transition-all duration-1000"></div>
                                 </div>
 
                                 <button className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-50 text-brand-dark font-bold hover:bg-brand-light hover:text-brand-secondary transition-colors">
                                     <PlayCircle className="w-5 h-5" />
-                                    Continue
+                                    {t('course.continueBtn', 'Продовжити навчання')}
                                 </button>
                             </div>
                         ))}

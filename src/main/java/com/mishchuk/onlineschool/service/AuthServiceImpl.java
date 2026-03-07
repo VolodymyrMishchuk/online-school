@@ -75,7 +75,8 @@ public class AuthServiceImpl implements AuthService {
                 person.getId(),
                 person.getRole() != null ? person.getRole().name() : "USER",
                 person.getFirstName(),
-                person.getLastName());
+                person.getLastName(),
+                person.getLanguage());
 
         return new AuthResultDto(authResponse, refreshToken.getToken());
     }
@@ -99,7 +100,8 @@ public class AuthServiceImpl implements AuthService {
                 person.getId(),
                 person.getRole() != null ? person.getRole().name() : "USER",
                 person.getFirstName(),
-                person.getLastName());
+                person.getLastName(),
+                person.getLanguage());
 
         return new AuthResultDto(authResponse, refreshToken.getToken());
     }
@@ -126,7 +128,8 @@ public class AuthServiceImpl implements AuthService {
                 person.id(),
                 person.role() != null ? person.role() : "USER",
                 person.firstName(),
-                person.lastName());
+                person.lastName(),
+                person.language());
 
         return new AuthResultDto(authResponse, newRefreshToken.getToken());
     }
@@ -172,7 +175,8 @@ public class AuthServiceImpl implements AuthService {
                 person.getId(),
                 person.getRole() != null ? person.getRole().name() : "USER",
                 person.getFirstName(),
-                person.getLastName());
+                person.getLastName(),
+                person.getLanguage());
 
         return new AuthResultDto(authResponse, refreshToken.getToken());
     }

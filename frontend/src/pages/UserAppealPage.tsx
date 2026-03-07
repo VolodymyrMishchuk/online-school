@@ -5,21 +5,29 @@ import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { createAppeal } from '../api/appeals';
 import { AppealSuccessModal } from '../components/AppealSuccessModal';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { useTranslation } from 'react-i18next';
 
 const CONTACT_METHODS = [
-    { id: 'MOBILE', label: 'Мобільний телефон', icon: Phone, color: 'text-emerald-500' },
-    { id: 'INSTAGRAM', label: 'Instagram', icon: Instagram, color: 'text-pink-500' },
-    { id: 'TELEGRAM', label: 'Telegram', icon: TelegramIcon, color: 'text-blue-500' },
-    { id: 'WHATSAPP', label: 'WhatsApp', icon: MessageCircle, color: 'text-green-500' },
-    { id: 'EMAIL', label: 'Email', icon: Mail, color: 'text-black' },
+    { id: 'MOBILE', label: 'Мобільний телефон', labelKey: 'appeal.mobile', icon: Phone, color: 'text-emerald-500' },
+    { id: 'INSTAGRAM', label: 'Instagram', labelKey: 'appeal.instagram', icon: Instagram, color: 'text-pink-500' },
+    { id: 'TELEGRAM', label: 'Telegram', labelKey: 'appeal.telegram', icon: TelegramIcon, color: 'text-blue-500' },
+    { id: 'WHATSAPP', label: 'WhatsApp', labelKey: 'appeal.whatsapp', icon: MessageCircle, color: 'text-green-500' },
+    { id: 'EMAIL', label: 'Email', labelKey: 'appeal.email', icon: Mail, color: 'text-black' },
 ] as const;
 
 type ContactMethodType = typeof CONTACT_METHODS[number]['id'];
 
 export default function UserAppealPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
 
     const [contactMethod, setContactMethod] = useState<ContactMethodType>('MOBILE');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -43,6 +51,12 @@ export default function UserAppealPage() {
     const [isDragging, setIsDragging] = useState(false);
     const [dragCounter, setDragCounter] = useState(0);
 
+    const showAlert = (message: string, title = t('common.error', 'Помилка')) => {
+        setAlertMessage(message);
+        setAlertTitle(title);
+        setIsAlertOpen(true);
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const selectedFiles = Array.from(e.target.files);
@@ -51,13 +65,13 @@ export default function UserAppealPage() {
             const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
 
             if (imageFiles.length !== selectedFiles.length) {
-                alert('Дозволені тільки зображення (JPEG, PNG).');
+                showAlert(t('appeal.alertInvalidImage', 'Дозволені тільки зображення (JPEG, PNG).'));
             }
 
             setPhotos(prev => {
                 const combined = [...prev, ...imageFiles];
                 if (combined.length > 10) {
-                    alert('Можна прикріпити макс. 10 зображень.');
+                    showAlert(t('appeal.alertMaxImages', 'Можна прикріпити макс. 10 зображень.'));
                     return combined.slice(0, 10);
                 }
                 return combined;
@@ -101,14 +115,14 @@ export default function UserAppealPage() {
             const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
 
             if (imageFiles.length !== selectedFiles.length) {
-                alert('Дозволені тільки зображення (JPEG, PNG).');
+                showAlert(t('appeal.alertInvalidImage', 'Дозволені тільки зображення (JPEG, PNG).'));
             }
 
             if (imageFiles.length > 0) {
                 setPhotos(prev => {
                     const combined = [...prev, ...imageFiles];
                     if (combined.length > 10) {
-                        alert('Можна прикріпити макс. 10 зображень.');
+                        showAlert(t('appeal.alertMaxImages', 'Можна прикріпити макс. 10 зображень.'));
                         return combined.slice(0, 10);
                     }
                     return combined;
@@ -119,28 +133,28 @@ export default function UserAppealPage() {
 
     const getPlaceholder = () => {
         switch (contactMethod) {
-            case 'MOBILE': return 'Введіть номер телефону';
-            case 'INSTAGRAM': return 'Введіть нікнейм в Instagram';
-            case 'TELEGRAM': return 'Введіть номер телефону, або нікнейм через @';
-            case 'WHATSAPP': return 'Введіть номер WhatsApp';
-            case 'EMAIL': return 'Введіть електронну адресу';
-            default: return 'Введіть контактні дані';
+            case 'MOBILE': return t('appeal.placeholderMobile', 'Введіть номер телефону');
+            case 'INSTAGRAM': return t('appeal.placeholderInstagram', 'Введіть нікнейм в Instagram');
+            case 'TELEGRAM': return t('appeal.placeholderTelegram', 'Введіть номер телефону, або нікнейм через @');
+            case 'WHATSAPP': return t('appeal.placeholderWhatsapp', 'Введіть номер WhatsApp');
+            case 'EMAIL': return t('appeal.placeholderEmail', 'Введіть електронну адресу');
+            default: return t('appeal.placeholderDefault', 'Введіть контактні дані');
         }
     };
 
     const handleSubmit = async () => {
         if (!contactDetails.trim()) {
-            alert('Введіть контактні дані');
+            showAlert(t('appeal.placeholderDefault', 'Введіть контактні дані'));
             return;
         }
 
         if ((contactMethod === 'MOBILE' || contactMethod === 'WHATSAPP') && !isValidPhoneNumber(contactDetails)) {
-            alert('Будь ласка, введіть коректний номер телефону для вибраного способу зв\'язку');
+            showAlert(t('settings.invalidPhoneError', "Введіть коректний номер телефону"));
             return;
         }
 
         if (!message.trim()) {
-            alert('Введіть текст звернення');
+            showAlert(t('appeal.alertNoMessage', 'Введіть текст звернення'));
             return;
         }
 
@@ -158,7 +172,7 @@ export default function UserAppealPage() {
             await createAppeal(formData);
             setIsSuccessModalOpen(true);
         } catch (error) {
-            alert('Не вдалося відправити звернення.');
+            showAlert(t('appeal.alertSubmitError', 'Не вдалося відправити звернення.'));
             console.error('Submit error', error);
         } finally {
             setIsSubmitting(false);
@@ -168,16 +182,16 @@ export default function UserAppealPage() {
     return (
         <div className="container mx-auto px-6 py-12">
             <div className="flex flex-col gap-2 mb-8">
-                <h1 className="text-3xl font-bold text-brand-dark">Звернутися</h1>
+                <h1 className="text-3xl font-bold text-brand-dark">{t('appeal.title', 'Звернутися')}</h1>
                 <p className="text-gray-500 text-sm max-w-2xl">
-                    Маєте питання чи пропозиції? Залиште звернення, і ми зв'яжемося з Вами
+                    {t('appeal.subtitle', 'Маєте питання чи пропозиції? Залиште звернення, і ми зв\'яжемося з Вами')}
                 </p>
             </div>
 
             <div className="max-w-2xl">
                 <div className="glass-panel rounded-lg overflow-hidden">
                     <div className="px-8 py-6 border-b border-gray-200/50 bg-white/30 backdrop-blur-sm">
-                        <h2 className="text-xl font-bold text-brand-dark">Нове звернення</h2>
+                        <h2 className="text-xl font-bold text-brand-dark">{t('appeal.newAppeal', 'Нове звернення')}</h2>
                     </div>
 
                     <div className="p-8">
@@ -185,7 +199,7 @@ export default function UserAppealPage() {
                             {/* Contact Method */}
                             <div className="relative">
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                                    Спосіб зв'язку
+                                    {t('appeal.contactMethodLabel', 'Спосіб звʼязку')}
                                 </label>
                                 <button
                                     type="button"
@@ -194,12 +208,14 @@ export default function UserAppealPage() {
                                 >
                                     <div className="flex items-center gap-3">
                                         {(() => {
-                                            const method = CONTACT_METHODS.find(m => m.id === contactMethod);
+                                            const method: any = CONTACT_METHODS.find(m => m.id === contactMethod);
                                             const Icon = method?.icon || Phone;
                                             return (
                                                 <>
                                                     <Icon className={`w-5 h-5 ${method?.color}`} />
-                                                    <span className="text-gray-700 font-medium">{method?.label}</span>
+                                                    <span className="text-gray-700 font-medium">
+                                                        {method?.labelKey ? t(method.labelKey) : method?.label}
+                                                    </span>
                                                 </>
                                             );
                                         })()}
@@ -214,7 +230,7 @@ export default function UserAppealPage() {
                                             onClick={() => setIsDropdownOpen(false)}
                                         />
                                         <div className="absolute z-20 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 py-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                                            {CONTACT_METHODS.map((method) => {
+                                            {CONTACT_METHODS.map((method: any) => {
                                                 const Icon = method.icon;
                                                 const isSelected = contactMethod === method.id;
                                                 return (
@@ -235,7 +251,7 @@ export default function UserAppealPage() {
                                                                 <Icon className={`w-4 h-4 ${method.color}`} />
                                                             </div>
                                                             <span className={`font-medium ${isSelected ? 'text-brand-dark' : 'text-gray-600'}`}>
-                                                                {method.label}
+                                                                {method.labelKey ? t(method.labelKey) : method.label}
                                                             </span>
                                                         </div>
                                                         {isSelected && <Check className="w-4 h-4 text-brand-primary" />}
@@ -250,7 +266,7 @@ export default function UserAppealPage() {
                             {/* Contact Details */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                                    Контактні дані
+                                    {t('appeal.contactDetails', 'Контактні дані')}
                                 </label>
                                 {contactMethod === 'MOBILE' || contactMethod === 'WHATSAPP' ? (
                                     <>
@@ -278,7 +294,7 @@ export default function UserAppealPage() {
                                             className="w-full px-4 py-3 rounded-lg border border-gray-200 focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-light outline-none transition-all bg-white/50 focus-within:bg-white phone-input-override"
                                         />
                                         {contactDetails && !isValidPhoneNumber(contactDetails) && (
-                                            <p className="text-red-500 text-xs mt-1.5 ml-1">Введіть коректний номер телефону</p>
+                                            <p className="text-red-500 text-xs mt-1.5 ml-1">{t('settings.invalidPhoneError', 'Введіть коректний номер телефону')}</p>
                                         )}
                                     </>
                                 ) : (
@@ -295,13 +311,13 @@ export default function UserAppealPage() {
                             {/* Message */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                                    Тема/Текст звернення
+                                    {t('appeal.messageLabel', 'Тема/Текст звернення')}
                                 </label>
                                 <textarea
                                     rows={5}
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
-                                    placeholder="Опишіть Вашу проблему чи пропозицію детально..."
+                                    placeholder={t('appeal.messagePlaceholder', 'Опишіть Вашу проблему чи пропозицію детально...')}
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light outline-none transition-all bg-white/50 focus:bg-white resize-none"
                                 />
                             </div>
@@ -309,7 +325,7 @@ export default function UserAppealPage() {
                             {/* Image Upload */}
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
-                                    Прикріпити зображення (макс. 10)
+                                    {t('appeal.attachImages', 'Прикріпити зображення (макс. 10)')}
                                 </label>
 
                                 <div
@@ -345,8 +361,8 @@ export default function UserAppealPage() {
                                         {photos.length === 0 ? (
                                             <label className="w-full min-h-[140px] flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-brand-primary hover:text-brand-primary hover:bg-brand-primary/5 transition-all cursor-pointer bg-white/50">
                                                 <ImageIcon className="w-8 h-8 mb-2" />
-                                                <span className="text-sm font-medium text-center px-4">Натисніть для вибору або перетягніть файли сюди</span>
-                                                <span className="text-xs text-gray-400 mt-1">JPEG, PNG (до 10 зображень)</span>
+                                                <span className="text-sm font-medium text-center px-4">{t('appeal.dragDropLabel', 'Натисніть для вибору або перетягніть файли сюди')}</span>
+                                                <span className="text-xs text-gray-400 mt-1">{t('appeal.dragDropFormat', 'JPEG, PNG (до 10 зображень)')}</span>
                                                 <input
                                                     type="file"
                                                     multiple
@@ -358,7 +374,7 @@ export default function UserAppealPage() {
                                         ) : photos.length < 10 ? (
                                             <label className="w-20 h-20 flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-brand-primary hover:text-brand-primary hover:bg-brand-primary/5 transition-all cursor-pointer">
                                                 <ImageIcon className="w-5 h-5 mb-1" />
-                                                <span className="text-[10px] font-medium text-center px-1">Додати</span>
+                                                <span className="text-[10px] font-medium text-center px-1">{t('appeal.addMore', 'Додати')}</span>
                                                 <input
                                                     type="file"
                                                     multiple
@@ -374,7 +390,7 @@ export default function UserAppealPage() {
                                         <div className="absolute inset-0 z-10 bg-brand-primary/10 border-2 border-dashed border-brand-primary rounded-xl flex items-center justify-center backdrop-blur-[1px]">
                                             <div className="bg-white px-6 py-3 rounded-full shadow-lg text-brand-primary font-medium flex items-center gap-2">
                                                 <ImageIcon className="w-5 h-5" />
-                                                Відпустіть файли тут
+                                                {t('appeal.dropFilesHere', 'Відпустіть файли тут')}
                                             </div>
                                         </div>
                                     )}
@@ -389,7 +405,7 @@ export default function UserAppealPage() {
                                 disabled={isSubmitting}
                                 className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 font-bold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed shadow-sm hover:shadow-md transform active:scale-95 duration-200"
                             >
-                                Скасувати
+                                {t('appeal.cancel', 'Скасувати')}
                             </button>
                             <button
                                 onClick={handleSubmit}
@@ -399,11 +415,11 @@ export default function UserAppealPage() {
                                 {isSubmitting ? (
                                     <>
                                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                        Відправка...
+                                        {t('appeal.sending', 'Відправка...')}
                                     </>
                                 ) : (
                                     <>
-                                        Відправити
+                                        {t('appeal.send', 'Відправити')}
                                     </>
                                 )}
                             </button>
@@ -415,6 +431,16 @@ export default function UserAppealPage() {
             <AppealSuccessModal
                 isOpen={isSuccessModalOpen}
                 onClose={() => setIsSuccessModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={alertTitle}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
             />
         </div>
     );

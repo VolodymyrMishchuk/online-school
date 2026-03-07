@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface VideoPlayerProps {
     url: string;
@@ -6,6 +7,7 @@ export interface VideoPlayerProps {
 }
 
 export function VideoPlayer({ url, title }: VideoPlayerProps) {
+    const { t } = useTranslation();
     const [error, setError] = useState<string | null>(null);
 
     // Extract YouTube video ID from URL
@@ -20,7 +22,7 @@ export function VideoPlayer({ url, title }: VideoPlayerProps) {
     if (!videoId) {
         return (
             <div className="relative bg-black rounded-lg overflow-hidden w-full aspect-video shadow-lg flex items-center justify-center">
-                <p className="text-red-500 font-bold">Невірний формат URL відео</p>
+                <p className="text-red-500 font-bold">{t('videoPlayer.invalidUrl', 'Невірний формат URL відео')}</p>
             </div>
         );
     }
@@ -44,11 +46,11 @@ export function VideoPlayer({ url, title }: VideoPlayerProps) {
         >
             <iframe
                 src={embedUrl}
-                title={title || "Video Player"}
+                title={title || t('videoPlayer.defaultTitle', 'Відео плеєр')}
                 className="absolute top-0 left-0 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                onError={() => setError("Помилка завантаження відео")}
+                onError={() => setError(t('videoPlayer.loadError', 'Помилка завантаження відео'))}
             />
 
             {error && (
@@ -72,7 +74,7 @@ export function VideoPlayer({ url, title }: VideoPlayerProps) {
                 onContextMenu={(e) => {
                     e.preventDefault();
                 }}
-                title="Відео доступне тільки на цій платформі"
+                title={t('videoPlayer.restrictionTitle', 'Відео доступне тільки на цій платформі')}
             />
 
             {/* Overlay to block bottom-right controls area (settings, YouTube logo) */}

@@ -12,5 +12,6 @@ public record PersonUpdateDto(
                 @Size(max = 20, message = "Телефон має бути не більше 20 символів") String phoneNumber,
                 String email,
                 String password,
-                String status) {
+                String status,
+                String language) {
 }

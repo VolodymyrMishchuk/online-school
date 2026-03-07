@@ -42,6 +42,9 @@ public class PersonEntity {
     @Column(name = "status", nullable = false)
     private PersonStatus status = PersonStatus.ACTIVE;
 
+    @Column(name = "language", nullable = false)
+    private String language = "uk";
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<EnrollmentEntity> enrollments;
 

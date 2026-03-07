@@ -5,6 +5,8 @@ import { createLesson } from '../api/lessons';
 import type { CreateLessonDto } from '../api/lessons';
 import { uploadFile } from '../api/files';
 import { getModules } from '../api/modules';
+import { useTranslation } from 'react-i18next';
+import { ConfirmModal } from './ConfirmModal';
 
 interface CreateLessonModalProps {
     isOpen: boolean;
@@ -13,6 +15,7 @@ interface CreateLessonModalProps {
 }
 
 export default function CreateLessonModal({ isOpen, onClose, onSuccess }: CreateLessonModalProps) {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<CreateLessonDto>({
         name: '',
         description: '',
@@ -22,6 +25,15 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
     });
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     // Fetch modules for select
     const { data: modules, isLoading: modulesLoading } = useQuery({
@@ -35,15 +47,15 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
         mutationFn: async () => {
             // Validate
             const newErrors: Record<string, string> = {};
-            if (!formData.name.trim()) newErrors.name = "Назва обов'язкова";
-            if (!formData.description.trim()) newErrors.description = "Опис обов'язковий";
+            if (!formData.name.trim()) newErrors.name = t('lessonModal.errors.nameRequired', "Назва обов'язкова");
+            if (!formData.description.trim()) newErrors.description = t('lessonModal.errors.descriptionRequired', "Опис обов'язковий");
             // moduleId is now optional
 
             if (formData.videoUrl && formData.videoUrl.trim()) {
                 try {
                     new URL(formData.videoUrl);
                 } catch {
-                    newErrors.videoUrl = "Невалідний URL";
+                    newErrors.videoUrl = t('lessonModal.errors.invalidUrl', "Невалідний URL");
                 }
             }
 
@@ -70,7 +82,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
         },
         onError: (error: any) => {
             if (error.message !== 'Validation failed') {
-                alert('Помилка створення уроку: ' + (error.response?.data?.message || error.message));
+                showAlert(t('lessonModal.errors.createError', 'Помилка створення уроку: ') + (error.response?.data?.message || error.message));
             }
         },
     });
@@ -118,7 +130,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
             <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between rounded-t-3xl">
-                    <h2 className="text-2xl font-bold text-brand-dark">Створити урок</h2>
+                    <h2 className="text-2xl font-bold text-brand-dark">{t('lessonModal.createLesson', 'Створити урок')}</h2>
                     <button
                         onClick={handleClose}
                         className="p-2 rounded-xl hover:bg-gray-100 transition-colors"
@@ -132,7 +144,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Name */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Назва уроку <span className="text-red-500">*</span>
+                            {t('lessonModal.lessonName', 'Назва уроку')} <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -143,7 +155,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                             }}
                             className={`w-full px-4 py-3 rounded-2xl border ${errors.name ? 'border-red-500' : 'border-gray-200'
                                 } focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
-                            placeholder="Введіть назву уроку..."
+                            placeholder={t('lessonModal.lessonNamePlaceholder', 'Введіть назву уроку...')}
                         />
                         {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                     </div>
@@ -151,7 +163,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Description */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Опис <span className="text-red-500">*</span>
+                            {t('lessonModal.description', 'Опис')} <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             value={formData.description}
@@ -162,7 +174,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                             rows={4}
                             className={`w-full px-4 py-3 rounded-2xl border ${errors.description ? 'border-red-500' : 'border-gray-200'
                                 } focus:outline-none focus:ring-2 focus:ring-brand-primary/20`}
-                            placeholder="Введіть опис уроку..."
+                            placeholder={t('lessonModal.descriptionPlaceholder', 'Введіть опис уроку...')}
                         />
                         {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
                     </div>
@@ -170,7 +182,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Video URL */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Посилання на відео
+                            {t('lessonModal.videoUrl', 'Посилання на відео')}
                         </label>
                         <input
                             type="url"
@@ -189,7 +201,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Module Select */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Модуль
+                            {t('lessonModal.module', 'Модуль')}
                         </label>
                         <select
                             value={formData.moduleId}
@@ -201,7 +213,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                                 } focus:outline-none focus:ring-2 focus:ring-brand-primary/20 bg-white`}
                             disabled={modulesLoading}
                         >
-                            <option value="">Виберіть модуль...</option>
+                            <option value="">{t('lessonModal.selectModule', 'Виберіть модуль...')}</option>
                             {modules?.map(module => (
                                 <option key={module.id} value={module.id}>
                                     {module.name} {module.courseName && `(${module.courseName})`}
@@ -214,7 +226,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Duration */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Тривалість (хвилини)
+                            {t('lessonModal.durationMinutes', 'Тривалість (хвилини)')}
                         </label>
                         <input
                             type="number"
@@ -232,7 +244,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                     {/* Files */}
                     <div>
                         <label className="block text-sm font-semibold text-brand-dark mb-2">
-                            Файли
+                            {t('lessonModal.files', 'Файли')}
                         </label>
                         <div className="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center">
                             <label className="cursor-pointer">
@@ -245,10 +257,10 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                                 <div className="flex flex-col items-center gap-2">
                                     <Upload className="w-8 h-8 text-gray-400" />
                                     <span className="text-sm text-gray-600 font-medium">
-                                        Натисніть, щоб обрати файли
+                                        {t('lessonModal.clickToChooseFiles', 'Натисніть, щоб обрати файли')}
                                     </span>
                                     <span className="text-xs text-gray-400">
-                                        або перетягніть файли сюди
+                                        {t('lessonModal.orDragFiles', 'або перетягніть файли сюди')}
                                     </span>
                                 </div>
                             </label>
@@ -291,7 +303,7 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                         disabled={createMutation.isPending}
                         className="px-6 py-3 rounded-2xl border border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         onClick={() => createMutation.mutate()}
@@ -301,10 +313,20 @@ export default function CreateLessonModal({ isOpen, onClose, onSuccess }: Create
                         {createMutation.isPending && (
                             <Loader2 className="w-4 h-4 animate-spin" />
                         )}
-                        {createMutation.isPending ? 'Створюємо...' : 'Створити урок'}
+                        {createMutation.isPending ? t('common.creating', 'Створюємо...') : t('lessonModal.createLessonBtn', 'Створити урок')}
                     </button>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.error', 'Помилка')}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
+            />
         </div>
     );
 }

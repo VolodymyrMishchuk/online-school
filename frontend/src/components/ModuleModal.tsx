@@ -3,6 +3,7 @@ import type { Lesson } from '../api/lessons';
 import type { CreateModuleDto } from '../api/modules';
 import { X, Layers, BookOpen, CheckCircle, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ModuleModalProps {
     isOpen: boolean;
@@ -28,6 +29,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
     courseId,
     initialData,
 }) => {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [selectedCourseId, setSelectedCourseId] = useState(courseId || (courses.length > 0 ? courses[0].id : ''));
@@ -101,7 +103,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                             <Layers className="w-5 h-5" />
                         </div>
                         <h2 className="text-xl font-bold text-brand-dark">
-                            {initialData ? 'Редагувати модуль' : 'Створити новий модуль'}
+                            {initialData ? t('moduleModal.editModule', 'Редагувати модуль') : t('moduleModal.createNewModule', 'Створити новий модуль')}
                         </h2>
                     </div>
                     <button
@@ -120,7 +122,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <BookOpen className="w-4 h-4" />
-                                    Курс
+                                    {t('moduleModal.course', 'Курс')}
                                 </label>
                                 <div className="relative">
                                     <select
@@ -128,7 +130,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                                         onChange={(e) => setSelectedCourseId(e.target.value)}
                                         className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none"
                                     >
-                                        <option value="">Без курсу</option>
+                                        <option value="">{t('moduleModal.noCourse', 'Без курсу')}</option>
                                         {courses.map(course => (
                                             <option key={course.id} value={course.id}>
                                                 {course.name}
@@ -143,7 +145,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                                 </div>
                                 {courses.length === 0 && (
                                     <p className="text-sm text-gray-500 mt-1 ml-1">
-                                        Курси відсутні. Модуль буде створено без курсу.
+                                        {t('moduleModal.noCoursesAvailable', 'Курси відсутні. Модуль буде створено без курсу.')}
                                     </p>
                                 )}
                             </div>
@@ -153,14 +155,14 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Layers className="w-4 h-4" />
-                                Назва модуля *
+                                {t('moduleModal.moduleName', 'Назва модуля *')}
                             </label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                placeholder="Введіть назву модуля"
+                                placeholder={t('moduleModal.moduleNamePlaceholder', 'Введіть назву модуля')}
                                 required
                             />
                         </div>
@@ -169,13 +171,13 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <FileText className="w-4 h-4" />
-                                Опис *
+                                {t('moduleModal.description', 'Опис *')}
                             </label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white resize-none"
-                                placeholder="Введіть опис модуля"
+                                placeholder={t('moduleModal.descriptionPlaceholder', 'Введіть опис модуля')}
                                 rows={3}
                                 required
                             />
@@ -185,12 +187,12 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <BookOpen className="w-4 h-4" />
-                                Вибрати уроки (Опціонально)
+                                {t('moduleModal.selectLessons', 'Вибрати уроки (Опціонально)')}
                             </label>
                             <div className="border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto bg-white/50 custom-scrollbar">
                                 {availableLessons.length === 0 ? (
                                     <div className="p-4 text-center text-gray-500 text-sm italic">
-                                        Немає вільних уроків
+                                        {t('moduleModal.noLessonsAvailable', 'Немає вільних уроків')}
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -224,7 +226,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                                 )}
                             </div>
                             <div className="text-xs font-medium text-gray-500 text-right pt-2 border-t border-gray-200/50 mt-2">
-                                Вибрано: <span className="text-brand-primary font-bold">{selectedLessonIds.length}</span>
+                                {t('moduleModal.selectedLessonsCount', 'Вибрано:')} <span className="text-brand-primary font-bold">{selectedLessonIds.length}</span>
                             </div>
                         </div>
                     </form>
@@ -237,7 +239,7 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                         onClick={onClose}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         type="submit"
@@ -248,10 +250,10 @@ export const ModuleModal: React.FC<ModuleModalProps> = ({
                         {isSubmitting ? (
                             <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                <span>Збереження...</span>
+                                <span>{t('common.saving', 'Збереження...')}</span>
                             </>
                         ) : (
-                            initialData ? 'Оновити' : 'Створити'
+                            initialData ? t('common.update', 'Оновити') : t('common.create', 'Створити')
                         )}
                     </button>
                 </div>

@@ -1,16 +1,22 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare } from 'lucide-react';
+import { getPerson } from '../api/persons';
 
 import { useEffect, useState, useRef } from 'react';
 import { getUnreadCount } from '../api/notifications';
 import { ScrollToTop } from '../components/ScrollToTop';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 export default function DashboardLayout() {
     const navigate = useNavigate();
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
     const mainRef = useRef<HTMLElement>(null);
+    const [user, setUser] = useState<any>(() => {
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr) : null;
+    });
     const [unreadCount, setUnreadCount] = useState(0);
+    const { t, i18n } = useTranslation();
 
     const userRole = localStorage.getItem('userRole') || 'USER';
     const isAdmin = userRole === 'ADMIN' || userRole === 'FAKE_ADMIN';
@@ -32,8 +38,31 @@ export default function DashboardLayout() {
         }
     };
 
+    const fetchUserProfile = async () => {
+        const token = localStorage.getItem('token');
+        const userId = localStorage.getItem('userId');
+        if (!token || !userId) return;
+
+        try {
+            const data = await getPerson(userId);
+
+            // Sync language if different
+            if (data.language && data.language !== i18n.language) {
+                i18n.changeLanguage(data.language);
+            }
+
+            // Sync user object
+            const updatedUser = { ...user, ...data };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        } catch (error) {
+            console.error('Failed to fetch user profile in layout', error);
+        }
+    };
+
     useEffect(() => {
         fetchUnreadCount();
+        fetchUserProfile();
 
         // Optional: Set up interval to refresh count periodically
         const interval = setInterval(fetchUnreadCount, 60000); // Every minute
@@ -41,24 +70,29 @@ export default function DashboardLayout() {
     }, []);
 
     const navItems = [
-        { to: '/dashboard/all-courses', icon: BookOpen, label: 'Всі курси' },
+        { to: '/dashboard/all-courses', icon: BookOpen, label: t('sidebar.all_courses') },
         ...(isAdmin ? [
-            { to: '/dashboard/all-modules', icon: FolderOpen, label: 'Всі модулі' },
-            { to: '/dashboard/all-lessons', icon: FileText, label: 'Всі уроки' },
-            { to: '/dashboard/users', icon: Users, label: 'Користувачі' },
-            { to: '/dashboard/appeals', icon: MessageSquare, label: 'Звернення' },
+            { to: '/dashboard/all-modules', icon: FolderOpen, label: t('sidebar.all_modules') },
+            { to: '/dashboard/all-lessons', icon: FileText, label: t('sidebar.all_lessons') },
+            { to: '/dashboard/users', icon: Users, label: t('sidebar.users') },
+            { to: '/dashboard/appeals', icon: MessageSquare, label: t('sidebar.appeals') },
         ] : [
-            { to: '/dashboard/appeal', icon: MessageSquare, label: 'Звернутися' }
+            { to: '/dashboard/appeal', icon: MessageSquare, label: t('sidebar.contact') }
         ]),
-        { to: '/dashboard/my-courses', icon: GraduationCap, label: 'Мої курси' },
-        { to: '/dashboard/notifications', icon: Bell, label: 'Сповіщення' },
-        { to: '/dashboard/settings', icon: Settings, label: 'Налаштування' },
+        { to: '/dashboard/my-courses', icon: GraduationCap, label: t('sidebar.my_courses') },
+        { to: '/dashboard/notifications', icon: Bell, label: t('sidebar.notifications') },
+        { to: '/dashboard/settings', icon: Settings, label: t('sidebar.settings') },
     ];
 
     return (
         <div className="h-screen overflow-hidden flex bg-transparent">
             {/* Sidebar */}
-            <aside className="w-64 glass-sidebar flex flex-col z-20 m-4 rounded-3xl h-[calc(100vh-2rem)] transition-all duration-300">
+            <aside className="w-64 glass-sidebar relative flex flex-col z-20 m-4 rounded-3xl h-[calc(100vh-2rem)] transition-all duration-300">
+                {/* Language Switcher - Top Right */}
+                <div className="absolute top-0 right-0 z-50">
+                    <LanguageSwitcher />
+                </div>
+
                 {/* Logo/Header */}
                 <div className="p-6 border-b border-white/20">
                     <div className="flex items-center gap-3">
@@ -66,11 +100,11 @@ export default function DashboardLayout() {
                             <Heart className="w-5 h-5 text-brand-secondary fill-brand-secondary" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-gray-800 text-lg">Dashboard</h2>
+                            <h2 className="font-bold text-gray-800 text-lg">{t('sidebar.dashboardTitle', 'Дошбоард')}</h2>
                             <p className="text-xs text-gray-500 font-medium">
                                 {user?.firstName && user?.lastName
                                     ? `${user.firstName} ${user.lastName}`
-                                    : (user?.email || 'User')}
+                                    : (user?.email || t('sidebar.user', 'Користувач'))}
                             </p>
                         </div>
                     </div>
@@ -91,12 +125,12 @@ export default function DashboardLayout() {
                         >
                             <div className="relative">
                                 <item.icon className="w-5 h-5" />
-                                {item.label === 'Сповіщення' && unreadCount > 0 && (
+                                {item.label === t('sidebar.notifications') && unreadCount > 0 && (
                                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                                 )}
                             </div>
                             <span>{item.label}</span>
-                            {item.label === 'Сповіщення' && unreadCount > 0 && (
+                            {item.label === t('sidebar.notifications') && unreadCount > 0 && (
                                 <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                                     {unreadCount > 99 ? '99+' : unreadCount}
                                 </span>
@@ -105,14 +139,14 @@ export default function DashboardLayout() {
                     ))}
                 </nav>
 
-                {/* Logout */}
-                <div className="p-4 border-t border-gray-100">
+                {/* Bottom Actions */}
+                <div className="p-4 border-t border-gray-100 flex flex-col gap-2">
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 transition-all"
                     >
                         <LogOut className="w-5 h-5" />
-                        <span>Вийти</span>
+                        <span>{t('sidebar.logout')}</span>
                     </button>
                 </div>
             </aside>

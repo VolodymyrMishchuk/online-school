@@ -11,12 +11,30 @@ import LessonModal from '../components/LessonModal';
 import ImagePreviewModal from '../components/ImagePreviewModal';
 import MultiSelect from '../components/MultiSelect';
 import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { useTranslation } from 'react-i18next';
 
 export default function AllLessonsPage() {
+    const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    // Deletion confirmation state
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [lessonToDelete, setLessonToDelete] = useState<Lesson | null>(null);
+
+    // Alert Modal state
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
+
+    const showAlert = (message: string, title = t('common.error', 'Помилка')) => {
+        setAlertMessage(message);
+        setAlertTitle(title);
+        setIsAlertOpen(true);
+    };
 
     // Filter states (Arrays for multi-select)
     const [selectedCourseIds, setSelectedCourseIds] = useState<string[]>([]);
@@ -69,7 +87,7 @@ export default function AllLessonsPage() {
             handleSuccess();
         },
         onError: (error: any) => {
-            alert('Помилка видалення уроку: ' + (error.response?.data?.message || error.message));
+            showAlert(t('allLessons.deleteError', 'Помилка видалення уроку: ') + (error.response?.data?.message || error.message));
         },
     });
 
@@ -89,14 +107,21 @@ export default function AllLessonsPage() {
         setIsModalOpen(true);
     };
 
-    const handleDelete = (lessonId: string, lesson: Lesson) => {
+    const handleDelete = (lesson: Lesson) => {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (userRole === 'FAKE_ADMIN' && lesson.createdBy?.id !== user.id) {
             setIsFakeAdminRestrictionModalOpen(true);
             return;
         }
-        if (window.confirm('Ви впевнені, що хочете видалити цей урок?')) {
-            deleteMutation.mutate(lessonId);
+        setLessonToDelete(lesson);
+        setIsConfirmModalOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (lessonToDelete) {
+            deleteMutation.mutate(lessonToDelete.id);
+            setIsConfirmModalOpen(false);
+            setLessonToDelete(null);
         }
     };
 
@@ -171,18 +196,18 @@ export default function AllLessonsPage() {
     if (lessonsLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <div className="text-brand-primary font-medium">Завантаження уроків...</div>
+                <div className="text-brand-primary font-medium">{t('allLessons.loading', 'Завантаження уроків...')}</div>
             </div>
         );
     }
 
     const courseOptions = [
-        { value: 'unassigned', label: 'Без курсу' },
+        { value: 'unassigned', label: t('allLessons.noCourseLabel', 'Без курсу') },
         ...(courses?.map(c => ({ value: c.id, label: c.name })) || [])
     ];
 
     const moduleOptions = [
-        { value: 'unassigned', label: 'Без модуля' },
+        { value: 'unassigned', label: t('allLessons.noModuleLabel', 'Без модуля') },
         ...filteredModules.map(m => ({ value: m.id, label: m.name }))
     ];
 
@@ -191,7 +216,7 @@ export default function AllLessonsPage() {
             {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold text-brand-dark">Всі уроки</h1>
+                    <h1 className="text-3xl font-bold text-brand-dark">{t('allLessons.title', 'Всі уроки')}</h1>
                     <span className="text-gray-400 font-medium">({displayedLessons}{displayedLessons !== totalLessons ? ` / ${totalLessons}` : ''})</span>
                 </div>
 
@@ -204,7 +229,7 @@ export default function AllLessonsPage() {
                         className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <Plus className="w-5 h-5" />
-                        <span>Додати урок</span>
+                        <span>{t('allLessons.addLessonBtn', 'Додати урок')}</span>
                     </button>
                 )}
             </div>
@@ -213,14 +238,14 @@ export default function AllLessonsPage() {
             <div className="flex flex-wrap gap-4 mb-8 bg-white p-3 rounded-lg border border-gray-100 shadow-sm items-center">
                 <div className="flex items-center gap-2 text-gray-500 mr-2">
                     <Filter className="w-5 h-5" />
-                    <span className="font-medium text-sm">Фільтри:</span>
+                    <span className="font-medium text-sm">{t('allLessons.filters', 'Фільтри:')}</span>
                 </div>
 
                 {/* Course Filter */}
                 <div className="min-w-[250px]">
                     <MultiSelect
                         label=""
-                        placeholder="Всі курси"
+                        placeholder={t('allLessons.allCoursesPlaceholder', 'Всі курси')}
                         options={courseOptions}
                         selectedValues={selectedCourseIds}
                         onChange={(ids) => {
@@ -233,7 +258,7 @@ export default function AllLessonsPage() {
                 <div className="min-w-[250px]">
                     <MultiSelect
                         label=""
-                        placeholder="Всі модулі"
+                        placeholder={t('allLessons.allModulesPlaceholder', 'Всі модулі')}
                         options={moduleOptions}
                         selectedValues={selectedModuleIds}
                         onChange={setSelectedModuleIds}
@@ -248,7 +273,7 @@ export default function AllLessonsPage() {
                         }}
                         className="text-sm text-red-500 hover:text-red-600 font-medium px-2 ml-auto"
                     >
-                        Скинути всі
+                        {t('allLessons.resetAllBtn', 'Скинути всі')}
                     </button>
                 )}
             </div>
@@ -259,9 +284,9 @@ export default function AllLessonsPage() {
                     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Filter className="w-8 h-8 text-gray-300" />
                     </div>
-                    <p className="text-gray-500 text-lg mb-2">Уроків не знайдено</p>
+                    <p className="text-gray-500 text-lg mb-2">{t('allLessons.noLessonsFound', 'Уроків не знайдено')}</p>
                     <p className="text-gray-400 text-sm">
-                        Спробуйте змінити параметри фільтрації або створіть новий урок
+                        {t('allLessons.noLessonsDesc', 'Спробуйте змінити параметри фільтрації або створіть новий урок')}
                     </p>
                 </div>
             ) : (
@@ -273,7 +298,7 @@ export default function AllLessonsPage() {
                             files={lessonFilesQueries.data?.[lesson.id] || []}
                             onImageClick={setPreviewImage}
                             onEdit={handleEdit}
-                            onDelete={(lessonId) => handleDelete(lessonId, lesson)}
+                            onDelete={() => handleDelete(lesson)}
                             onFileDelete={handleFileDelete}
                             isCatalogMode={true}
                         />
@@ -300,6 +325,32 @@ export default function AllLessonsPage() {
             <FakeAdminRestrictionModal
                 isOpen={isFakeAdminRestrictionModalOpen}
                 onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => {
+                    setIsConfirmModalOpen(false);
+                    setLessonToDelete(null);
+                }}
+                onConfirm={confirmDelete}
+                title={t('allLessons.deleteConfirmTitle', 'Підтвердження видалення')}
+                message={t('allLessons.deleteConfirmMessage', 'Ви впевнені, що хочете видалити урок "{{name}}"?', { name: lessonToDelete?.name || '' })}
+                warningMessage={t('allLessons.deleteWarningMessage', 'Ця дія незворотна. Після видалення всі файли та матеріали цього уроку будуть видалені з системи назавжди.')}
+                confirmText={t('common.deleteBtn', 'Видалити')}
+                cancelText={t('common.cancelBtn', 'Скасувати')}
+                type="danger"
+                isLoading={deleteMutation.isPending}
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={alertTitle}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
             />
         </div>
     );

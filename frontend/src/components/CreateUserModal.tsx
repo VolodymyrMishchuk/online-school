@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type CreatePersonDto, getRoles } from '../api/users';
 import { getCourses, type CourseDto } from '../api/courses';
-import { UserPlus, X, User, Mail, Phone, Lock, Calendar, Shield, BookOpen, AlertCircle, CheckCircle } from 'lucide-react';
+import { UserPlus, X, User, Mail, Phone, Lock, Calendar, Shield, BookOpen, AlertCircle, CheckCircle, Globe } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -12,6 +13,7 @@ interface CreateUserModalProps {
 }
 
 export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClose, onSubmit }) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<CreatePersonDto>({
         firstName: '',
         lastName: '',
@@ -20,6 +22,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
         phoneNumber: '',
         role: 'USER',
         bornedAt: '',
+        language: 'uk',
         courseIds: []
     });
     const [loading, setLoading] = useState(false);
@@ -70,6 +73,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
             phoneNumber: '',
             role: 'USER',
             bornedAt: '',
+            language: 'uk',
             courseIds: []
         });
         setError(null);
@@ -103,7 +107,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
         setError(null);
 
         if (formData.phoneNumber && !isValidPhoneNumber(formData.phoneNumber)) {
-            setError('Please enter a valid phone number');
+            setError(t('common.errors.invalidPhone', 'Будь ласка, введіть коректний номер телефону'));
             setLoading(false);
             return;
         }
@@ -120,7 +124,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
             await onSubmit(submitData);
             handleClose();
         } catch (err) {
-            setError('Не вдалося створити користувача. Перевірте введені дані.');
+            setError(t('createUserModal.errors.createFailed', 'Не вдалося створити користувача. Перевірте введені дані.'));
             setLoading(false);
         }
     };
@@ -138,7 +142,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                         <div className="flex items-center justify-center w-10 h-10 rounded-full bg-brand-light/50 text-brand-primary ring-2 ring-white shadow-sm">
                             <UserPlus className="w-5 h-5" />
                         </div>
-                        <h2 className="text-xl font-bold text-brand-dark">Створити нового користувача</h2>
+                        <h2 className="text-xl font-bold text-brand-dark">{t('createUserModal.createNewUser', 'Створити нового користувача')}</h2>
                     </div>
                     <button
                         onClick={handleClose}
@@ -163,7 +167,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <User className="w-4 h-4" />
-                                    Ім'я
+                                    {t('common.firstName', "Ім'я")}
                                 </label>
                                 <input
                                     type="text"
@@ -171,7 +175,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                                     value={formData.firstName}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Іван"
+                                    placeholder={t('common.firstNamePlaceholder', 'Іван')}
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
                                 />
                             </div>
@@ -179,7 +183,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <User className="w-4 h-4" />
-                                    Прізвище
+                                    {t('common.lastName', 'Прізвище')}
                                 </label>
                                 <input
                                     type="text"
@@ -187,7 +191,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                                     value={formData.lastName}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Петренко"
+                                    placeholder={t('common.lastNamePlaceholder', 'Петренко')}
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
                                 />
                             </div>
@@ -198,7 +202,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Mail className="w-4 h-4" />
-                                    Email
+                                    {t('common.email', 'Email')}
                                 </label>
                                 <input
                                     type="email"
@@ -214,7 +218,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Phone className="w-4 h-4" />
-                                    Номер телефону
+                                    {t('common.phoneNumber', 'Номер телефону')}
                                 </label>
                                 <style>{`
                                     .phone-input-override-modal .PhoneInputInput {
@@ -248,7 +252,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Lock className="w-4 h-4" />
-                                    Пароль
+                                    {t('common.password', 'Пароль')}
                                 </label>
                                 <input
                                     type="password"
@@ -264,7 +268,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Calendar className="w-4 h-4" />
-                                    Дата народження
+                                    {t('common.birthDate', 'Дата народження')}
                                 </label>
                                 <input
                                     type="date"
@@ -280,7 +284,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Shield className="w-4 h-4" />
-                                Роль
+                                {t('common.role', 'Роль')}
                             </label>
                             <div className="relative">
                                 <select
@@ -299,17 +303,42 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                                     </svg>
                                 </div>
                             </div>
+
+                            {/* Language */}
+                            <div>
+                                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
+                                    <Globe className="w-4 h-4" />
+                                    {t('common.interfaceLanguage', 'Мова інтерфейсу')}
+                                </label>
+                                <div className="relative">
+                                    <select
+                                        name="language"
+                                        value={formData.language}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none cursor-pointer"
+                                    >
+                                        <option value="uk">{t('common.languages.uk', 'Українська')}</option>
+                                        <option value="en">{t('common.languages.en', 'English')}</option>
+                                        <option value="de">{t('common.languages.de', 'Deutsch')}</option>
+                                    </select>
+                                    <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Courses Access */}
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <BookOpen className="w-4 h-4" />
-                                Надати доступ до курсів
+                                {t('createUserModal.grantAccessToCourses', 'Надати доступ до курсів')}
                             </label>
                             <div className="border border-gray-200 rounded-lg p-4 max-h-48 overflow-y-auto bg-white/50 custom-scrollbar">
                                 {courses.length === 0 ? (
-                                    <p className="text-gray-500 text-sm italic text-center py-2">Немає доступних курсів</p>
+                                    <p className="text-gray-500 text-sm italic text-center py-2">{t('createUserModal.noCoursesAvailable', 'Немає доступних курсів')}</p>
                                 ) : (
                                     <div className="space-y-3">
                                         {courses.map(course => (
@@ -342,7 +371,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                         onClick={handleClose}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         type="submit"
@@ -353,9 +382,9 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
                         {loading ? (
                             <div className="flex items-center justify-center gap-2">
                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                <span>Створення...</span>
+                                <span>{t('common.creating', 'Створення...')}</span>
                             </div>
-                        ) : 'Створити'}
+                        ) : t('common.create', 'Створити')}
                     </button>
                 </div>
             </div>

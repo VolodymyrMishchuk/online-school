@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { ShieldAlert } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FakeAdminRestrictionModalProps {
     isOpen: boolean;
@@ -11,6 +12,7 @@ export const FakeAdminRestrictionModal: React.FC<FakeAdminRestrictionModalProps>
     isOpen,
     onClose
 }) => {
+    const { t } = useTranslation();
     if (!isOpen) return null;
 
     return createPortal(
@@ -20,14 +22,14 @@ export const FakeAdminRestrictionModal: React.FC<FakeAdminRestrictionModalProps>
                 <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-white shrink-0 shadow-sm">
                     <div className="flex items-center gap-2 text-red-500">
                         <ShieldAlert className="w-5 h-5" />
-                        <h3 className="text-xl font-bold text-brand-dark">Обмеження доступу</h3>
+                        <h3 className="text-xl font-bold text-brand-dark">{t('fakeAdminRestriction.title', 'Обмеження доступу')}</h3>
                     </div>
                 </div>
 
                 {/* Body */}
                 <div className="p-6 text-gray-700 flex-1 overflow-y-auto custom-scrollbar">
                     <p className="text-center text-lg">
-                        Вибачте, але демо-адміністратор може редагувати та видаляти лише ті об'єкти, які створив сам.
+                        {t('fakeAdminRestriction.message', "Вибачте, але демо-адміністратор може редагувати та видаляти лише ті об'єкти, які створив сам.")}
                     </p>
                 </div>
 
@@ -37,7 +39,7 @@ export const FakeAdminRestrictionModal: React.FC<FakeAdminRestrictionModalProps>
                         onClick={onClose}
                         className="px-8 py-3 bg-brand-primary text-white font-bold rounded-lg hover:bg-brand-secondary transition-colors shadow-lg hover:shadow-xl transform active:scale-95 duration-200"
                     >
-                        Зрозумів
+                        {t('fakeAdminRestriction.understoodBtn', 'Зрозумів')}
                     </button>
                 </div>
             </div>

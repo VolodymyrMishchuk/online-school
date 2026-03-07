@@ -6,17 +6,38 @@ import { getNotifications, markAsRead, markAsUnread, deleteNotification, markAll
 import type { NotificationDto } from '../api/notifications';
 import { Bell, CheckCircle, Info, ShoppingCart, UserPlus, Megaphone, Download, ExternalLink, Plus, Trash2, Search } from 'lucide-react';
 import { format } from 'date-fns';
-import { uk } from 'date-fns/locale';
+import { uk, enUS, de } from 'date-fns/locale';
 import { CreateNotificationModal } from '../components/CreateNotificationModal';
 import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
+import { ConfirmModal } from '../components/ConfirmModal';
+import { useTranslation } from 'react-i18next';
 
 export const NotificationsPage: React.FC = () => {
+    const { t, i18n } = useTranslation();
+
+    const getDateLocale = () => {
+        switch (i18n.language) {
+            case 'en': return enUS;
+            case 'de': return de;
+            case 'uk':
+            default: return uk;
+        }
+    };
     const [notifications, setNotifications] = useState<NotificationDto[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+
+    const showAlert = (message: string) => {
+        setAlertMessage(message);
+        setIsAlertOpen(true);
+    };
 
     // Get the refresh function from DashboardLayout context
     const { refreshUnreadCount } = useOutletContext<{ refreshUnreadCount: () => void }>() || { refreshUnreadCount: () => { } };
@@ -94,7 +115,7 @@ export const NotificationsPage: React.FC = () => {
             window.URL.revokeObjectURL(downloadUrl);
         } catch (error) {
             console.error('Download failed', error);
-            alert('Помилка при завантаженні відео. Спробуйте пізніше.');
+            showAlert(t('notifications.downloadError', 'Помилка при завантаженні відео. Спробуйте пізніше.'));
         }
     };
 
@@ -191,7 +212,7 @@ export const NotificationsPage: React.FC = () => {
         <div className="container mx-auto px-6 py-12">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Сповіщення</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('notifications.title', 'Сповіщення')}</h1>
                 </div>
                 <div className="flex gap-3">
                     {isAdmin && (
@@ -200,7 +221,7 @@ export const NotificationsPage: React.FC = () => {
                             className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                         >
                             <Plus className="w-5 h-5" />
-                            <span>Надіслати сповіщення</span>
+                            <span>{t('notifications.sendNotification', 'Надіслати сповіщення')}</span>
                         </button>
                     )}
                 </div>
@@ -211,7 +232,7 @@ export const NotificationsPage: React.FC = () => {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
-                        placeholder="Пошук..."
+                        placeholder={t('notifications.searchPlaceholder', 'Пошук...')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-brand-primary transition-all shadow-sm"
@@ -223,19 +244,19 @@ export const NotificationsPage: React.FC = () => {
                         onClick={handleMarkAllAsUnread}
                         className="flex-1 md:flex-none px-4 py-2 text-sm font-bold text-brand-primary bg-brand-light/20 border border-brand-primary/20 rounded-lg hover:bg-brand-primary hover:text-white transition-colors whitespace-nowrap"
                     >
-                        Вибрати все
+                        {t('notifications.markAllAsUnread', 'Вибрати все')}
                     </button>
                     <button
                         onClick={handleMarkAllAsRead}
                         className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
                     >
-                        Прочитати все
+                        {t('notifications.markAllAsRead', 'Прочитати все')}
                     </button>
                     <button
                         onClick={() => setIsDeleteAllModalOpen(true)}
                         className="flex-1 md:flex-none px-4 py-2 text-sm font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-colors whitespace-nowrap"
                     >
-                        Видалити все
+                        {t('notifications.deleteAll', 'Видалити все')}
                     </button>
                 </div>
             </div>
@@ -249,8 +270,8 @@ export const NotificationsPage: React.FC = () => {
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                             <Bell className="w-8 h-8 text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-medium text-gray-900 mb-2">Немає нових сповіщень</h3>
-                        <p className="text-gray-400">Тут будуть показані всі важливі події</p>
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">{t('notifications.noNewNotifications', 'Немає нових сповіщень')}</h3>
+                        <p className="text-gray-400">{t('notifications.noNewNotificationsDesc', 'Тут будуть показані всі важливі події')}</p>
                     </div>
                 ) : (
                     notifications.filter(n =>
@@ -276,7 +297,7 @@ export const NotificationsPage: React.FC = () => {
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="space-y-1">
                                             <h4 className={`text-lg font-bold transition-colors duration-300 ${notification.read ? 'text-gray-600' : 'text-gray-900'}`}>
-                                                {notification.title || 'Сповіщення'}
+                                                {notification.title || t('notifications.defaultTitle', 'Сповіщення')}
                                             </h4>
                                             <p className={`text-base transition-colors duration-300 ${notification.read ? 'text-gray-500' : 'text-gray-700'} leading-relaxed`}>
                                                 {notification.message}
@@ -288,7 +309,7 @@ export const NotificationsPage: React.FC = () => {
                                                 <button
                                                     onClick={(e) => handleMarkAsRead(notification.id, e)}
                                                     className="p-2 hover:bg-black/5 rounded-full transition-colors group/btn"
-                                                    title="Позначити, як прочитане"
+                                                    title={t('notifications.markAsReadBtn', 'Позначити, як прочитане')}
                                                 >
                                                     <div className="w-2.5 h-2.5 rounded-full bg-brand-primary group-hover/btn:bg-brand-secondary transition-colors" />
                                                 </button>
@@ -304,7 +325,7 @@ export const NotificationsPage: React.FC = () => {
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow"
                                                 >
                                                     <Download className="w-4 h-4 text-brand-primary" />
-                                                    Завантажити відео
+                                                    {t('notifications.downloadVideo', 'Завантажити відео')}
                                                 </button>
                                             ) : (
                                                 <a
@@ -315,7 +336,7 @@ export const NotificationsPage: React.FC = () => {
                                                     className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm hover:shadow"
                                                 >
                                                     <ExternalLink className="w-4 h-4 text-brand-primary" />
-                                                    Перейти
+                                                    {t('notifications.goToLink', 'Перейти')}
                                                 </a>
                                             )}
                                         </div>
@@ -323,15 +344,15 @@ export const NotificationsPage: React.FC = () => {
 
                                     <div className="mt-3 flex items-center gap-2 text-sm text-gray-400">
                                         <span>
-                                            {format(new Date(notification.createdAt), "d MMMM yyyy HH:mm", { locale: uk })}
+                                            {format(new Date(notification.createdAt), "d MMMM yyyy HH:mm", { locale: getDateLocale() })}
                                         </span>
                                         {(notification as any).viewAgain ? (
                                             <span className="flex items-center gap-1 text-brand-primary font-medium">
-                                                • Переглянути знову
+                                                • {t('notifications.viewAgain', 'Переглянути знову')}
                                             </span>
                                         ) : notification.read ? (
                                             <span className="flex items-center gap-1 text-gray-300">
-                                                • Прочитано
+                                                • {t('notifications.read', 'Прочитано')}
                                             </span>
                                         ) : null}
                                     </div>
@@ -373,23 +394,22 @@ export const NotificationsPage: React.FC = () => {
                                 <div className="p-2 bg-red-100 rounded-lg">
                                     <Trash2 className="w-6 h-6 text-red-600" />
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900">Видалення</h3>
+                                <h3 className="text-xl font-bold text-gray-900">{t('notifications.deleteModalTitle', 'Видалення')}</h3>
                             </div>
-                            <p className="text-gray-600 mt-2 mb-6 text-sm">
-                                Ви впевнені, що хочете видалити <strong>ВСІ</strong> сповіщення? Цю дію неможливо скасувати.
+                            <p className="text-gray-600 mt-2 mb-6 text-sm" dangerouslySetInnerHTML={{ __html: t('notifications.deleteModalDesc', 'Ви впевнені, що хочете видалити <strong>ВСІ</strong> сповіщення? Цю дію неможливо скасувати.') }}>
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setIsDeleteAllModalOpen(false)}
                                     className="flex-1 px-4 py-2.5 rounded-xl font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
                                 >
-                                    Скасувати
+                                    {t('common.cancelBtn', 'Скасувати')}
                                 </button>
                                 <button
                                     onClick={handleDeleteAll}
                                     className="flex-1 px-4 py-2.5 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-md shadow-red-500/20 transition-all active:scale-95"
                                 >
-                                    Видалити всі
+                                    {t('notifications.deleteAllConfirmBtn', 'Видалити всі')}
                                 </button>
                             </div>
                         </div>
@@ -401,6 +421,16 @@ export const NotificationsPage: React.FC = () => {
             <FakeAdminRestrictionModal
                 isOpen={isFakeAdminRestrictionModalOpen}
                 onClose={() => setIsFakeAdminRestrictionModalOpen(false)}
+            />
+
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={t('common.error', 'Помилка')}
+                message={alertMessage}
+                isAlert={true}
+                type="warning"
             />
         </div>
     );

@@ -3,6 +3,7 @@ import type { Module } from '../api/modules';
 import { X, BookOpen, Layers, CheckCircle, Euro, Percent, Clock, Tag, ArrowRight, FileText } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { API_URL } from '../api/client';
+import { useTranslation } from 'react-i18next';
 
 interface CourseModalProps {
     isOpen: boolean;
@@ -23,6 +24,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     initialData,
     initialModuleIds = []
 }) => {
+    const { t } = useTranslation();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState<number | undefined>(undefined);
@@ -127,7 +129,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             <BookOpen className="w-5 h-5" />
                         </div>
                         <h2 className="text-xl font-bold text-brand-dark">
-                            {initialData ? 'Редагувати курс' : 'Створити новий курс'}
+                            {initialData ? t('courseModal.editCourse', 'Редагувати курс') : t('courseModal.createNewCourse', 'Створити новий курс')}
                         </h2>
                     </div>
                     <button
@@ -145,13 +147,13 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <FileText className="w-4 h-4" />
-                                Обкладинка курсу
+                                {t('courseModal.courseCover', 'Обкладинка курсу')}
                             </label>
                             <div className="flex flex-col gap-3 w-full">
                                 <div className="flex items-start gap-4">
                                     {previewUrl && (
                                         <div className="w-32 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0 relative group">
-                                            <img src={previewUrl} alt="Cover preview" className="w-full h-full object-cover" />
+                                            <img src={previewUrl} alt={t('courseModal.coverPreviewAlt', 'Превʼю обкладинки')} className="w-full h-full object-cover" />
                                         </div>
                                     )}
                                     <div className="flex flex-col gap-2">
@@ -166,7 +168,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                             htmlFor="cover-upload"
                                             className="px-4 py-2 bg-brand-light/50 text-brand-primary hover:bg-brand-light/80 font-semibold rounded-lg cursor-pointer transition-colors text-sm text-center inline-block"
                                         >
-                                            Обрати файл
+                                            {t('courseModal.chooseFileBtn', 'Обрати файл')}
                                         </label>
 
                                         {previewUrl && (
@@ -182,12 +184,12 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                                 }}
                                                 className="px-4 py-2 bg-white border border-red-500 text-red-500 hover:bg-red-50 font-bold rounded-lg transition-all shadow-sm hover:shadow-md transform active:scale-95 duration-200 text-sm"
                                             >
-                                                Видалити обкладинку
+                                                {t('courseModal.deleteCoverBtn', 'Видалити обкладинку')}
                                             </button>
                                         )}
                                     </div>
                                 </div>
-                                {!previewUrl && <span className="text-sm text-gray-500">No file chosen</span>}
+                                {!previewUrl && <span className="text-sm text-gray-500">{t('courseModal.noFileChosen', 'Файл не обрано')}</span>}
                             </div>
                         </div>
 
@@ -195,14 +197,14 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <BookOpen className="w-4 h-4" />
-                                Назва курсу *
+                                {t('courseModal.courseName', 'Назва курсу *')}
                             </label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                placeholder="Введіть назву курсу"
+                                placeholder={t('courseModal.courseNamePlaceholder', 'Введіть назву курсу')}
                                 required
                             />
                         </div>
@@ -211,13 +213,13 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <FileText className="w-4 h-4" />
-                                Опис *
+                                {t('courseModal.description', 'Опис *')}
                             </label>
                             <textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white resize-none"
-                                placeholder="Введіть опис курсу"
+                                placeholder={t('courseModal.descriptionPlaceholder', 'Введіть опис курсу')}
                                 rows={3}
                                 required
                             />
@@ -229,7 +231,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Euro className="w-4 h-4" />
-                                    Ціна (€)
+                                    {t('courseModal.price', 'Ціна (€)')}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -245,7 +247,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                 </div>
                                 {price && (discountAmount || discountPercentage) ? (
                                     <div className="mt-2 text-sm font-medium bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-100 inline-block w-full text-center">
-                                        Нова ціна: {(discountAmount
+                                        {t('courseModal.newPrice', 'Нова ціна:')} {(discountAmount
                                             ? (price - discountAmount)
                                             : (price * (1 - (discountPercentage || 0) / 100))
                                         ).toFixed(2)}€
@@ -257,7 +259,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Tag className="w-4 h-4" />
-                                    Знижка (Сума)
+                                    {t('courseModal.discountAmount', 'Знижка (Сума)')}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -281,7 +283,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             <div>
                                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                     <Percent className="w-4 h-4" />
-                                    Знижка (%)
+                                    {t('courseModal.discountPercentage', 'Знижка (%)')}
                                 </label>
                                 <div className="relative">
                                     <input
@@ -306,7 +308,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Clock className="w-4 h-4" />
-                                Тривалість доступу (дні)
+                                {t('courseModal.accessDuration', 'Тривалість доступу (дні)')}
                             </label>
                             <input
                                 type="number"
@@ -314,10 +316,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                 value={accessDuration || ''}
                                 onChange={(e) => setAccessDuration(e.target.value ? parseInt(e.target.value) : undefined)}
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white"
-                                placeholder="Наприклад: 30"
+                                placeholder={t('courseModal.accessDurationPlaceholder', 'Наприклад: 30')}
                             />
                             <p className="text-xs text-gray-500 mt-1 ml-1">
-                                Залиште порожнім для необмеженого доступу
+                                {t('courseModal.unlimitedAccessHint', 'Залиште порожнім для необмеженого доступу')}
                             </p>
                         </div>
 
@@ -325,7 +327,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Percent className="w-4 h-4" />
-                                Акційна знижка на наступний курс (% або фіксована сума)
+                                {t('courseModal.promotionalDiscount', 'Акційна знижка на наступний курс (% або фіксована сума)')}
                             </label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Promotional Discount Percentage */}
@@ -342,12 +344,12 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                                 if (val && val > 0) setPromotionalDiscountAmount(undefined);
                                             }}
                                             className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                            placeholder="Наприклад: 15"
+                                            placeholder={t('courseModal.promotionalPercentagePlaceholder', 'Наприклад: 15')}
                                         />
                                         <span className="absolute right-4 top-3.5 text-gray-400 font-medium">%</span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1 ml-1">
-                                        Знижка у відсотках
+                                        {t('courseModal.promotionalPercentageHint', 'Знижка у відсотках')}
                                     </p>
                                 </div>
 
@@ -365,12 +367,12 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                                 if (val && val > 0) setPromotionalDiscountPercentage(undefined);
                                             }}
                                             className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                            placeholder="Наприклад: 10.00"
+                                            placeholder={t('courseModal.promotionalAmountPlaceholder', 'Наприклад: 10.00')}
                                         />
                                         <span className="absolute right-4 top-3.5 text-gray-400 font-medium">€</span>
                                     </div>
                                     <p className="text-xs text-gray-500 mt-1 ml-1">
-                                        Фіксована знижка
+                                        {t('courseModal.promotionalAmountHint', 'Фіксована знижка')}
                                     </p>
                                 </div>
                             </div>
@@ -380,7 +382,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <ArrowRight className="w-4 h-4" />
-                                Наступний рекомендований курс
+                                {t('courseModal.nextCourse', 'Наступний рекомендований курс')}
                             </label>
                             <div className="relative">
                                 <select
@@ -388,7 +390,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                     onChange={(e) => setNextCourseId(e.target.value || undefined)}
                                     className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none"
                                 >
-                                    <option value="">Не вказано</option>
+                                    <option value="">{t('courseModal.notSpecified', 'Не вказано')}</option>
                                     {courses
                                         .filter(course => course.id !== initialData?.id)
                                         .map(course => (
@@ -404,7 +406,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                 </div>
                             </div>
                             <p className="text-xs text-gray-500 mt-1 ml-1">
-                                Рекомендований наступний курс після завершення цього
+                                {t('courseModal.nextCourseHint', 'Рекомендований наступний курс після завершення цього')}
                             </p>
                         </div>
 
@@ -412,14 +414,14 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
                                 <Layers className="w-4 h-4" />
-                                Вибрати модулі (Опціонально)
+                                {t('courseModal.selectModules', 'Вибрати модулі (Опціонально)')}
                             </label>
                             <div className="border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto bg-white/50 custom-scrollbar">
                                 {modules
                                     .filter(module => !module.courseId || (initialData && module.courseId === initialData.id))
                                     .length === 0 ? (
                                     <div className="p-4 text-center text-gray-500 text-sm italic">
-                                        Доступних модулів не знайдено
+                                        {t('courseModal.noModulesFound', 'Доступних модулів не знайдено')}
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -450,7 +452,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                                         )}
                                                         {module.courseName && module.courseName !== (initialData?.name || '') && (
                                                             <div className="text-xs text-orange-500 mt-1 font-medium bg-orange-50 inline-block px-2 py-0.5 rounded border border-orange-100">
-                                                                Поточний курс: {module.courseName} (буде змінено)
+                                                                {t('courseModal.currentCourse', 'Поточний курс:')} {module.courseName} {t('courseModal.willBeChanged', '(буде змінено)')}
                                                             </div>
                                                         )}
                                                     </div>
@@ -460,7 +462,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                                 )}
                             </div>
                             <div className="text-xs font-medium text-gray-500 text-right pt-2 border-t border-gray-200/50 mt-2">
-                                Вибрано: <span className="text-brand-primary font-bold">{selectedModuleIds.length}</span>
+                                {t('courseModal.selectedModulesCount', 'Вибрано:')} <span className="text-brand-primary font-bold">{selectedModuleIds.length}</span>
                             </div>
                         </div>
                     </form>
@@ -473,7 +475,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         onClick={onClose}
                         className="flex-1 py-3 font-bold text-brand-primary bg-white hover:bg-brand-primary hover:text-white rounded-lg transition-colors shadow-sm border border-gray-100"
                     >
-                        Скасувати
+                        {t('common.cancelBtn', 'Скасувати')}
                     </button>
                     <button
                         type="submit"
@@ -484,10 +486,10 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                         {isSubmitting ? (
                             <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
-                                <span>Збереження...</span>
+                                <span>{t('common.saving', 'Збереження...')}</span>
                             </>
                         ) : (
-                            initialData ? 'Оновити' : 'Створити'
+                            initialData ? t('common.update', 'Оновити') : t('common.create', 'Створити')
                         )}
                     </button>
                 </div>

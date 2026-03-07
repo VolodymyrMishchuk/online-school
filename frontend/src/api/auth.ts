@@ -6,6 +6,7 @@ export interface AuthResponse {
     role: string;
     firstName: string;
     lastName: string;
+    language: string;
 }
 
 export interface LoginRequest {
@@ -38,6 +39,7 @@ export interface RegisterRequest {
     phoneNumber: string;
     bornedAt: string; // ISO string
     password: string;
+    language?: string;
 }
 
 export const register = async (request: RegisterRequest): Promise<AuthResponse> => {

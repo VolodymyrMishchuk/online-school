@@ -10,8 +10,10 @@ import { ModuleCard } from '../components/ModuleCard';
 import { ModuleModal } from '../components/ModuleModal';
 import MultiSelect from '../components/MultiSelect';
 import { FakeAdminRestrictionModal } from '../components/FakeAdminRestrictionModal';
+import { useTranslation } from 'react-i18next';
 
 export const AllModulesPage: React.FC = () => {
+    const { t } = useTranslation();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingModule, setEditingModule] = useState<{ module: Module; lessons: Lesson[] } | null>(null);
@@ -156,7 +158,7 @@ export const AllModulesPage: React.FC = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Всі модулі</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">{t('allModules.title', 'Всі модулі')}</h1>
                 </div>
                 {isAdmin && (
                     <button
@@ -164,7 +166,7 @@ export const AllModulesPage: React.FC = () => {
                         className="flex items-center gap-2 px-4 py-2 text-gray-900 font-medium hover:bg-gray-100 rounded-lg transition-colors"
                     >
                         <Plus size={20} />
-                        <span>Додати модуль</span>
+                        <span>{t('allModules.addModuleBtn', 'Додати модуль')}</span>
                     </button>
                 )}
             </div>
@@ -173,16 +175,16 @@ export const AllModulesPage: React.FC = () => {
             <div className="flex flex-wrap gap-4 mb-8 bg-white p-3 rounded-lg border border-gray-100 shadow-sm items-center">
                 <div className="flex items-center gap-2 text-gray-500 mr-2">
                     <Filter className="w-5 h-5" />
-                    <span className="font-medium text-sm">Фільтри:</span>
+                    <span className="font-medium text-sm">{t('allModules.filters', 'Фільтри:')}</span>
                 </div>
 
                 {/* Course Filter */}
                 <div className="min-w-[250px]">
                     <MultiSelect
                         label=""
-                        placeholder="Всі курси"
+                        placeholder={t('allModules.allCoursesPlaceholder', 'Всі курси')}
                         options={[
-                            { value: 'unassigned', label: 'Без курсу' },
+                            { value: 'unassigned', label: t('allModules.noCourseLabel', 'Без курсу') },
                             ...(courses.map(c => ({ value: c.id, label: c.name })) || [])
                         ]}
                         selectedValues={selectedCourseIds}
@@ -195,7 +197,7 @@ export const AllModulesPage: React.FC = () => {
                         onClick={() => setSelectedCourseIds([])}
                         className="text-sm text-red-500 hover:text-red-600 font-medium px-2 ml-auto"
                     >
-                        Скинути
+                        {t('allModules.resetFiltersBtn', 'Скинути')}
                     </button>
                 )}
             </div>
@@ -207,10 +209,10 @@ export const AllModulesPage: React.FC = () => {
                         <FolderOpen className="w-8 h-8 text-gray-300" />
                     </div>
                     <h3 className="text-xl font-medium text-gray-900 mb-2">
-                        Модулів не знайдено
+                        {t('allModules.noModulesFound', 'Модулів не знайдено')}
                     </h3>
                     <p className="text-gray-400 mb-6">
-                        Спробуйте змінити параметри фільтрації або створіть новий модуль
+                        {t('allModules.noModulesDesc', 'Спробуйте змінити параметри фільтрації або створіть новий модуль')}
                     </p>
                     {isAdmin && (
                         <button
@@ -218,7 +220,7 @@ export const AllModulesPage: React.FC = () => {
                             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90 transition-colors shadow-sm"
                         >
                             <Plus size={20} />
-                            Створити Модуль
+                            {t('allModules.createModuleBtn', 'Створити Модуль')}
                         </button>
                     )}
                 </div>

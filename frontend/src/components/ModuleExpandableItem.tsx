@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Layers, BookOpen, Clock } from 'lucide-react';
 import type { Module } from '../api/modules';
 import type { Lesson } from '../api/lessons';
@@ -19,6 +20,7 @@ interface ModuleExpandableItemProps {
 }
 
 export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, onDeleteLesson, isTransparent = false, isCatalogMode = false }: ModuleExpandableItemProps) {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const { data: lessons, isLoading: lessonsLoading } = useQuery({
@@ -75,12 +77,7 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                             <BookOpen size={16} />
                             <span>
                                 {module.lessonsNumber || 0} {
-                                    (() => {
-                                        const count = module.lessonsNumber || 0;
-                                        if (count % 10 === 1 && count % 100 !== 11) return 'урок';
-                                        if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) return 'уроки';
-                                        return 'уроків';
-                                    })()
+                                    t('moduleExpandableItem.lessonsCount', { count: module.lessonsNumber || 0 })
                                 }
                             </span>
                         </div>
@@ -89,8 +86,11 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                                 <Clock size={16} />
                                 <span>
                                     {module.durationMinutes < 60
-                                        ? `${module.durationMinutes} хв`
-                                        : `${Math.floor(module.durationMinutes / 60)} год ${module.durationMinutes % 60 > 0 ? `${module.durationMinutes % 60} хв` : ''}`
+                                        ? t('moduleExpandableItem.durationMinutes', '{{count}} хв', { count: module.durationMinutes })
+                                        : t('moduleExpandableItem.durationHoursMinutes', '{{hours}} год {{minutes}} хв', {
+                                            hours: Math.floor(module.durationMinutes / 60),
+                                            minutes: module.durationMinutes % 60
+                                        }).replace(' 0 хв', '')
                                     }
                                 </span>
                             </div>
@@ -125,7 +125,7 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                             </div>
                         ) : (
                             <div className="text-center py-4 text-gray-500 italic">
-                                У цьому модулі поки немає уроків.
+                                {t('moduleExpandableItem.noLessonsYet', 'У цьому модулі поки немає уроків.')}
                             </div>
                         )}
                     </div>

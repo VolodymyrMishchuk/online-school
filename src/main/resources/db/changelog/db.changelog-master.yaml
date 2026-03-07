@@ -80,3 +80,6 @@ databaseChangeLog:
   - include:
       file: changesing/028-create-appeals-table.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/029-add-language-to-persons.sql
+      relativeToChangelogFile: true

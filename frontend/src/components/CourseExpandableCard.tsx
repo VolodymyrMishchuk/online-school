@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X, Settings2 } from 'lucide-react';
 import type { CourseDto } from '../api/courses';
 import { cloneCourse, updateCourseStatus } from '../api/courses';
@@ -9,6 +10,7 @@ import { removeCourseAccess } from '../api/users';
 import ModuleExpandableItem from './ModuleExpandableItem';
 import { ExtendAccessModal } from './ExtendAccessModal';
 import { FakeAdminRestrictionModal } from './FakeAdminRestrictionModal';
+import { ConfirmModal } from './ConfirmModal';
 import { API_URL } from '../api/client';
 
 interface CourseExpandableCardProps {
@@ -34,6 +36,7 @@ function CourseExpandableCard({
     onRefresh,
     isCatalogMode = false
 }: CourseExpandableCardProps) {
+    const { t } = useTranslation();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -45,6 +48,19 @@ function CourseExpandableCard({
     // New UX states
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [selectedSettingsAction, setSelectedSettingsAction] = useState<string>('');
+
+    // Alert Modal State
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
+    const [alertTitle, setAlertTitle] = useState('');
+    const [alertType, setAlertType] = useState<'info' | 'warning' | 'danger'>('warning');
+
+    const showAlert = (message: string, type: 'info' | 'warning' | 'danger' = 'warning', title = t('common.notification', 'Сповіщення')) => {
+        setAlertMessage(message);
+        setAlertType(type);
+        setAlertTitle(title);
+        setIsAlertOpen(true);
+    };
 
     const userStr = localStorage.getItem('user');
     const user = userStr ? JSON.parse(userStr) : null;
@@ -88,14 +104,14 @@ function CourseExpandableCard({
             }
         } catch (error) {
             console.error('Failed to remove course', error);
-            alert('Помилка при видаленні курсу. Спробуйте пізніше.');
+            showAlert(t('courseExpandableCard.errors.removeFailed', 'Помилка при видаленні курсу. Спробуйте пізніше.'));
             setIsDeleting(false);
         }
     };
 
     const handleExtendWithPayment = () => {
         // Placeholder for future logic
-        alert('Ця функція перебуває у стадії розробки.');
+        showAlert(t('common.errors.featureUnderDevelopment', 'Ця функція перебуває у стадії розробки.'), 'info');
     };
 
     const handleStatusChange = async (newStatus: string) => {
@@ -109,7 +125,7 @@ function CourseExpandableCard({
             if (onRefresh) onRefresh();
         } catch (error) {
             console.error('Failed to change status', error);
-            alert('Помилка при зміні статусу курсу.');
+            showAlert(t('courseExpandableCard.errors.statusChangeFailed', 'Помилка при зміні статусу курсу.'));
         } finally {
             setIsStatusUpdating(false);
         }
@@ -123,32 +139,16 @@ function CourseExpandableCard({
         try {
             setIsCloning(true);
             await cloneCourse(course.id);
-            alert('Курс успішно клоновано.');
+            showAlert(t('courseExpandableCard.success.cloned', 'Курс успішно клоновано.'), 'info', t('courseExpandableCard.successTitle', 'Успіх'));
             if (onRefresh) onRefresh();
         } catch (error) {
             console.error('Failed to clone course', error);
-            alert('Помилка при клонуванні курсу.');
+            showAlert(t('courseExpandableCard.errors.cloneFailed', 'Помилка при клонуванні курсу.'));
         } finally {
             setIsCloning(false);
         }
     };
 
-    // Helper for pluralization
-    const getNoun = (number: number, one: string, two: string, five: string) => {
-        let n = Math.abs(number);
-        n %= 100;
-        if (n >= 5 && n <= 20) {
-            return five;
-        }
-        n %= 10;
-        if (n === 1) {
-            return one;
-        }
-        if (n >= 2 && n <= 4) {
-            return two;
-        }
-        return five;
-    };
 
     let expirationText = '';
     let isExpirationLessThanWeek = false;
@@ -158,31 +158,35 @@ function CourseExpandableCard({
         const diffMins = Math.floor(diffMs / (1000 * 60));
 
         if (diffMs <= 0) {
-            expirationText = 'Доступ завершено';
+            expirationText = t('common.accessExpired', 'Доступ завершено');
             isExpirationLessThanWeek = true;
         } else if (diffMins < 60) {
-            expirationText = `Курс доступний ще ${diffMins} ${getNoun(diffMins, 'хвилина', 'хвилини', 'хвилин')}`;
+            expirationText = t('courseExpandableCard.availableForMinutes', { count: diffMins });
             isExpirationLessThanWeek = true;
         } else if (diffMins < 48 * 60) {
             const h = Math.floor(diffMins / 60);
-            expirationText = `Курс доступний ще ${h} ${getNoun(h, 'година', 'години', 'годин')}`;
+            expirationText = t('courseExpandableCard.availableForHours', { count: h });
             isExpirationLessThanWeek = true;
         } else {
             const totalDays = Math.floor(diffMins / (60 * 24));
             isExpirationLessThanWeek = totalDays < 7;
             const months = Math.floor(totalDays / 30);
             const days = totalDays % 30;
+
             const parts = [];
 
             if (months > 0 && totalDays > 31) {
-                parts.push(`${months} ${getNoun(months, 'місяць', 'місяці', 'місяців')}`);
+                parts.push(t('common.monthsCount', { count: months }));
             }
 
             const remainingDays = totalDays > 31 ? days : totalDays;
             if (remainingDays > 0) {
-                parts.push(`${remainingDays} ${getNoun(remainingDays, 'день', 'дні', 'днів')}`);
+                parts.push(t('common.daysCount', { count: remainingDays }));
             }
-            expirationText = parts.length > 0 ? `Курс доступний ще ${parts.join(' ')}` : 'Курс доступний ще менше дня';
+
+            expirationText = parts.length > 0
+                ? t('courseExpandableCard.availableForLabel', 'Курс доступний ще {{time}}', { time: parts.join(' ') })
+                : t('courseExpandableCard.availableForLessThanDay', 'Курс доступний ще менше дня');
         }
     }
 
@@ -256,7 +260,7 @@ function CourseExpandableCard({
                                     {/* Enrolled Badge or Status */}
                                     {course.isEnrolled && !isCatalogMode && course.enrollmentStatus === 'BLOCKED' && (
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${hasImage ? 'bg-red-500/20 text-red-100 border border-red-500/30 backdrop-blur-sm' : 'bg-red-100 text-red-800'}`}>
-                                            Доступ завершено
+                                            {t('common.accessExpired', 'Доступ завершено')}
                                         </span>
                                     )}
                                     {course.expiresAt && !isCatalogMode && course.enrollmentStatus !== 'BLOCKED' && (
@@ -284,24 +288,26 @@ function CourseExpandableCard({
                                     // Modules
                                     const modulesCount = courseModules.length;
                                     if (modulesCount > 0) {
-                                        parts.push(`${modulesCount} ${getNoun(modulesCount, 'модуль', 'модулі', 'модулів')}`);
+                                        parts.push(t('common.modulesCount', { count: modulesCount }));
                                     }
 
                                     // Lessons
                                     if (lessonCount > 0) {
-                                        parts.push(`${lessonCount} ${getNoun(lessonCount, 'урок', 'уроки', 'уроків')}`);
+                                        parts.push(t('common.lessonsCount', { count: lessonCount }));
                                     }
-
-                                    // Files - REMOVED per request
 
                                     // Duration
                                     if (totalMinutes > 0) {
                                         const h = Math.floor(totalMinutes / 60);
                                         const m = totalMinutes % 60;
                                         if (h > 0) {
-                                            parts.push(`${h} год${m > 0 ? ` ${m} хв` : ''}`);
+                                            if (m > 0) {
+                                                parts.push(t('common.hoursMinutesCount', { hours: h, minutes: m }));
+                                            } else {
+                                                parts.push(t('common.hoursCount', { count: h }));
+                                            }
                                         } else {
-                                            parts.push(`${m} хв`);
+                                            parts.push(t('common.minutesCount', { count: m }));
                                         }
                                     }
 
@@ -335,7 +341,7 @@ function CourseExpandableCard({
                                             </div>
                                         ) : (
                                             <div className={`text-lg font-bold ${hasImage ? 'text-white drop-shadow-md' : 'text-gray-900'}`}>
-                                                {!course.price || course.price === 0 ? 'Безкоштовно' : `${course.price}€`}
+                                                {!course.price || course.price === 0 ? t('common.free', 'Безкоштовно') : `${course.price}€`}
                                             </div>
                                         )}
                                     </div>
@@ -353,7 +359,7 @@ function CourseExpandableCard({
                                                 }
                                             }}
                                             className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-white/20 text-gray-300 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-brand-primary'}`}
-                                            title="Редагувати"
+                                            title={t('common.editBtn', 'Редагувати')}
                                         >
                                             <Edit2 className="w-4 h-4" />
                                         </button>
@@ -367,7 +373,7 @@ function CourseExpandableCard({
                                                 }
                                             }}
                                             className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-white/20 text-gray-300 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-brand-primary'}`}
-                                            title="Налаштування"
+                                            title={t('common.settingsBtn', 'Налаштування')}
                                         >
                                             <Settings2 className="w-4 h-4" />
                                         </button>
@@ -380,7 +386,7 @@ function CourseExpandableCard({
                                                 }
                                             }}
                                             className={`p-2 rounded-lg transition-colors ${hasImage ? 'hover:bg-red-500/20 text-gray-300 hover:text-red-400' : 'hover:bg-red-50 text-gray-500 hover:text-red-50'}`}
-                                            title="Видалити"
+                                            title={t('common.deleteBtn', 'Видалити')}
                                         >
                                             <Trash2 className="w-4 h-4" />
                                         </button>
@@ -396,10 +402,10 @@ function CourseExpandableCard({
                                         onEnroll(course.id);
                                     }}
                                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-primary text-white hover:bg-brand-primary/90 transition-colors shadow-sm w-full justify-center"
-                                    title="Придбати курс"
+                                    title={t('courseExpandableCard.buyCourse', 'Придбати курс')}
                                 >
                                     <ShoppingCart className="w-4 h-4" />
-                                    <span className="font-medium">Придбати курс</span>
+                                    <span className="font-medium">{t('courseExpandableCard.buyCourse', 'Придбати курс')}</span>
                                 </button>
                             )}
 
@@ -410,25 +416,25 @@ function CourseExpandableCard({
                                         onClick={() => setIsExtendModalOpen(true)}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
                                     >
-                                        Отримати доступ за відеовідгук
+                                        {t('courseExpandableCard.extendForReview', 'Отримати доступ за відеовідгук')}
                                     </button>
                                     <button
                                         onClick={handleExtendWithPayment}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-brand-dark bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
                                     >
-                                        Продовжити курс зі знижкою
+                                        {t('courseExpandableCard.extendWithDiscount', 'Продовжити курс зі знижкою')}
                                     </button>
                                     <button
-                                        onClick={() => alert('Ця функція перебуває у стадії розробки.')}
+                                        onClick={() => showAlert(t('common.errors.featureUnderDevelopment', 'Ця функція перебуває у стадії розробки.'), 'info')}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
                                     >
-                                        Отримати знижку -10€ на СУПЕР новий курс
+                                        {t('courseExpandableCard.getNewCourseDiscount', 'Отримати знижку -10€ на СУПЕР новий курс')}
                                     </button>
                                     <button
                                         onClick={handleDeleteCourse}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors shadow-sm"
                                     >
-                                        Видалити курс
+                                        {t('courseExpandableCard.deleteCourse', 'Видалити курс')}
                                     </button>
                                 </div>
                             )}
@@ -456,7 +462,7 @@ function CourseExpandableCard({
                         <div className="mt-4 pt-2">
                             <h4 className={`text-sm font-semibold mb-4 uppercase tracking-wide flex items-center gap-2 ${hasImage ? 'text-white/90 drop-shadow-sm' : 'text-gray-900'}`}>
                                 <BookOpen className={`w-4 h-4 ${hasImage ? 'text-white' : 'text-brand-primary'}`} />
-                                Зміст Курсу ({courseModules.length})
+                                {t('courseExpandableCard.courseContent', 'Зміст Курсу')} ({courseModules.length})
                             </h4>
 
                             {courseModules.length > 0 ? (
@@ -476,7 +482,7 @@ function CourseExpandableCard({
                             ) : (
                                 <div className={`text-center py-6 rounded-lg border border-dashed ${hasImage ? 'border-white/20 bg-white/10 text-gray-300' : 'border-gray-100 bg-gray-50/50 text-gray-400'}`}>
                                     <BookOpen size={24} className="mx-auto mb-2 opacity-30" />
-                                    <p className="text-xs font-medium">Модулі ще не додано</p>
+                                    <p className="text-xs font-medium">{t('courseExpandableCard.noModulesYet', 'Модулі ще не додано')}</p>
                                 </div>
                             )}
                         </div>
@@ -492,7 +498,7 @@ function CourseExpandableCard({
                         />
                         <div className="relative bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 border border-gray-100">
                             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                <h3 className="text-lg font-semibold text-gray-900">Налаштування курсу</h3>
+                                <h3 className="text-lg font-semibold text-gray-900">{t('courseExpandableCard.courseSettings', 'Налаштування курсу')}</h3>
                                 <button
                                     onClick={() => setIsSettingsModalOpen(false)}
                                     className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
@@ -512,7 +518,7 @@ function CourseExpandableCard({
                                             disabled={course.status === 'PUBLISHED'}
                                             className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
                                         />
-                                        <span className={`text-sm ${course.status === 'PUBLISHED' ? 'text-gray-400' : 'text-gray-700'}`}>Опублікувати курс</span>
+                                        <span className={`text-sm ${course.status === 'PUBLISHED' ? 'text-gray-400' : 'text-gray-700'}`}>{t('courseExpandableCard.publishCourse', 'Опублікувати курс')}</span>
                                     </label>
                                     <label className="flex items-center gap-3 cursor-pointer">
                                         <input
@@ -524,7 +530,7 @@ function CourseExpandableCard({
                                             disabled={course.status === 'DRAFT'}
                                             className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
                                         />
-                                        <span className={`text-sm ${course.status === 'DRAFT' ? 'text-gray-400' : 'text-gray-700'}`}>Перемістити в чернетки</span>
+                                        <span className={`text-sm ${course.status === 'DRAFT' ? 'text-gray-400' : 'text-gray-700'}`}>{t('courseExpandableCard.moveToDrafts', 'Перемістити в чернетки')}</span>
                                     </label>
                                     <label className="flex items-center gap-3 cursor-pointer">
                                         <input
@@ -536,7 +542,7 @@ function CourseExpandableCard({
                                             disabled={course.status === 'ARCHIVED'}
                                             className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300 disabled:opacity-50"
                                         />
-                                        <span className={`text-sm ${course.status === 'ARCHIVED' ? 'text-gray-400' : 'text-gray-700'}`}>Перемістити в архів</span>
+                                        <span className={`text-sm ${course.status === 'ARCHIVED' ? 'text-gray-400' : 'text-gray-700'}`}>{t('courseExpandableCard.moveToArchive', 'Перемістити в архів')}</span>
                                     </label>
                                     <label className="flex items-center gap-3 cursor-pointer">
                                         <input
@@ -547,7 +553,7 @@ function CourseExpandableCard({
                                             onChange={(e) => setSelectedSettingsAction(e.target.value)}
                                             className="w-4 h-4 text-brand-primary focus:ring-brand-primary border-gray-300"
                                         />
-                                        <span className="text-sm text-gray-700">Створити нову версію (клонувати)</span>
+                                        <span className="text-sm text-gray-700">{t('courseExpandableCard.cloneVersion', 'Створити нову версію (клонувати)')}</span>
                                     </label>
                                 </div>
                             </div>
@@ -556,7 +562,7 @@ function CourseExpandableCard({
                                     onClick={() => setIsSettingsModalOpen(false)}
                                     className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
-                                    Скасувати
+                                    {t('common.cancelBtn', 'Скасувати')}
                                 </button>
                                 <button
                                     disabled={!selectedSettingsAction || isStatusUpdating || isCloning}
@@ -574,7 +580,7 @@ function CourseExpandableCard({
                                     }}
                                     className="px-4 py-2 text-sm font-medium text-white bg-brand-primary rounded-lg hover:bg-brand-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {isStatusUpdating || isCloning ? 'Обробка...' : 'Застосувати'}
+                                    {isStatusUpdating || isCloning ? t('common.processing', 'Обробка...') : t('common.applyBtn', 'Застосувати')}
                                 </button>
                             </div>
                         </div>
@@ -602,66 +608,26 @@ function CourseExpandableCard({
                 />
             </div>
 
-            {isDeleteModalOpen && createPortal(
-                <div
-                    className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-white/40 backdrop-blur-sm animate-in fade-in duration-200"
-                    onClick={(e) => { e.stopPropagation(); setIsDeleteModalOpen(false); }}
-                >
-                    <div
-                        className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-lg shadow-2xl relative animate-in zoom-in-95 duration-200 border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Header */}
-                        <div className="flex-shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-200/50">
-                            <h2 className="text-xl font-bold text-gray-900">
-                                Підтвердження видалення
-                            </h2>
-                            <button
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                className="p-2 -mr-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={confirmDeleteCourse}
+                title={t('courseExpandableCard.deleteConfirmTitle', 'Підтвердження видалення')}
+                message={t('courseExpandableCard.deleteConfirmMessage', 'Ви дійсно бажаєте видалити курс "{{name}}"?', { name: course.name })}
+                warningMessage={t('courseExpandableCard.deleteWarningMessage', 'Ця дія є незворотною. Після видалення ви та всі учні втратять доступ до матеріалів курсу. Усі файли та уроки будуть назавжди стерті з системи. Кошти автоматично не повертаються.')}
+                confirmText={isDeleting ? t('common.processing', 'Обробка...') : t('courseExpandableCard.deleteCourse', 'Видалити курс')}
+                cancelText={t('common.cancelBtn', 'Скасувати')}
+            />
 
-                        {/* Content */}
-                        <div className="flex-1 p-8 space-y-6 overflow-y-auto custom-scrollbar">
-                            <p className="text-gray-700 text-lg">
-                                Ви дійсно бажаєте видалити курс "<span className="font-bold">{course.name}</span>"?
-                            </p>
-                            <p className="text-gray-500 text-sm">
-                                Ця дія є незворотною. Після видалення ви та всі учні втратять доступ до матеріалів курсу. Усі файли та уроки будуть назавжди стерті з системи. Кошти автоматично не повертаються.
-                            </p>
-                        </div>
-
-                        {/* Footer */}
-                        <div className="flex-shrink-0 flex items-center justify-end gap-3 px-8 py-6 border-t border-gray-200/50">
-                            <button
-                                onClick={() => setIsDeleteModalOpen(false)}
-                                disabled={isDeleting}
-                                className="text-gray-900 font-medium hover:bg-gray-100 rounded-lg px-4 py-2 transition-colors disabled:opacity-50"
-                            >
-                                Скасувати
-                            </button>
-                            <button
-                                onClick={confirmDeleteCourse}
-                                disabled={isDeleting}
-                                className={`
-                                    bg-red-600 text-white font-bold rounded-lg px-6 py-3 shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center min-w-[140px]
-                                    ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-700 hover:shadow-red-500/25'}
-                                `}
-                            >
-                                {isDeleting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                ) : (
-                                    'Видалити курс'
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body
-            )}
+            <ConfirmModal
+                isOpen={isAlertOpen}
+                onClose={() => setIsAlertOpen(false)}
+                onConfirm={() => setIsAlertOpen(false)}
+                title={alertTitle}
+                message={alertMessage}
+                isAlert={true}
+                type={alertType}
+            />
         </div >
     );
 }

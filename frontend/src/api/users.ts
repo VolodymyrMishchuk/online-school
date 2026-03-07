@@ -19,6 +19,7 @@ export interface PersonWithEnrollments {
     email: string;
     role: string;
     status: string;
+    language: string;
     enrollments: EnrollmentDto[];
     createdAt?: string;
     updatedAt?: string;
@@ -38,6 +39,7 @@ export interface CreatePersonDto {
     phoneNumber: string;
     bornedAt?: string;
     role: string;
+    language?: string;
     courseIds?: string[];
 }
 
@@ -49,6 +51,7 @@ export interface UpdatePersonDto {
     role?: string;
     status?: string;
     email?: string;
+    language?: string;
 }
 
 export const getUsersWithEnrollments = async (): Promise<PersonWithEnrollments[]> => {

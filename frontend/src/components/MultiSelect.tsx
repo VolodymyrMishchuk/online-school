@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, Check, X } from 'lucide-react';
 
 interface Option {
@@ -21,6 +22,7 @@ export default function MultiSelect({
     onChange,
     placeholder = 'Select...'
 }: MultiSelectProps) {
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +60,7 @@ export default function MultiSelect({
         ? placeholder
         : selectedValues.length === 1
             ? selectedLabels[0]
-            : `${selectedValues.length} вибрано`;
+            : t('common.selectedCountShort', '{{count}} вибрано', { count: selectedValues.length });
 
     return (
         <div className="relative min-w-[200px]" ref={dropdownRef}>
@@ -97,7 +99,7 @@ export default function MultiSelect({
                     <div className="p-1">
                         {options.length === 0 ? (
                             <div className="px-4 py-3 text-sm text-gray-400 text-center">
-                                Немає опцій
+                                {t('common.noOptions', 'Немає опцій')}
                             </div>
                         ) : (
                             options.map((option) => {

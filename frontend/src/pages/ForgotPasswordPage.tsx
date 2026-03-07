@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { forgotPassword } from '../api/auth';
 import { Heart, ArrowLeft, Mail } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function ForgotPasswordPage() {
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
@@ -17,10 +19,8 @@ export default function ForgotPasswordPage() {
             await forgotPassword({ email });
             setSubmitted(true);
         } catch (err: any) {
-            // Even if email doesn't exist, we might want to say success for security,
-            // but for now let's handle errors if the server typically throws only on bad request.
             // If the server returns 200 even for non-existent emails (recommended), this catch might not be hit for that.
-            setError('Something went wrong. Please try again.');
+            setError(t('auth.forgotPassword.error', 'Щось пішло не так. Спробуйте ще раз пізніше.'));
         } finally {
             setLoading(false);
         }
@@ -33,12 +33,12 @@ export default function ForgotPasswordPage() {
                     <div className="inline-block bg-green-100 p-4 rounded-full mb-6">
                         <Mail className="w-8 h-8 text-green-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-brand-dark mb-4">Check your email</h2>
+                    <h2 className="text-2xl font-bold text-brand-dark mb-4">{t('auth.forgotPassword.checkEmailTitle', 'Перевірте пошту')}</h2>
                     <p className="text-gray-500 mb-8">
-                        If an account exists for <strong>{email}</strong>, you will receive password reset instructions.
+                        {t('auth.forgotPassword.checkEmailDescStart', 'Ми надіслали інструкції для відновлення пароля на')} <strong>{email}</strong>{t('auth.forgotPassword.checkEmailDescEnd', '.')}
                     </p>
                     <Link to="/login" className="text-brand-primary font-semibold hover:text-brand-secondary">
-                        Return to Sign In
+                        {t('auth.forgotPassword.returnToSignIn', 'Повернутися до входу')}
                     </Link>
                 </div>
             </div>
@@ -53,14 +53,14 @@ export default function ForgotPasswordPage() {
                         <Heart className="w-8 h-8 text-brand-secondary fill-brand-secondary" />
                     </Link>
                     <h2 className="text-3xl font-bold text-brand-dark">
-                        Forgot Password?
+                        {t('auth.forgotPassword.title', 'Відновлення пароля')}
                     </h2>
-                    <p className="mt-2 text-gray-500">No worries, we'll send you reset instructions.</p>
+                    <p className="mt-2 text-gray-500">{t('auth.forgotPassword.subtitle', 'Введіть ваш email, щоб отримати посилання для відновлення')}</p>
                 </div>
 
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">Email</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.login.emailLabel')}</label>
                         <input
                             type="email"
                             required
@@ -78,13 +78,13 @@ export default function ForgotPasswordPage() {
                         disabled={loading}
                         className="w-full py-3.5 px-4 border border-transparent rounded-full shadow-lg text-white bg-brand-primary hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary font-bold text-lg transition-all transform hover:-translate-y-0.5 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        {loading ? 'Sending...' : 'Reset Password'}
+                        {loading ? t('auth.forgotPassword.sending', 'Надсилаємо...') : t('auth.forgotPassword.submit', 'Надіслати')}
                     </button>
                 </form>
 
                 <div className="mt-6 text-center text-sm">
                     <Link to="/login" className="font-medium text-gray-500 hover:text-brand-dark flex items-center justify-center gap-2">
-                        <ArrowLeft className="w-4 h-4" /> Back to Sign In
+                        <ArrowLeft className="w-4 h-4" /> {t('auth.forgotPassword.backToSignIn', 'Назад до входу')}
                     </Link>
                 </div>
             </div>
