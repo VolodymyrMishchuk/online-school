@@ -4,7 +4,6 @@ import com.mishchuk.onlineschool.repository.PasswordResetTokenRepository;
 import com.mishchuk.onlineschool.repository.PersonRepository;
 import com.mishchuk.onlineschool.repository.entity.PasswordResetTokenEntity;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
-import com.mishchuk.onlineschool.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

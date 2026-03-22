@@ -17,6 +17,7 @@ import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
 import com.mishchuk.onlineschool.repository.entity.PersonRole;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.time.OffsetDateTime;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +60,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         // Assign lessons to this module if provided
         if (dto.lessonIds() != null && !dto.lessonIds().isEmpty()) {
-            for (java.util.UUID lessonId : dto.lessonIds()) {
+            for (UUID lessonId : dto.lessonIds()) {
                 LessonEntity lesson = lessonRepository.findById(lessonId)
                         .orElseThrow(() -> new RuntimeException("Lesson not found: " + lessonId));
                 lesson.setModule(savedModule);
@@ -69,7 +71,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<ModuleDto> getModule(java.util.UUID id) {
+    public Optional<ModuleDto> getModule(UUID id) {
         return moduleRepository.findById(id)
                 .map(moduleMapper::toDto);
     }
@@ -82,7 +84,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ModuleDto> getAllModules(java.util.UUID courseId) {
+    public List<ModuleDto> getAllModules(UUID courseId) {
         List<ModuleEntity> entities;
         if (courseId != null) {
             entities = moduleRepository.findByCourseId(courseId);
@@ -170,7 +172,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional
-    public void updateModule(java.util.UUID id, ModuleUpdateDto dto) {
+    public void updateModule(UUID id, ModuleUpdateDto dto) {
         ModuleEntity entity = moduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Module not found"));
 
@@ -198,7 +200,7 @@ public class ModuleServiceImpl implements ModuleService {
             }
 
             // Then assign the new lessons
-            for (java.util.UUID lessonId : dto.lessonIds()) {
+            for (UUID lessonId : dto.lessonIds()) {
                 LessonEntity lesson = lessonRepository.findById(lessonId)
                         .orElseThrow(() -> new RuntimeException("Lesson not found: " + lessonId));
                 lesson.setModule(entity);
@@ -209,7 +211,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional
-    public void deleteModule(java.util.UUID id) {
+    public void deleteModule(UUID id) {
         ModuleEntity entity = moduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Module not found"));
 
@@ -219,7 +221,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only delete their own entities.");
             }
         }

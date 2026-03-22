@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket } from 'lucide-react';
 import { getPerson } from '../api/persons';
 
 import { useEffect, useState, useRef } from 'react';
@@ -80,6 +80,7 @@ export default function DashboardLayout() {
             { to: '/dashboard/appeal', icon: MessageSquare, label: t('sidebar.contact') }
         ]),
         { to: '/dashboard/my-courses', icon: GraduationCap, label: t('sidebar.my_courses') },
+        { to: '/dashboard/promo-codes', icon: Ticket, label: t('sidebar.promo_codes') },
         { to: '/dashboard/notifications', icon: Bell, label: t('sidebar.notifications') },
         { to: '/dashboard/settings', icon: Settings, label: t('sidebar.settings') },
     ];

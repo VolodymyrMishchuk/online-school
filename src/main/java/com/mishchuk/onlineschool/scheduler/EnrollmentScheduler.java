@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import com.mishchuk.onlineschool.service.NotificationService;
-import com.mishchuk.onlineschool.service.email.EmailService;
+import com.mishchuk.onlineschool.service.EmailService;
 import com.mishchuk.onlineschool.repository.entity.NotificationType;
 
 import java.time.OffsetDateTime;

@@ -10,10 +10,11 @@ import com.mishchuk.onlineschool.repository.CourseRepository;
 import com.mishchuk.onlineschool.repository.CourseReviewRequestRepository;
 import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.entity.*;
-import com.mishchuk.onlineschool.service.email.EmailService;
 import com.mishchuk.onlineschool.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,7 +49,7 @@ public class CourseServiceImpl implements CourseService {
     public void createCourse(CourseCreateDto dto, MultipartFile coverImage) {
         log.info("Creating new course: {}", dto.name());
         if (dto.promotionalDiscountPercentage() != null && dto.promotionalDiscountAmount() != null) {
-            throw new com.mishchuk.onlineschool.exception.BadRequestException(
+            throw new BadRequestException(
                     "Cannot set both promotional discount percentage and amount");
         }
         CourseEntity entity = courseMapper.toEntity(dto);
@@ -99,7 +102,7 @@ public class CourseServiceImpl implements CourseService {
     @Override
     @Transactional(readOnly = true)
     public List<CourseDto> getAllCourses() {
-        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isAdmin = false;
 
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
@@ -107,8 +110,8 @@ public class CourseServiceImpl implements CourseService {
             Optional<PersonEntity> currentUserOpt = personRepository.findByEmail(userEmail);
             if (currentUserOpt.isPresent()) {
                 PersonEntity currentUser = currentUserOpt.get();
-                if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.ADMIN ||
-                        currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+                if (currentUser.getRole() == PersonRole.ADMIN ||
+                        currentUser.getRole() == PersonRole.FAKE_ADMIN) {
                     isAdmin = true;
                 }
             }
@@ -118,8 +121,8 @@ public class CourseServiceImpl implements CourseService {
 
         if (!isAdmin) {
             allCourses = allCourses.stream()
-                    .filter(c -> c.getStatus() == com.mishchuk.onlineschool.repository.entity.CourseStatus.PUBLISHED)
-                    .collect(Collectors.toList());
+                    .filter(c -> c.getStatus() == CourseStatus.PUBLISHED)
+                    .toList();
         }
 
         return allCourses.stream()
@@ -194,9 +197,9 @@ public class CourseServiceImpl implements CourseService {
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }
@@ -244,9 +247,9 @@ public class CourseServiceImpl implements CourseService {
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only delete their own entities.");
             }
         }
@@ -265,7 +268,7 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
 
         // Extend access by 31 days from now
-        enrollment.setExpiresAt(java.time.OffsetDateTime.now().plusDays(31));
+        enrollment.setExpiresAt(OffsetDateTime.now().plusDays(31));
         enrollment.setStatus("ACTIVE");
         enrollmentRepository.save(enrollment);
 
@@ -329,7 +332,7 @@ public class CourseServiceImpl implements CourseService {
         clonedCourse.setPromotionalDiscountAmount(originalCourse.getPromotionalDiscountAmount());
         clonedCourse.setPromotionalDiscountPercentage(originalCourse.getPromotionalDiscountPercentage());
         clonedCourse.setModulesNumber(originalCourse.getModulesNumber());
-        clonedCourse.setStatus(com.mishchuk.onlineschool.repository.entity.CourseStatus.DRAFT);
+        clonedCourse.setStatus(CourseStatus.DRAFT);
 
         String originalVersion = originalCourse.getVersion() != null ? originalCourse.getVersion() : "1.0";
         try {
@@ -342,7 +345,7 @@ public class CourseServiceImpl implements CourseService {
                 clonedCourse.setVersion((major + 1) + ".0");
             }
         } catch (NumberFormatException e) {
-            clonedCourse.setVersion(originalVersion + " (Copy)"); // Polyfill just in case
+            clonedCourse.setVersion(originalVersion + " (Copy)");
         }
 
         clonedCourse.setCreatedBy(currentUser);
@@ -357,7 +360,7 @@ public class CourseServiceImpl implements CourseService {
         }
 
         if (originalCourse.getModules() != null) {
-            List<ModuleEntity> clonedModules = new java.util.ArrayList<>();
+            List<ModuleEntity> clonedModules = new ArrayList<>();
             for (ModuleEntity originalModule : originalCourse.getModules()) {
                 ModuleEntity clonedModule = new ModuleEntity();
                 clonedModule.setCourse(clonedCourse);
@@ -367,7 +370,7 @@ public class CourseServiceImpl implements CourseService {
                 clonedModule.setCreatedBy(currentUser);
 
                 if (originalModule.getLessons() != null) {
-                    List<LessonEntity> clonedLessons = new java.util.ArrayList<>();
+                    List<LessonEntity> clonedLessons = new ArrayList<>();
                     for (LessonEntity originalLesson : originalModule.getLessons()) {
                         LessonEntity clonedLesson = new LessonEntity();
                         clonedLesson.setModule(clonedModule);
@@ -378,10 +381,10 @@ public class CourseServiceImpl implements CourseService {
                         clonedLesson.setCreatedBy(currentUser);
 
                         if (originalLesson.getFiles() != null) {
-                            List<com.mishchuk.onlineschool.repository.entity.FileEntity> clonedFiles = new java.util.ArrayList<>();
-                            for (com.mishchuk.onlineschool.repository.entity.FileEntity originalFile : originalLesson
+                            List<FileEntity> clonedFiles = new java.util.ArrayList<>();
+                            for (FileEntity originalFile : originalLesson
                                     .getFiles()) {
-                                com.mishchuk.onlineschool.repository.entity.FileEntity clonedFile = new com.mishchuk.onlineschool.repository.entity.FileEntity();
+                                FileEntity clonedFile = new FileEntity();
                                 clonedFile.setLesson(clonedLesson);
                                 clonedFile.setFileName(originalFile.getFileName());
                                 clonedFile.setOriginalName(originalFile.getOriginalName());
@@ -413,7 +416,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     @Transactional
-    public void updateCourseStatus(UUID id, com.mishchuk.onlineschool.repository.entity.CourseStatus status) {
+    public void updateCourseStatus(UUID id, CourseStatus status) {
         log.info("Updating status for course {} to {}", id, status);
         CourseEntity entity = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + id));
@@ -422,9 +425,9 @@ public class CourseServiceImpl implements CourseService {
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }

@@ -3,6 +3,7 @@ package com.mishchuk.onlineschool.controller;
 import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
 import com.mishchuk.onlineschool.controller.dto.PersonDto;
 import com.mishchuk.onlineschool.controller.dto.PersonUpdateDto;
+import com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto;
 import com.mishchuk.onlineschool.service.PersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -61,15 +62,13 @@ public class PersonController {
         return ResponseEntity.noContent().build();
     }
 
-    // Users Management Endpoints
-
     @GetMapping("/with-enrollments")
-    public ResponseEntity<List<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto>> getAllPersonsWithEnrollments() {
+    public ResponseEntity<List<PersonWithEnrollmentsDto>> getAllPersonsWithEnrollments() {
         return ResponseEntity.ok(personService.getAllPersonsWithEnrollments());
     }
 
     @GetMapping("/paginated")
-    public ResponseEntity<Page<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto>> getPaginatedPersons(
+    public ResponseEntity<Page<PersonWithEnrollmentsDto>> getPaginatedPersons(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String search,
@@ -79,7 +78,7 @@ public class PersonController {
             @RequestParam(required = false) String adminSort) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto> result =
+        Page<PersonWithEnrollmentsDto> result =
                 personService.getPaginatedPersons(search, sortKey, sortDir, blockedSort, adminSort, pageable);
 
         return ResponseEntity.ok(result);

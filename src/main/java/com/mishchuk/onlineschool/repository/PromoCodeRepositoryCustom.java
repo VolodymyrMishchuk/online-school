@@ -2,15 +2,14 @@ package com.mishchuk.onlineschool.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.mishchuk.onlineschool.repository.entity.PersonEntity;
+import com.mishchuk.onlineschool.repository.entity.PromoCodeEntity;
 
-public interface PersonRepositoryCustom {
-    Page<PersonEntity> findPaginatedUsers(
+public interface PromoCodeRepositoryCustom {
+    Page<PromoCodeEntity> findPaginatedPromoCodes(
             String search,
             String sortKey,
             String sortDir,
-            String blockedSort,
-            String adminSort,
+            String statusSort,
             Pageable pageable
     );
 }

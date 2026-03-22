@@ -2,7 +2,7 @@ package com.mishchuk.onlineschool.scheduler;
 
 import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
-import com.mishchuk.onlineschool.service.email.EmailService;
+import com.mishchuk.onlineschool.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

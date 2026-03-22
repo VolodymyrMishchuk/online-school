@@ -19,6 +19,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminAppealsPage from './pages/AdminAppealsPage';
 import UserAppealPage from './pages/UserAppealPage';
+import PromoCodesRouter from './pages/PromoCodesRouter';
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function App() {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="appeals" element={<AdminRoute><AdminAppealsPage /></AdminRoute>} />
             <Route path="appeal" element={<UserAppealPage />} />
+            <Route path="promo-codes" element={<PromoCodesRouter />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

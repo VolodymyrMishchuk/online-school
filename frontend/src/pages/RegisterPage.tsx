@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 import { register } from '../api/auth';
 import { Heart } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useCountryCode } from '../hooks/useCountryCode';
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -17,19 +18,8 @@ export default function RegisterPage() {
     });
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
     const navigate = useNavigate();
-    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
     const { t, i18n } = useTranslation();
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code);
-                }
-            })
-            .catch(err => console.error('Error fetching country:', err));
-    }, []);
+    const defaultCountry = useCountryCode('UA');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

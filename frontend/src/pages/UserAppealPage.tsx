@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Image as ImageIcon, Phone, Instagram, Send as TelegramIcon, MessageCircle, Mail, ChevronsUpDown, Check } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
@@ -7,6 +7,7 @@ import { createAppeal } from '../api/appeals';
 import { AppealSuccessModal } from '../components/AppealSuccessModal';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { useTranslation } from 'react-i18next';
+import { useCountryCode } from '../hooks/useCountryCode';
 
 const CONTACT_METHODS = [
     { id: 'MOBILE', label: 'Мобільний телефон', labelKey: 'appeal.mobile', icon: Phone, color: 'text-emerald-500' },
@@ -34,19 +35,7 @@ export default function UserAppealPage() {
     const [contactDetails, setContactDetails] = useState('');
     const [message, setMessage] = useState('');
     const [photos, setPhotos] = useState<File[]>([]);
-
-    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code);
-                }
-            })
-            .catch(err => console.error('Error fetching country:', err));
-    }, []);
+    const defaultCountry = useCountryCode('UA');
 
     const [isDragging, setIsDragging] = useState(false);
     const [dragCounter, setDragCounter] = useState(0);

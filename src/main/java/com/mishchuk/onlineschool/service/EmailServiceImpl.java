@@ -1,5 +1,6 @@
-package com.mishchuk.onlineschool.service.email;
+package com.mishchuk.onlineschool.service;
 
+import com.mishchuk.onlineschool.security.JwtUtils;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class EmailServiceImpl implements EmailService {
 
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-    private final com.mishchuk.onlineschool.security.JwtUtils jwtUtils;
+    private final JwtUtils jwtUtils;
 
     @Value("${spring.application.frontend.url:http://localhost:5173}")
     private String frontendUrl;

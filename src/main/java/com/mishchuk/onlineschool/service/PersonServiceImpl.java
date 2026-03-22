@@ -10,14 +10,14 @@ import com.mishchuk.onlineschool.mapper.PersonMapper;
 import com.mishchuk.onlineschool.repository.CourseRepository;
 import com.mishchuk.onlineschool.repository.EnrollmentRepository;
 import com.mishchuk.onlineschool.repository.PersonRepository;
-import com.mishchuk.onlineschool.repository.entity.CourseEntity;
-import com.mishchuk.onlineschool.repository.entity.EnrollmentEntity;
-import com.mishchuk.onlineschool.repository.entity.PersonEntity;
-import com.mishchuk.onlineschool.repository.entity.PersonStatus;
+import com.mishchuk.onlineschool.repository.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +36,7 @@ public class PersonServiceImpl implements PersonService {
     private final EnrollmentRepository enrollmentRepository;
     private final PersonMapper personMapper;
     private final PasswordEncoder passwordEncoder;
-    private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+    private final EmailService emailService;
     private final NotificationService notificationService;
 
     @Override
@@ -52,9 +52,7 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity entity = personMapper.toEntity(dto);
         entity.setPassword(passwordEncoder.encode(entity.getPassword()));
 
-        // Track creator if authenticated (e.g., FAKE_ADMIN or ADMIN creating a user via
-        // UI)
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder
+        Authentication auth = SecurityContextHolder
                 .getContext().getAuthentication();
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
             personRepository.findByEmail(auth.getName()).ifPresent(entity::setCreatedBy);
@@ -76,7 +74,7 @@ public class PersonServiceImpl implements PersonService {
                     "Новий користувач",
                     "Зареєстровано нового користувача: " + entity.getFirstName() + " " + entity.getLastName() + " ("
                             + entity.getEmail() + ")",
-                    com.mishchuk.onlineschool.repository.entity.NotificationType.NEW_USER_REGISTRATION);
+                    NotificationType.NEW_USER_REGISTRATION);
         } catch (Exception e) {
             log.error("Failed to notify admins about new user {}", entity.getEmail(), e);
         }
@@ -113,16 +111,16 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity entity = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
 
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             // FAKE_ADMIN can only edit themselves or users they created
             if (!entity.getId().equals(currentUser.getId()) &&
                     (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId()))) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }
@@ -137,15 +135,15 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity entity = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
 
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             // FAKE_ADMIN can only delete users they created (cannot delete themselves)
             if (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only delete their own entities.");
             }
         }
@@ -155,7 +153,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto> getAllPersonsWithEnrollments() {
+    public List<PersonWithEnrollmentsDto> getAllPersonsWithEnrollments() {
         return personRepository.findAll().stream()
                 .map(personMapper::toDtoWithEnrollments)
                 .toList();
@@ -183,18 +181,18 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
 
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
-            throw new org.springframework.security.access.AccessDeniedException(
+        if (currentUser.getRole() == PersonRole.USER) {
+            throw new AccessDeniedException(
                     "Regular users cannot update statuses.");
         }
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (person.getCreatedBy() == null || !person.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }
@@ -213,14 +211,14 @@ public class PersonServiceImpl implements PersonService {
                         person.getId(),
                         "Зміна статусу облікового запису",
                         statusMessage,
-                        com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+                        NotificationType.SYSTEM);
 
                 // Notify Admins
                 notificationService.broadcastToAdmins(
                         "Зміна статусу користувача",
                         "Статус користувача " + person.getFirstName() + " " + person.getLastName() + " змінено на "
                                 + status,
-                        com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+                        NotificationType.SYSTEM);
             } catch (Exception e) {
                 log.error("Failed to send notifications for status change of user {}", person.getEmail(), e);
             }
@@ -237,19 +235,19 @@ public class PersonServiceImpl implements PersonService {
         CourseEntity course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
+        if (currentUser.getRole() == PersonRole.USER) {
             if (!person.getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "Users cannot grant access to others.");
             }
-        } else if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        } else if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (person.getCreatedBy() == null || !person.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }
@@ -276,7 +274,7 @@ public class PersonServiceImpl implements PersonService {
                     person.getId(),
                     "Доступ до курсу відкрито",
                     "Вам надано доступ до курсу \"" + course.getName() + "\". Успішного навчання!",
-                    com.mishchuk.onlineschool.repository.entity.NotificationType.COURSE_PURCHASED,
+                    NotificationType.COURSE_PURCHASED,
                     "/dashboard/my-courses");
 
             // Notify admins
@@ -284,7 +282,7 @@ public class PersonServiceImpl implements PersonService {
                     "Нове зарахування на курс",
                     "Користувач " + person.getFirstName() + " " + person.getLastName() + " отримав доступ до курсу \""
                             + course.getName() + "\"",
-                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+                    NotificationType.SYSTEM);
         } catch (Exception e) {
             log.error("Failed to create notifications for enrollment of {} to {}", person.getEmail(), course.getId(),
                     e);
@@ -301,17 +299,20 @@ public class PersonServiceImpl implements PersonService {
         PersonEntity student = enrollment.getStudent();
         CourseEntity course = enrollment.getCourse();
 
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         PersonEntity currentUser = personRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.USER) {
-            throw new org.springframework.security.access.AccessDeniedException("Regular users cannot revoke access.");
+        if (currentUser.getRole() == PersonRole.USER) {
+            // Users can only remove their own enrollments
+            if (!personId.equals(currentUser.getId())) {
+                throw new AccessDeniedException("Regular users cannot revoke access for other users.");
+            }
         }
-        if (currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+        if (currentUser.getRole() == PersonRole.FAKE_ADMIN) {
             if (student.getCreatedBy() == null || !student.getCreatedBy().getId().equals(currentUser.getId())) {
-                throw new org.springframework.security.access.AccessDeniedException(
+                throw new AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
         }
@@ -331,14 +332,14 @@ public class PersonServiceImpl implements PersonService {
                     student.getId(),
                     "Доступ до курсу скасовано",
                     "Ваш доступ до курсу \"" + course.getName() + "\" було скасовано адміністратором.",
-                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+                    NotificationType.SYSTEM);
 
             // Notify Admins
             notificationService.broadcastToAdmins(
                     "Доступ до курсу скасовано",
                     "Адміністратор скасував доступ користувача " + student.getFirstName() + " " + student.getLastName()
                             + " (" + student.getEmail() + ") до курсу \"" + course.getName() + "\"",
-                    com.mishchuk.onlineschool.repository.entity.NotificationType.SYSTEM);
+                    NotificationType.SYSTEM);
         } catch (Exception e) {
             log.error("Failed to send notifications for access revocation of user {} to course {}", student.getEmail(),
                     course.getId(), e);

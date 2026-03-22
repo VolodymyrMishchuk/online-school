@@ -1,9 +1,6 @@
 package com.mishchuk.onlineschool.service;
 
-import com.mishchuk.onlineschool.controller.dto.AuthRequest;
-import com.mishchuk.onlineschool.controller.dto.AuthResponse;
-import com.mishchuk.onlineschool.controller.dto.AuthResultDto;
-import com.mishchuk.onlineschool.controller.dto.PersonCreateDto;
+import com.mishchuk.onlineschool.controller.dto.*;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import com.mishchuk.onlineschool.repository.entity.RefreshTokenEntity;
 import com.mishchuk.onlineschool.security.CustomUserDetailsService;
@@ -30,7 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final PersonService personService;
     private final RefreshTokenService refreshTokenService;
-    private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+    private final EmailService emailService;
     private final NotificationService notificationService;
     private final DemoCleanupScheduler demoCleanupScheduler;
 
@@ -67,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
         notificationService.createNotification(
                 person.getId(),
                 "Ласкаво просимо!",
-                "Вітаємо в Svitlo School! Ми раді, що ви з нами. Перегляньте доступні курси.",
+                "Вітаємо в PidSercem! Ми раді, що ви з нами. Перегляньте доступні курси.",
                 NotificationType.GENERIC);
 
         AuthResponse authResponse = new AuthResponse(
@@ -144,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             RefreshTokenEntity tokenEntity = refreshTokenService.findByToken(refreshToken);
 
-            com.mishchuk.onlineschool.controller.dto.PersonDto person = personService
+            PersonDto person = personService
                     .getPerson(tokenEntity.getPersonId()).orElse(null);
             if (person != null && ("FAKE_ADMIN".equals(person.role()) || "FAKE_USER".equals(person.role()))) {
                 demoCleanupScheduler.cleanupDataForUser(person.id());

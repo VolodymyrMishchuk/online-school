@@ -6,14 +6,19 @@ import com.mishchuk.onlineschool.repository.PersonRepository;
 import com.mishchuk.onlineschool.repository.entity.NotificationEntity;
 import com.mishchuk.onlineschool.repository.entity.NotificationType;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
+import com.mishchuk.onlineschool.repository.entity.PersonRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,28 +51,28 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void broadcastToAdmins(String title, String message, NotificationType type, String buttonUrl) {
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        java.util.List<PersonEntity> adminsToNotify = new java.util.ArrayList<>();
+        List<PersonEntity> adminsToNotify = new ArrayList<>();
 
         if (userEmail != null) {
             PersonEntity currentUser = personRepository.findByEmail(userEmail).orElse(null);
             if (currentUser != null
-                    && currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+                    && currentUser.getRole() == PersonRole.FAKE_ADMIN) {
                 log.info("Scoping broadcast to admins for FAKE_ADMIN to only themselves");
                 adminsToNotify.add(currentUser);
             } else {
                 adminsToNotify.addAll(personRepository
-                        .findAllByRole(com.mishchuk.onlineschool.repository.entity.PersonRole.ADMIN));
+                        .findAllByRole(PersonRole.ADMIN));
             }
         } else {
             adminsToNotify.addAll(personRepository
-                    .findAllByRole(com.mishchuk.onlineschool.repository.entity.PersonRole.ADMIN));
+                    .findAllByRole(PersonRole.ADMIN));
         }
 
         log.info("Broadcasting notification to {} admins: {}", adminsToNotify.size(), title);
 
-        java.util.List<NotificationEntity> notifications = adminsToNotify.stream()
+        List<NotificationEntity> notifications = adminsToNotify.stream()
                 .map(admin -> {
                     NotificationEntity n = new NotificationEntity();
                     n.setRecipient(admin);
@@ -78,7 +83,7 @@ public class NotificationServiceImpl implements NotificationService {
                     n.setRead(false);
                     return n;
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         notificationRepository.saveAll(notifications);
     }
@@ -86,14 +91,14 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void sendToAllUsers(String title, String message, String buttonUrl) {
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        java.util.List<PersonEntity> usersToNotify = new java.util.ArrayList<>();
+        List<PersonEntity> usersToNotify = new ArrayList<>();
 
         if (userEmail != null) {
             PersonEntity currentUser = personRepository.findByEmail(userEmail).orElse(null);
             if (currentUser != null
-                    && currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+                    && currentUser.getRole() == PersonRole.FAKE_ADMIN) {
                 log.info("Scoping broadcast to all users for FAKE_ADMIN to only themselves and users they created");
                 usersToNotify.add(currentUser);
                 usersToNotify.addAll(personRepository.findAllByCreatedById(currentUser.getId()));
@@ -106,39 +111,39 @@ public class NotificationServiceImpl implements NotificationService {
 
         log.info("Broadcasting notification to {} users: {}", usersToNotify.size(), title);
 
-        java.util.List<NotificationEntity> notifications = usersToNotify.stream()
+        List<NotificationEntity> notifications = usersToNotify.stream()
                 .map(user -> {
                     NotificationEntity n = new NotificationEntity();
                     n.setRecipient(user);
                     n.setTitle(title);
                     n.setMessage(message);
-                    n.setType(com.mishchuk.onlineschool.repository.entity.NotificationType.ADMIN_ANNOUNCEMENT);
+                    n.setType(NotificationType.ADMIN_ANNOUNCEMENT);
                     n.setButtonUrl(buttonUrl);
                     n.setRead(false);
                     return n;
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         notificationRepository.saveAll(notifications);
     }
 
     @Override
     @Transactional
-    public void sendToUsers(String title, String message, java.util.List<UUID> userIds, String buttonUrl) {
-        String userEmail = org.springframework.security.core.context.SecurityContextHolder.getContext()
+    public void sendToUsers(String title, String message, List<UUID> userIds, String buttonUrl) {
+        String userEmail = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        java.util.List<PersonEntity> recipients = personRepository.findAllById(userIds);
+        List<PersonEntity> recipients = personRepository.findAllById(userIds);
 
         if (userEmail != null) {
             PersonEntity currentUser = personRepository.findByEmail(userEmail).orElse(null);
             if (currentUser != null
-                    && currentUser.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+                    && currentUser.getRole() == PersonRole.FAKE_ADMIN) {
                 log.info("Scoping targeted broadcast for FAKE_ADMIN");
                 recipients = recipients.stream()
                         .filter(user -> user.getId().equals(currentUser.getId()) ||
                                 (user.getCreatedBy() != null
                                         && user.getCreatedBy().getId().equals(currentUser.getId())))
-                        .collect(java.util.stream.Collectors.toList());
+                        .toList();
             }
         }
 
@@ -150,12 +155,12 @@ public class NotificationServiceImpl implements NotificationService {
                     n.setRecipient(user);
                     n.setTitle(title);
                     n.setMessage(message);
-                    n.setType(com.mishchuk.onlineschool.repository.entity.NotificationType.ADMIN_ANNOUNCEMENT);
+                    n.setType(NotificationType.ADMIN_ANNOUNCEMENT);
                     n.setButtonUrl(buttonUrl);
                     n.setRead(false);
                     return n;
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
 
         notificationRepository.saveAll(notifications);
     }
@@ -189,7 +194,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAllAsRead(UUID userId) {
-        java.util.List<NotificationEntity> notifications = notificationRepository
+        List<NotificationEntity> notifications = notificationRepository
                 .findByRecipientIdOrderByCreatedAtDesc(userId);
         notifications.forEach(n -> n.setRead(true));
         notificationRepository.saveAll(notifications);
@@ -198,7 +203,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAllAsUnread(UUID userId) {
-        java.util.List<NotificationEntity> notifications = notificationRepository
+        List<NotificationEntity> notifications = notificationRepository
                 .findByRecipientIdOrderByCreatedAtDesc(userId);
         notifications.forEach(n -> n.setRead(false));
         notificationRepository.saveAll(notifications);
@@ -207,7 +212,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void deleteAll(UUID userId) {
-        java.util.List<NotificationEntity> notifications = notificationRepository
+        List<NotificationEntity> notifications = notificationRepository
                 .findByRecipientIdOrderByCreatedAtDesc(userId);
         notificationRepository.deleteAll(notifications);
     }

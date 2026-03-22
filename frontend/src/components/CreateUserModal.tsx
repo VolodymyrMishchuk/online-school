@@ -5,6 +5,7 @@ import { getCourses, type CourseDto } from '../api/courses';
 import { UserPlus, X, User, Mail, Phone, Lock, Calendar, Shield, BookOpen, AlertCircle, CheckCircle, Globe } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { useCountryCode } from '../hooks/useCountryCode';
 
 interface CreateUserModalProps {
     isOpen: boolean;
@@ -29,18 +30,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({ isOpen, onClos
     const [roles, setRoles] = useState<string[]>([]);
     const [courses, setCourses] = useState<CourseDto[]>([]);
     const [error, setError] = useState<string | null>(null);
-    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code);
-                }
-            })
-            .catch(err => console.error('Error fetching country:', err));
-    }, []);
+    const defaultCountry = useCountryCode('UA');
 
     useEffect(() => {
         const fetchData = async () => {

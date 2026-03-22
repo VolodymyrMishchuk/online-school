@@ -7,6 +7,7 @@ import ChangePasswordModal from '../components/ChangePasswordModal';
 import { getPerson, updatePerson } from '../api/persons';
 import type { PersonDto } from '../api/persons';
 import { useTranslation } from 'react-i18next';
+import { useCountryCode } from '../hooks/useCountryCode';
 
 export default function SettingsPage() {
     const userId = localStorage.getItem('userId');
@@ -30,20 +31,7 @@ export default function SettingsPage() {
     const [language, setLanguage] = useState('');
 
     const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
-    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
-
-
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code);
-                }
-            })
-            .catch(err => console.error('Error fetching country:', err));
-    }, []);
+    const defaultCountry = useCountryCode('UA');
 
     useEffect(() => {
         if (userId) {

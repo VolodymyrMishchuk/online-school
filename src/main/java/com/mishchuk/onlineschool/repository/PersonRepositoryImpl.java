@@ -36,7 +36,6 @@ public class PersonRepositoryImpl implements PersonRepositoryCustom {
         joinClause.append("         MIN(c.name) as first_course_name, ");
         joinClause.append("         MIN(e.created_at) as earliest_enrollment, ");
         joinClause.append("         MAX(e.created_at) as latest_enrollment, ");
-        // compute expiry: if access_duration is null, default to 0 to prevent null addition
         joinClause.append("         MIN(e.created_at + make_interval(days => CAST(COALESCE(c.access_duration, 0) AS int))) as earliest_expiry ");
         joinClause.append("  FROM enrollments e ");
         joinClause.append("  JOIN courses c ON e.course_id = c.id ");

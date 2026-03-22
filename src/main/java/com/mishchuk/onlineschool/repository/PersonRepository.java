@@ -1,15 +1,20 @@
 package com.mishchuk.onlineschool.repository;
 
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
+
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import com.mishchuk.onlineschool.repository.entity.PersonRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PersonRepository extends JpaRepository<PersonEntity, java.util.UUID>, PersonRepositoryCustom {
+public interface PersonRepository extends JpaRepository<PersonEntity, UUID>, PersonRepositoryCustom {
     Optional<PersonEntity> findByEmail(String email);
 
-    java.util.List<PersonEntity> findAllByRole(com.mishchuk.onlineschool.repository.entity.PersonRole role);
+    List<PersonEntity> findAllByRole(PersonRole role);
 
-    java.util.List<PersonEntity> findAllByCreatedById(java.util.UUID createdById);
+    List<PersonEntity> findAllByCreatedById(UUID createdById);
 }

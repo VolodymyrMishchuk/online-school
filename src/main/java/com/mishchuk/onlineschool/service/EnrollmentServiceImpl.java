@@ -26,7 +26,7 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         private final PersonRepository personRepository;
         private final CourseRepository courseRepository;
         private final EnrollmentMapper enrollmentMapper;
-        private final com.mishchuk.onlineschool.service.email.EmailService emailService;
+        private final EmailService emailService;
         private final NotificationService notificationService;
 
         @Override

@@ -1,4 +1,4 @@
-package com.mishchuk.onlineschool.service.email;
+package com.mishchuk.onlineschool.service;
 
 import java.time.LocalDate;
 

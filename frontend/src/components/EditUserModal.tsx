@@ -4,6 +4,7 @@ import { type PersonWithEnrollments, type UpdatePersonDto, getRoles, getStatuses
 import { X, User, Mail, Phone, Calendar, Shield, Activity, Save, Loader2, Globe } from 'lucide-react';
 import PhoneInput, { isValidPhoneNumber } from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
+import { useCountryCode } from '../hooks/useCountryCode';
 
 interface EditUserModalProps {
     isOpen: boolean;
@@ -30,18 +31,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({ isOpen, onClose, u
     const [error, setError] = useState<string | null>(null);
     const [roles, setRoles] = useState<string[]>([]);
     const [statuses, setStatuses] = useState<string[]>([]);
-    const [defaultCountry, setDefaultCountry] = useState<any>('UA');
-
-    useEffect(() => {
-        fetch('https://ipapi.co/json/')
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.country_code) {
-                    setDefaultCountry(data.country_code);
-                }
-            })
-            .catch(err => console.error('Error fetching country:', err));
-    }, []);
+    const defaultCountry = useCountryCode('UA');
 
     useEffect(() => {
         const fetchEnums = async () => {
