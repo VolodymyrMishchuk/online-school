@@ -207,6 +207,41 @@
     "willBeChanged": "(буде змінено)",
     "selectedModulesCount": "Вибрано:"
   },
+  "courseExpandableCard": {
+    "availableForMinutes_one": "Доступ залишився: {{count}} хвилина",
+    "availableForMinutes_few": "Доступ залишився: {{count}} хвилини",
+    "availableForMinutes_many": "Доступ залишився: {{count}} хвилин",
+    "availableForMinutes_other": "Доступ залишився: {{count}} хвилин",
+    "availableForHours_one": "Доступ залишився: {{count}} година",
+    "availableForHours_few": "Доступ залишився: {{count}} години",
+    "availableForHours_many": "Доступ залишився: {{count}} годин",
+    "availableForHours_other": "Доступ залишився: {{count}} годин",
+    "availableForLabel": "Курс доступний ще {{time}}",
+    "availableForLessThanDay": "Курс доступний ще менше дня",
+    "buyCourse": "Придбати курс",
+    "extendForReview": "Отримати доступ за відеовідгук",
+    "extendWithDiscount": "Продовжити курс зі знижкою",
+    "getNewCourseDiscount": "Отримати знижку -10€ на СУПЕР новий курс",
+    "deleteCourse": "Видалити курс",
+    "courseContent": "Зміст Курсу",
+    "noModulesYet": "Модулі ще не додано",
+    "courseSettings": "Налаштування курсу",
+    "publishCourse": "Опублікувати курс",
+    "moveToDrafts": "Перемістити в чернетки",
+    "moveToArchive": "Перемістити в архів",
+    "cloneVersion": "Створити нову версію (клонувати)",
+    "deleteConfirmTitle": "Підтвердження видалення",
+    "deleteConfirmMessage": "Ви дійсно бажаєте видалити курс \"{{name}}\"?",
+    "deleteWarningMessage": "Ця дія є незворотною. Після видалення ви та всі учні втратять доступ до матеріалів курсу. Усі файли та уроки будуть назавжди стерті з системи. Кошти автоматично не повертаються.",
+    "errors": {
+      "removeFailed": "Помилка при видаленні курсу. Спробуйте пізніше.",
+      "statusChangeFailed": "Помилка при зміні статусу курсу.",
+      "cloneFailed": "Помилка при клонуванні курсу."
+    },
+    "success": {
+      "cloned": "Курс успішно клоновано."
+    }
+  },
   "appeal": {
     "title": "Звернення",
     "subtitle": "Маєте питання чи пропозиції? Залиште звернення, і ми зв'яжемося з Вами",

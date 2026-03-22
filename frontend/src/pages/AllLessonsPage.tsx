@@ -217,7 +217,9 @@ export default function AllLessonsPage() {
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
                     <h1 className="text-3xl font-bold text-brand-dark">{t('allLessons.title', 'Всі уроки')}</h1>
-                    <span className="text-gray-400 font-medium">({displayedLessons}{displayedLessons !== totalLessons ? ` / ${totalLessons}` : ''})</span>
+                    <span className="px-3 py-1 bg-transparent text-rose-900 text-xl font-normal rounded-lg border-2 border-rose-900 self-center leading-none">
+                        {displayedLessons}{displayedLessons !== totalLessons ? ` / ${totalLessons}` : ''}
+                    </span>
                 </div>
 
                 {isAdmin && (

@@ -4,7 +4,7 @@ import { getModules } from '../api/modules';
 // import { getLessons } from '../api/lessons';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Book, GraduationCap } from 'lucide-react';
+import { Book } from 'lucide-react';
 import CourseExpandableCard from '../components/CourseExpandableCard';
 import { useTranslation } from 'react-i18next';
 
@@ -58,9 +58,7 @@ export default function MyCoursesPage() {
     return (
         <div className="container mx-auto px-6 py-12">
             <div className="flex items-center gap-3 mb-8">
-                <GraduationCap className="w-8 h-8 text-brand-primary" />
                 <h1 className="text-3xl font-bold text-brand-dark">{t('myCourses.title', 'Мої курси')}</h1>
-                <span className="text-gray-400 font-medium">({enrolledCourses.length})</span>
             </div>
 
             {enrolledCourses.length === 0 ? (
@@ -87,6 +85,7 @@ export default function MyCoursesPage() {
                                 key={course.id}
                                 course={course}
                                 modules={modules || []}
+                                isMyCoursesPage={true}
                                 onEdit={() => { }} // Students cannot edit courses
                                 onDelete={() => { }} // Students cannot delete courses
                                 onEnroll={undefined} // Already enrolled
