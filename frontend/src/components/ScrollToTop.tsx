@@ -41,7 +41,7 @@ export const ScrollToTop: React.FC<ScrollToTopProps> = ({ scrollContainerRef }) 
     return (
         <button
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 z-50 hover:shadow-xl animate-fade-in"
+            className="fixed bottom-8 right-8 bg-brand-primary text-white p-3 rounded-full shadow-lg hover:bg-brand-dark transition-all duration-300 z-50 hover:shadow-xl animate-fade-in"
             aria-label="Scroll to top"
         >
             <ArrowUp size={24} />

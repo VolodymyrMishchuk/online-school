@@ -1,0 +1,1543 @@
+openapi: 3.0.3
+info:
+  title: Online School API
+  description: REST API для платформи онлайн-навчання. Включає управління курсами, модулями, уроками, користувачами, реєстрацією на курси та файлами.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@onlineschool.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: Реєстрація, логін, refresh token, logout
+  - name: Courses
+    description: Управління курсами
+  - name: Modules
+    description: Управління модулями курсів
+  - name: Lessons
+    description: Управління уроками
+  - name: Enrollments
+    description: Реєстрація студентів на курси
+  - name: Persons
+    description: Управління користувачами
+  - name: Files
+    description: Завантаження та керування файлами
+  - name: Notifications
+    description: Управління сповіщеннями
+  - name: References
+    description: Довідники (ролі, статуси)
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== Authentication ====================
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Реєстрація нового користувача
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonCreateDto'
+      responses:
+        '200':
+          description: Успішна реєстрація
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              description: Refresh token as HTTP-only cookie
+              schema:
+                type: string
+                example: refreshToken=abc123; HttpOnly; Secure; Path=/; Max-Age=604800
+        '400':
+          description: Невалідні дані
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Логін користувача
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успішний логін
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          headers:
+            Set-Cookie:
+              description: Refresh token as HTTP-only cookie
+              schema:
+                type: string
+        '401':
+          description: Невірні credentials
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Оновлення access token
+      operationId: refreshToken
+      security: []
+      parameters:
+        - in: cookie
+          name: refreshToken
+          required: true
+          schema:
+            type: string
+          description: Refresh token from cookie
+      responses:
+        '200':
+          description: Новий access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Невалідний refresh token
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Вихід користувача
+      operationId: logout
+      responses:
+        '200':
+          description: Успішний logout
+        '401':
+          description: Unauthorized
+
+  /auth/magic-login:
+    post:
+      tags:
+        - Authentication
+      summary: Вхід за магічним посиланням
+      operationId: magicLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Успішний вхід
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Невалідний токен
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Ініціювати скидання паролю
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '200':
+          description: Email відправлено (або email не знайдено)
+        '400':
+          description: Невалідні дані
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Виконати скидання паролю
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Пароль успішно змінено
+        '400':
+          description: Невалідний токен або пароль
+
+  /auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Змінити пароль (для авторизованих користувачів)
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Пароль успішно змінено
+        '400':
+          description: Невірний старий пароль або невалідні дані
+        '401':
+          description: Неавторизований
+
+  # ==================== Courses ====================
+  /courses:
+    get:
+      tags:
+        - Courses
+      summary: Отримати всі курси
+      operationId: getAllCourses
+      security: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Фільтр по ID користувача (для отримання курсів конкретного юзера)
+      responses:
+        '200':
+          description: Список курсів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseDto'
+        '204':
+          description: Немає курсів
+    post:
+      tags:
+        - Courses
+      summary: Створити новий курс
+      operationId: createCourse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseCreateDto'
+      responses:
+        '201':
+          description: Курс створено
+        '400':
+          description: Невалідні дані
+
+  /courses/{id}:
+    get:
+      tags:
+        - Courses
+      summary: Отримати курс за ID
+      operationId: getCourse
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі курсу
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDto'
+        '404':
+          description: Курс не знайдено
+    put:
+      tags:
+        - Courses
+      summary: Оновити курс
+      operationId: updateCourse
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CourseUpdateDto'
+      responses:
+        '204':
+          description: Курс оновлено
+        '404':
+          description: Курс не знайдено
+    delete:
+      tags:
+        - Courses
+      summary: Видалити курс
+      operationId: deleteCourse
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Курс видалено
+
+  /courses/{id}/cover:
+    get:
+      tags:
+        - Courses
+      summary: Отримати обкладинку курсу
+      operationId: getCourseCover
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Зображення обкладинки
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Курс або зображення не знайдено
+
+  /courses/{id}/extend-access:
+    post:
+      tags:
+        - Courses
+      summary: Запит на продовження доступу (за відгук)
+      operationId: extendAccessForReview
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                video:
+                  type: string
+                  format: binary
+                  description: Відео-відгук
+      responses:
+        '200':
+          description: Запит прийнято
+        '400':
+          description: Помилка завантаження
+
+  # ==================== Modules ====================
+  /modules:
+    get:
+      tags:
+        - Modules
+      summary: Отримати всі модулі
+      operationId: getAllModules
+      responses:
+        '200':
+          description: Список модулів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModuleDto'
+        '204':
+          description: Немає модулів
+    post:
+      tags:
+        - Modules
+      summary: Створити новий модуль
+      operationId: createModule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleCreateDto'
+      responses:
+        '201':
+          description: Модуль створено
+
+  /modules/{id}:
+    get:
+      tags:
+        - Modules
+      summary: Отримати модуль за ID
+      operationId: getModule
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі модуля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleDto'
+        '404':
+          description: Модуль не знайдено
+    put:
+      tags:
+        - Modules
+      summary: Оновити модуль
+      operationId: updateModule
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModuleUpdateDto'
+      responses:
+        '204':
+          description: Модуль оновлено
+        '404':
+          description: Модуль не знайдено
+    delete:
+      tags:
+        - Modules
+      summary: Видалити модуль
+      operationId: deleteModule
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Модуль видалено
+
+  /modules/{id}/lessons:
+    get:
+      tags:
+        - Modules
+      summary: Отримати уроки модуля
+      operationId: getModuleLessons
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
+
+  # ==================== Lessons ====================
+  /lessons:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати всі уроки
+      operationId: getAllLessons
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
+    post:
+      tags:
+        - Lessons
+      summary: Створити новий урок
+      operationId: createLesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonCreateDto'
+      responses:
+        '201':
+          description: Урок створено
+
+  /lessons/unassigned:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати уроки без модуля
+      operationId: getUnassignedLessons
+      responses:
+        '200':
+          description: Список уроків
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LessonDto'
+
+  /lessons/{id}:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати урок за ID
+      operationId: getLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі уроку
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonDto'
+        '404':
+          description: Урок не знайдено
+    put:
+      tags:
+        - Lessons
+      summary: Оновити урок
+      operationId: updateLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LessonUpdateDto'
+      responses:
+        '204':
+          description: Урок оновлено
+        '404':
+          description: Урок не знайдено
+    delete:
+      tags:
+        - Lessons
+      summary: Видалити урок
+      operationId: deleteLesson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Урок видалено
+
+  /lessons/{id}/files:
+    get:
+      tags:
+        - Lessons
+      summary: Отримати файли уроку
+      operationId: getLessonFiles
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Список файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
+
+  # ==================== Enrollments ====================
+  /enrollments:
+    get:
+      tags:
+        - Enrollments
+      summary: Отримати реєстрації
+      operationId: getEnrollments
+      parameters:
+        - in: query
+          name: studentId
+          schema:
+            type: string
+            format: uuid
+          required: false
+          description: Фільтр по ID студента
+      responses:
+        '200':
+          description: Список реєстрацій
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnrollmentDto'
+    post:
+      tags:
+        - Enrollments
+      summary: Зареєструвати студента на курс
+      operationId: createEnrollment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentCreateDto'
+      responses:
+        '201':
+          description: Реєстрація створена
+        '400':
+          description: Невалідні дані
+
+  # ==================== Persons ====================
+  /persons:
+    get:
+      tags:
+        - Persons
+      summary: Отримати всіх користувачів
+      operationId: getAllPersons
+      responses:
+        '200':
+          description: Список користувачів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonDto'
+        '204':
+          description: Немає користувачів
+    post:
+      tags:
+        - Persons
+      summary: Створити користувача
+      operationId: createPerson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonCreateDto'
+      responses:
+        '201':
+          description: Користувача створено
+
+  /persons/{id}:
+    get:
+      tags:
+        - Persons
+      summary: Отримати користувача за ID
+      operationId: getPerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Деталі користувача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonDto'
+        '404':
+          description: Користувача не знайдено
+    put:
+      tags:
+        - Persons
+      summary: Оновити користувача
+      operationId: updatePerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonUpdateDto'
+      responses:
+        '204':
+          description: Користувача оновлено
+        '404':
+          description: Користувача не знайдено
+    delete:
+      tags:
+        - Persons
+      summary: Видалити користувача
+      operationId: deletePerson
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Користувача видалено
+
+  /persons/with-enrollments:
+    get:
+      tags:
+        - Persons
+      summary: Отримати користувачів з їх реєстраціями
+      operationId: getAllPersonsWithEnrollments
+      responses:
+        '200':
+          description: Список користувачів з деталями
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PersonWithEnrollmentsDto'
+
+  /persons/{id}/status:
+    patch:
+      tags:
+        - Persons
+      summary: Оновити статус користувача
+      operationId: updatePersonStatus
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: query
+          name: status
+          required: true
+          schema:
+            type: string
+            enum: [ACTIVE, BLOCKED]
+      responses:
+        '204':
+          description: Статус оновлено
+
+  /persons/{id}/enrollments/{courseId}:
+    post:
+      tags:
+        - Persons
+      summary: Додати доступ до курсу
+      operationId: addCourseAccess
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Доступ надано
+    delete:
+      tags:
+        - Persons
+      summary: Забрати доступ до курсу
+      operationId: removeCourseAccess
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+        - in: path
+          name: courseId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Доступ скасовано
+
+
+
+  # ==================== Files ====================
+  /files/upload:
+    post:
+      tags:
+        - Files
+      summary: Завантажити файл
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл для завантаження (PDF, JPEG, PNG)
+                entityType:
+                  type: string
+                  description: Тип entity (COURSE, MODULE, LESSON)
+                  example: COURSE
+                entityId:
+                  type: string
+                  format: uuid
+                  description: ID entity, до якої прив'язаний файл
+      responses:
+        '200':
+          description: Файл завантажено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileDto'
+        '400':
+          description: Невалідний файл
+
+  /files/{fileId}:
+    get:
+      tags:
+        - Files
+      summary: Завантажити файл
+      operationId: downloadFile
+      security: []
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Файл
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              description: 'attachment; filename="..."'
+        '404':
+          description: Файл не знайдено
+    delete:
+      tags:
+        - Files
+      summary: Видалити файл
+      operationId: deleteFile
+      parameters:
+        - in: path
+          name: fileId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Файл видалено
+        '404':
+          description: Файл не знайдено
+
+  /files/entity/{entityType}/{entityId}:
+    get:
+      tags:
+        - Files
+      summary: Отримати файли для entity
+      operationId: getFilesForEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            type: string
+            enum: [COURSE, MODULE, LESSON]
+        - in: path
+          name: entityId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Список файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
+
+  /files/my-files:
+    get:
+      tags:
+        - Files
+      summary: Отримати мої файли
+      operationId: getMyFiles
+      responses:
+        '200':
+          description: Список моїх файлів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FileDto'
+
+  # ==================== Notifications ====================
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Отримати сповіщення користувача
+      operationId: getUserNotifications
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Список сповіщень
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationDto'
+        '401':
+          description: Unauthorized
+
+  /notifications/unread-count:
+    get:
+      tags:
+        - Notifications
+      summary: Кількість непрочитаних сповіщень
+      operationId: getUnreadCount
+      responses:
+        '200':
+          description: Кількість
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+
+  /notifications/{id}/read:
+    put:
+      tags:
+        - Notifications
+      summary: Позначити як прочитане
+      operationId: markAsRead
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '200':
+          description: Оновлено
+
+  /notifications/{id}:
+    delete:
+      tags:
+        - Notifications
+      summary: Видалити сповіщення
+      operationId: deleteNotification
+      parameters:
+        - $ref: '#/components/parameters/IdPathParam'
+      responses:
+        '204':
+          description: Видалено
+
+  /notifications/broadcast:
+    post:
+      tags:
+        - Notifications
+      summary: Надіслати всім користувачам (Admin only)
+      operationId: broadcastToAll
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BroadcastRequest'
+      responses:
+        '200':
+          description: Надіслано
+        '403':
+          description: Forbidden
+
+  /notifications/send-to-users:
+    post:
+      tags:
+        - Notifications
+      summary: Надіслати конкретним користувачам (Admin only)
+      operationId: sendToUsers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TargetedNotificationRequest'
+      responses:
+        '200':
+          description: Надіслано
+        '403':
+          description: Forbidden
+
+  # ==================== References ====================
+  /references/roles:
+    get:
+      tags:
+        - References
+      summary: Отримати список ролей
+      operationId: getRoles
+      responses:
+        '200':
+          description: Список ролей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum: [USER, ADMIN]
+
+  /references/statuses:
+    get:
+      tags:
+        - References
+      summary: Отримати список статусів
+      operationId: getStatuses
+      responses:
+        '200':
+          description: Список статусів
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  enum: [ACTIVE, BLOCKED]
+
+# ==================== Components ====================
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPathParam:
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID ідентифікатор
+
+  schemas:
+    # ==================== Auth Schemas ====================
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          format: password
+          example: password123
+
+    ForgotPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Token received in email link
+        newPassword:
+          type: string
+          format: password
+          minLength: 6
+          example: newPassword123
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - oldPassword
+        - newPassword
+      properties:
+        oldPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+          minLength: 6
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (15 хвилин)
+        tokenType:
+          type: string
+          example: Bearer
+        userId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN]
+
+    # ==================== Person Schemas ====================
+    PersonCreateDto:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+
+    PersonDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bornedAt:
+          type: string
+          format: date-time
+        phoneNumber:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, BLOCKED]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PersonWithEnrollmentsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        bornedAt:
+          type: string
+          format: date-time
+        phoneNumber:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, BLOCKED]
+        enrollments:
+          type: array
+          items:
+            $ref: '#/components/schemas/EnrollmentDto'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PersonUpdateDto:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+
+
+
+    # ==================== Course Schemas ====================
+    CourseCreateDto:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          example: Introduction to Java
+        description:
+          type: string
+          example: Learn Java programming from scratch
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+          default: DRAFT
+        price:
+          type: number
+          format: double
+          description: Ціна курсу
+        discountAmount:
+          type: number
+          format: double
+          description: Фіксована сума знижки
+        discountPercentage:
+          type: integer
+          description: Відсоток знижки
+        accessDuration:
+          type: integer
+          description: Тривалість доступу в днях
+
+    CourseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        modulesNumber:
+          type: integer
+        lessonsCount:
+          type: integer
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+        price:
+          type: number
+          format: double
+        discountAmount:
+          type: number
+          format: double
+        discountPercentage:
+          type: integer
+        accessDuration:
+          type: integer
+          description: Тривалість доступу в днях
+        promotionalDiscountPercentage:
+          type: integer
+        promotionalDiscountAmount:
+          type: number
+          format: double
+        nextCourseId:
+          type: string
+          format: uuid
+        nextCourseName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        isEnrolled:
+          type: boolean
+        enrolledAt:
+          type: string
+          format: date-time
+        enrollmentStatus:
+          type: string
+        coverImageUrl:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        averageColor:
+          type: string
+
+    CourseUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, ARCHIVED]
+        price:
+          type: number
+          format: double
+        discountAmount:
+          type: number
+          format: double
+        discountPercentage:
+          type: integer
+
+    # ==================== Module Schemas ====================
+    ModuleCreateDto:
+      type: object
+      required:
+        - name
+        - description
+        - courseId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+
+    ModuleDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+        courseName:
+          type: string
+        orderIndex:
+          type: integer
+
+    ModuleUpdateDto:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        orderIndex:
+          type: integer
+
+    # ==================== Lesson Schemas ====================
+    LessonCreateDto:
+      type: object
+      required:
+        - title
+        - content
+        - moduleId
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        moduleId:
+          type: string
+          format: uuid
+        orderIndex:
+          type: integer
+
+    LessonDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        moduleId:
+          type: string
+          format: uuid
+        moduleName:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+          description: Тривалість в хвилинах
+
+    LessonUpdateDto:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        orderIndex:
+          type: integer
+        duration:
+          type: integer
+
+    # ==================== Enrollment Schemas ====================
+    EnrollmentCreateDto:
+      type: object
+      required:
+        - studentId
+        - courseId
+      properties:
+        studentId:
+          type: string
+          format: uuid
+        courseId:
+          type: string
+          format: uuid
+
+    EnrollmentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        courseId:
+          type: string
+          format: uuid
+        courseName:
+          type: string
+        enrollmentDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [ACTIVE, COMPLETED, CANCELLED, BLOCKED]
+
+    # ==================== File Schemas ====================
+    FileDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        originalName:
+          type: string
+        contentType:
+          type: string
+          example: application/pdf
+        fileSize:
+          type: integer
+          format: int64
+          description: Розмір в байтах
+        uploadedAt:
+          type: string
+          format: date-time
+        downloadUrl:
+          type: string
+          example: /files/uuid
+        relatedEntityType:
+          type: string
+          enum: [COURSE, MODULE, LESSON]
+        relatedEntityId:
+          type: string
+          format: uuid
+
+    # ==================== Notification Schemas ====================
+    NotificationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [GENERIC, COURSE_UPDATE, NEW_COURSE, HOMEWORK_REVIEWED, PROMOTION, SUBSCRIPTION_EXPIRING, SYSTEM_ALERT, NEW_USER_REGISTRATION]
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        buttonUrl:
+          type: string
+
+    BroadcastRequest:
+      type: object
+      required:
+        - title
+        - message
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        buttonUrl:
+          type: string
+
+    TargetedNotificationRequest:
+      type: object
+      required:
+        - title
+        - message
+        - userIds
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+        userIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        buttonUrl:
+          type: string

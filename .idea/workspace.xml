@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="13424e7d-094a-4445-9707-de5978388bf9" name="Changes" comment="Minor UI improvement">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;VolodymyrMishchuk&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/VolodymyrMishchuk/online-school.git&quot;,
+    &quot;accountId&quot;: &quot;597d265d-431c-4c3b-98c1-a0b3aebf2e82&quot;
+  }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="38f3EeIF1ZYspBHVpJrEu3RwmUY" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+    <ConfirmationsSetting value="2" id="Remove" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.online-school [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.online-school [install].executor&quot;: &quot;Run&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.OnlineSchoolApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/volodymyr.mishchuk/IdeaProjects/online-school&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.Confirmation&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/volodymyr.mishchuk/IdeaProjects/online-school/frontend/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;postgresql&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/resources" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Spring Boot.OnlineSchoolApplication">
+    <configuration default="true" type="AZURE_FUNCTION_SUPPORT" factoryName="Run Functions">
+      <option name="appName" />
+      <option name="appServicePlanName" />
+      <option name="appServicePlanResourceGroup" />
+      <option name="appSettingsKey" value="3534a9aa-61da-451a-a3fa-04e0c5f814e7" />
+      <option name="artifact" />
+      <option name="debugOptions" />
+      <option name="deployment" />
+      <option name="deploymentStagingDirectoryPath" />
+      <option name="funcPath" />
+      <option name="functionHostArguments" />
+      <option name="hostJsonPath" />
+      <option name="insightsName" />
+      <option name="instrumentationKey" />
+      <option name="javaVersion" />
+      <option name="localSettingsJsonPath" />
+      <option name="moduleName" />
+      <option name="os" />
+      <option name="pricingTier" />
+      <option name="providerMap">
+        <map />
+      </option>
+      <option name="region" />
+      <option name="resourceGroup" />
+      <option name="stagingFolder" />
+      <option name="subscription" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="OnlineSchoolApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <envs>
+        <env name="JWT_SECRET" value="404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970" />
+      </envs>
+      <module name="online-school" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.mishchuk.onlineschool.OnlineSchoolApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="docker-compose.yml" temporary="true">
+      <deployment type="docker-compose.yml">
+        <settings />
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <configuration name="docker-compose.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
+      <deployment type="docker-compose.yml">
+        <settings>
+          <option name="sourceFilePath" value="docker-compose.yml" />
+        </settings>
+      </deployment>
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
+      <item itemvalue="Spring Boot.OnlineSchoolApplication" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.28774.11" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.28774.11" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="Logical" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="13424e7d-094a-4445-9707-de5978388bf9" name="Changes" comment="" />
+      <created>1769176688262</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1769176688262</updated>
+      <workItem from="1769176689779" duration="696000" />
+      <workItem from="1769356374869" duration="32000" />
+      <workItem from="1769443959339" duration="517000" />
+      <workItem from="1769670808038" duration="3753000" />
+      <workItem from="1769675825506" duration="14345000" />
+      <workItem from="1769960473122" duration="180000" />
+      <workItem from="1769960670971" duration="159000" />
+      <workItem from="1769960873617" duration="330000" />
+      <workItem from="1769961215733" duration="19230000" />
+      <workItem from="1770286021813" duration="3546000" />
+      <workItem from="1770304866218" duration="567000" />
+      <workItem from="1770305445149" duration="213000" />
+      <workItem from="1770305667457" duration="541000" />
+      <workItem from="1770306238530" duration="383000" />
+      <workItem from="1770306655368" duration="267000" />
+      <workItem from="1770306935555" duration="92366000" />
+      <workItem from="1770991377994" duration="16319000" />
+      <workItem from="1771092991601" duration="38330000" />
+      <workItem from="1771372309915" duration="37297000" />
+      <workItem from="1771757802612" duration="19050000" />
+      <workItem from="1772274798593" duration="39036000" />
+      <workItem from="1772878067964" duration="44886000" />
+      <workItem from="1774163746084" duration="5350000" />
+    </task>
+    <task id="LOCAL-00001" summary="first commit">
+      <option name="closed" value="true" />
+      <created>1769857526148</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769857526148</updated>
+    </task>
+    <task id="LOCAL-00002" summary="second commit">
+      <option name="closed" value="true" />
+      <created>1770023069789</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1770023069789</updated>
+    </task>
+    <task id="LOCAL-00003" summary="unversioned files">
+      <option name="closed" value="true" />
+      <created>1770023122595</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1770023122595</updated>
+    </task>
+    <task id="LOCAL-00004" summary="third big commit">
+      <option name="closed" value="true" />
+      <created>1770545189667</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1770545189668</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Improvements to course functionality">
+      <option name="closed" value="true" />
+      <created>1770555163217</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1770555163217</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Implementation of email sending">
+      <option name="closed" value="true" />
+      <created>1770560003836</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770560003837</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Implementation of user management and improvements to the platform’s email services">
+      <option name="closed" value="true" />
+      <created>1770659481951</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1770659481951</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Updated UI">
+      <option name="closed" value="true" />
+      <created>1770715071900</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770715071900</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Implementation of password recovery, personal data editing, and other minor improvements">
+      <option name="closed" value="true" />
+      <created>1770736016496</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1770736016496</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Enhanced sorting logic">
+      <option name="closed" value="true" />
+      <created>1770803818952</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770803818952</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Small UI improvements">
+      <option name="closed" value="true" />
+      <created>1770842434657</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1770842434657</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Implementation of the Notifications feature and partial implementation of the logic to extend course access after the access period expires.">
+      <option name="closed" value="true" />
+      <created>1771092411919</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1771092411919</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Redesign of modal forms">
+      <option name="closed" value="true" />
+      <created>1771153795069</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1771153795069</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Extend functionality for new course creation">
+      <option name="closed" value="true" />
+      <created>1771156158309</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1771156158309</updated>
+    </task>
+    <task id="LOCAL-00015" summary="A few minor functional improvements">
+      <option name="closed" value="true" />
+      <created>1771164945156</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1771164945156</updated>
+    </task>
+    <task id="LOCAL-00016" summary="A few minor functional improvements too">
+      <option name="closed" value="true" />
+      <created>1771188222687</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1771188222687</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Redesign of the “All Modules” tab">
+      <option name="closed" value="true" />
+      <created>1771190010697</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1771190010697</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Redesign of the “All Modules” tab too">
+      <option name="closed" value="true" />
+      <created>1771190417873</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1771190417873</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Redesign of the “All courses” tab">
+      <option name="closed" value="true" />
+      <created>1771250661356</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1771250661356</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Improved visual appearance of the course card. Added background customization">
+      <option name="closed" value="true" />
+      <created>1771364922849</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1771364922849</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Many minor improvements">
+      <option name="closed" value="true" />
+      <created>1771588089460</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1771588089460</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Functional improvements to the Notifications tab">
+      <option name="closed" value="true" />
+      <created>1771603451515</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1771603451515</updated>
+    </task>
+    <task id="LOCAL-00023" summary="Role-based access implementation and numerous minor improvements">
+      <option name="closed" value="true" />
+      <created>1771757775205</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1771757775205</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Implementation of “version control” for Course entities">
+      <option name="closed" value="true" />
+      <created>1771776596697</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1771776596697</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Refactoring of Auth logic">
+      <option name="closed" value="true" />
+      <created>1771916029147</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1771916029147</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Implemented functionality for submitting a request from the user role to the admin role. Also included minor improvements">
+      <option name="closed" value="true" />
+      <created>1772722754906</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1772722754906</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Minor improvements">
+      <option name="closed" value="true" />
+      <created>1772723038607</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1772723038607</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Implementation of multilingual support (Ukrainian, English, German)">
+      <option name="closed" value="true" />
+      <created>1772873410009</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1772873410009</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Implemented infinite scrolling and pagination. Moved sorting and search logic to the backend">
+      <option name="closed" value="true" />
+      <created>1772923045198</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1772923045198</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Implemented feature of Promo Codes">
+      <option name="closed" value="true" />
+      <created>1774176693083</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1774176693083</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Minor UI improvement">
+      <option name="closed" value="true" />
+      <created>1774188769118</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1774188769118</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Implementation of user management and improvements to the platform’s email services" />
+    <MESSAGE value="Updated UI" />
+    <MESSAGE value="Implementation of password recovery, personal data editing, and other minor improvements" />
+    <MESSAGE value="Enhanced sorting logic" />
+    <MESSAGE value="Small UI improvements" />
+    <MESSAGE value="Implementation of the Notifications feature and partial implementation of the logic to extend course access after the access period expires." />
+    <MESSAGE value="Redesign of modal forms" />
+    <MESSAGE value="Extend functionality for new course creation" />
+    <MESSAGE value="A few minor functional improvements" />
+    <MESSAGE value="A few minor functional improvements too" />
+    <MESSAGE value="Redesign of the “All Modules” tab" />
+    <MESSAGE value="Redesign of the “All Modules” tab too" />
+    <MESSAGE value="Redesign of the “All courses” tab" />
+    <MESSAGE value="Improved visual appearance of the course card. Added background customization" />
+    <MESSAGE value="Many minor improvements" />
+    <MESSAGE value="Functional improvements to the Notifications tab" />
+    <MESSAGE value="Role-based access implementation and numerous minor improvements" />
+    <MESSAGE value="Implementation of “version control” for Course entities" />
+    <MESSAGE value="Refactoring of Auth logic" />
+    <MESSAGE value="Implemented functionality for submitting a request from the user role to the admin role. Also included minor improvements" />
+    <MESSAGE value="Minor improvements" />
+    <MESSAGE value="Implementation of multilingual support (Ukrainian, English, German)" />
+    <MESSAGE value="Implemented infinite scrolling and pagination. Moved sorting and search logic to the backend" />
+    <MESSAGE value="Implemented feature of Promo Codes" />
+    <MESSAGE value="Minor UI improvement" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor UI improvement" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
