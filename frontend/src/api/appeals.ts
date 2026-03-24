@@ -21,6 +21,7 @@ export interface AppealResponse {
     userFirstName: string;
     userLastName: string;
     userEmail: string;
+    guestName?: string;
     contactMethod: 'MOBILE' | 'INSTAGRAM' | 'TELEGRAM' | 'EMAIL';
     contactDetails: string;
     message: string;
@@ -39,6 +40,15 @@ export interface PageResponse<T> {
 
 export const createAppeal = async (formData: FormData): Promise<AppealResponse> => {
     const response = await api.post<AppealResponse>('/appeals', formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+    return response.data;
+};
+
+export const createPublicAppeal = async (formData: FormData): Promise<AppealResponse> => {
+    const response = await api.post<AppealResponse>('/appeals/public', formData, {
         headers: {
             'Content-Type': 'multipart/form-data',
         },

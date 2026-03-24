@@ -31,15 +31,16 @@ public class PromoCodeController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String sortKey,
             @RequestParam(required = false) String sortDir,
-            @RequestParam(required = false) String statusSort
+            @RequestParam(required = false) String statusSort,
+            Authentication authentication
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<PromoCodeResponseDto> result = promoCodeService.getPaginatedPromoCodes(search, sortKey, sortDir, statusSort, pageable);
+        Page<PromoCodeResponseDto> result = promoCodeService.getPaginatedPromoCodes(search, sortKey, sortDir, statusSort, pageable, authentication.getName());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     public ResponseEntity<PromoCodeResponseDto> createPromoCode(
             @RequestBody PromoCodeCreateDto dto,
             Authentication authentication
@@ -68,7 +69,7 @@ public class PromoCodeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     public ResponseEntity<PromoCodeResponseDto> updatePromoCode(
             @PathVariable UUID id,
             @RequestBody PromoCodeCreateDto dto,
@@ -79,7 +80,7 @@ public class PromoCodeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     public ResponseEntity<Void> deletePromoCode(
             @PathVariable UUID id,
             Authentication authentication

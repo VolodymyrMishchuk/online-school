@@ -18,8 +18,11 @@ public class AppealEntity {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private PersonEntity user;
+
+    @Column(name = "guest_name")
+    private String guestName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "contact_method", nullable = false)

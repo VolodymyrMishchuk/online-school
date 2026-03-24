@@ -24,7 +24,8 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepositoryCustom {
             String sortKey,
             String sortDir,
             String statusSort,
-            Pageable pageable) {
+            Pageable pageable,
+            java.util.UUID creatorId) {
         
         StringBuilder selectClause = new StringBuilder("SELECT pc.* FROM promo_codes pc ");
 
@@ -69,11 +70,20 @@ public class PromoCodeRepositoryImpl implements PromoCodeRepositoryCustom {
         // Tie-breaker
         orderClause.append("pc.id ASC");
 
+        if (creatorId != null) {
+            whereClause.append("AND pc.created_by_id = :creatorId ");
+        }
+
         String dataQueryStr = selectClause.toString() + whereClause + orderClause;
         String countQueryStr = "SELECT COUNT(pc.id) FROM promo_codes pc " + whereClause;
 
         Query dataQuery = em.createNativeQuery(dataQueryStr, PromoCodeEntity.class);
         Query countQuery = em.createNativeQuery(countQueryStr);
+
+        if (creatorId != null) {
+            dataQuery.setParameter("creatorId", creatorId);
+            countQuery.setParameter("creatorId", creatorId);
+        }
 
         if (search != null && !search.trim().isEmpty()) {
             String searchParam = "%" + search.trim() + "%";

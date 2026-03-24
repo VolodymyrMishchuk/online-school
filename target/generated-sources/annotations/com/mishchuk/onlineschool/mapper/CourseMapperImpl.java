@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-22T08:15:50+0100",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-03-24T12:00:37+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component
 public class CourseMapperImpl implements CourseMapper {
@@ -86,14 +86,14 @@ public class CourseMapperImpl implements CourseMapper {
 
         CourseEntity courseEntity = new CourseEntity();
 
-        courseEntity.setAccessDuration( dto.accessDuration() );
+        courseEntity.setName( dto.name() );
         courseEntity.setDescription( dto.description() );
+        courseEntity.setAccessDuration( dto.accessDuration() );
+        courseEntity.setPrice( dto.price() );
         courseEntity.setDiscountAmount( dto.discountAmount() );
         courseEntity.setDiscountPercentage( dto.discountPercentage() );
-        courseEntity.setName( dto.name() );
-        courseEntity.setPrice( dto.price() );
-        courseEntity.setPromotionalDiscountAmount( dto.promotionalDiscountAmount() );
         courseEntity.setPromotionalDiscountPercentage( dto.promotionalDiscountPercentage() );
+        courseEntity.setPromotionalDiscountAmount( dto.promotionalDiscountAmount() );
 
         courseEntity.setStatus( CourseStatus.DRAFT );
         courseEntity.setVersion( "1.0" );
@@ -107,14 +107,14 @@ public class CourseMapperImpl implements CourseMapper {
             return;
         }
 
-        entity.setAccessDuration( dto.accessDuration() );
+        entity.setName( dto.name() );
         entity.setDescription( dto.description() );
+        entity.setAccessDuration( dto.accessDuration() );
+        entity.setPrice( dto.price() );
         entity.setDiscountAmount( dto.discountAmount() );
         entity.setDiscountPercentage( dto.discountPercentage() );
-        entity.setName( dto.name() );
-        entity.setPrice( dto.price() );
-        entity.setPromotionalDiscountAmount( dto.promotionalDiscountAmount() );
         entity.setPromotionalDiscountPercentage( dto.promotionalDiscountPercentage() );
+        entity.setPromotionalDiscountAmount( dto.promotionalDiscountAmount() );
     }
 
     private UUID entityNextCourseId(CourseEntity courseEntity) {

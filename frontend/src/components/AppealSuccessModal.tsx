@@ -6,9 +6,10 @@ import { useTranslation } from 'react-i18next';
 interface AppealSuccessModalProps {
     isOpen: boolean;
     onClose: () => void;
+    redirectOnClose?: boolean;
 }
 
-export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, onClose }) => {
+export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, onClose, redirectOnClose = true }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
@@ -16,7 +17,9 @@ export const AppealSuccessModal: React.FC<AppealSuccessModalProps> = ({ isOpen, 
 
     const handleAcknowledge = () => {
         onClose();
-        navigate('/dashboard/all-courses');
+        if (redirectOnClose) {
+            navigate('/dashboard/all-courses');
+        }
     };
 
     return (

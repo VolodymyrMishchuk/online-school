@@ -1,6 +1,7 @@
 package com.mishchuk.onlineschool.service;
 
 import com.mishchuk.onlineschool.controller.dto.AppealCreateRequest;
+import com.mishchuk.onlineschool.controller.dto.PublicAppealCreateRequest;
 import com.mishchuk.onlineschool.controller.dto.AppealResponse;
 import com.mishchuk.onlineschool.controller.dto.FileDto;
 import com.mishchuk.onlineschool.exception.ResourceNotFoundException;
@@ -63,6 +64,37 @@ public class AppealServiceImpl implements AppealService {
                 : user.getEmail();
         String title = "Нове звернення";
         String messageStr = "Отримано нове звернення від " + userName;
+        String buttonUrl = "/dashboard/appeals?id=" + savedAppeal.getId();
+
+        notificationService.broadcastToAdmins(title, messageStr, NotificationType.NEW_APPEAL, buttonUrl);
+
+        return enrichWithPhotos(savedAppeal);
+    }
+
+    @Override
+    @Transactional
+    public AppealResponse createPublicAppeal(PublicAppealCreateRequest request, List<MultipartFile> photos) {
+        AppealEntity appeal = new AppealEntity();
+        appeal.setGuestName(request.getName());
+        appeal.setContactMethod(request.getContactMethod());
+        appeal.setContactDetails(request.getContactDetails());
+        appeal.setMessage(request.getMessage());
+        appeal.setStatus(AppealStatus.NEW);
+
+        AppealEntity savedAppeal = appealRepository.save(appeal);
+
+        // Process photos
+        if (photos != null && !photos.isEmpty()) {
+            for (MultipartFile photo : photos) {
+                if (!photo.isEmpty()) {
+                    fileStorageService.uploadFile(photo, "APPEAL", savedAppeal.getId(), null);
+                }
+            }
+        }
+
+        // Notify admins
+        String title = "Нове звернення з лендінгу";
+        String messageStr = "Отримано нове зовнішнє звернення від " + request.getName();
         String buttonUrl = "/dashboard/appeals?id=" + savedAppeal.getId();
 
         notificationService.broadcastToAdmins(title, messageStr, NotificationType.NEW_APPEAL, buttonUrl);

@@ -6,6 +6,7 @@ import com.mishchuk.onlineschool.repository.entity.AppealStatus;
 import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import com.mishchuk.onlineschool.security.CustomUserDetailsService;
 import com.mishchuk.onlineschool.service.AppealService;
+import com.mishchuk.onlineschool.controller.dto.PublicAppealCreateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -49,8 +50,17 @@ public class AppealController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PostMapping(value = "/public", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AppealResponse> createPublicAppeal(
+            @Valid @ModelAttribute PublicAppealCreateRequest request,
+            @RequestPart(value = "photos", required = false) List<MultipartFile> photos) {
+
+        AppealResponse response = appealService.createPublicAppeal(request, photos);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<AppealResponse>> getAppeals(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
@@ -61,13 +71,13 @@ public class AppealController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppealResponse> getAppeal(@PathVariable UUID id) {
         return ResponseEntity.ok(appealService.getAppeal(id));
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AppealResponse> updateAppealStatus(
             @PathVariable UUID id,
             @RequestParam AppealStatus status) {
@@ -75,7 +85,7 @@ public class AppealController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAppeal(@PathVariable UUID id) {
         appealService.deleteAppeal(id);
         return ResponseEntity.noContent().build();

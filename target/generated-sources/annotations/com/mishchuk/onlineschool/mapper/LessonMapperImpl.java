@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-22T08:15:50+0100",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-03-24T12:00:37+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component
 public class LessonMapperImpl implements LessonMapper {
@@ -64,10 +64,10 @@ public class LessonMapperImpl implements LessonMapper {
 
         LessonEntity lessonEntity = new LessonEntity();
 
-        lessonEntity.setDescription( dto.description() );
-        lessonEntity.setDurationMinutes( dto.durationMinutes() );
         lessonEntity.setName( dto.name() );
+        lessonEntity.setDescription( dto.description() );
         lessonEntity.setVideoUrl( dto.videoUrl() );
+        lessonEntity.setDurationMinutes( dto.durationMinutes() );
 
         return lessonEntity;
     }
@@ -78,17 +78,17 @@ public class LessonMapperImpl implements LessonMapper {
             return;
         }
 
-        if ( dto.description() != null ) {
-            entity.setDescription( dto.description() );
-        }
-        if ( dto.durationMinutes() != null ) {
-            entity.setDurationMinutes( dto.durationMinutes() );
-        }
         if ( dto.name() != null ) {
             entity.setName( dto.name() );
         }
+        if ( dto.description() != null ) {
+            entity.setDescription( dto.description() );
+        }
         if ( dto.videoUrl() != null ) {
             entity.setVideoUrl( dto.videoUrl() );
+        }
+        if ( dto.durationMinutes() != null ) {
+            entity.setDurationMinutes( dto.durationMinutes() );
         }
     }
 

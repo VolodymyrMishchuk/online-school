@@ -313,6 +313,9 @@ export default function AdminAppealsPage() {
         }
     };
 
+    const userRole = localStorage.getItem('role');
+    const isFakeAdmin = userRole === 'FAKE_ADMIN';
+
     const [appeals, setAppeals] = useState<AppealResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -333,6 +336,10 @@ export default function AdminAppealsPage() {
     };
 
     const fetchAppeals = async (pageNumber: number) => {
+        if (isFakeAdmin) {
+            setIsLoading(false);
+            return;
+        }
         try {
             setIsLoading(true);
             const data = await getAppeals(pageNumber, 20);
@@ -393,6 +400,18 @@ export default function AdminAppealsPage() {
 
 
 
+    if (isFakeAdmin) {
+        return (
+            <div className="p-8 max-w-7xl mx-auto h-full flex flex-col items-center justify-center text-center">
+                <MessageSquare className="w-16 h-16 text-brand-primary mb-4 opacity-75" />
+                <h1 className="text-2xl font-bold text-gray-900 mb-2">Звернення</h1>
+                <p className="text-gray-500 text-lg max-w-md">
+                    Більш детальна інформація з цієї вкладки доступна лише адміністраторам платформи.
+                </p>
+            </div>
+        );
+    }
+
     if (isLoading && appeals.length === 0) {
         return (
             <div className="flex h-full items-center justify-center">
@@ -432,11 +451,20 @@ export default function AdminAppealsPage() {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-4 mb-4">
                                     <div className="space-y-1">
-                                        <h4 className={`text-lg font-bold transition-colors duration-300 ${appeal.status === 'PROCESSED' ? 'text-gray-600' : 'text-gray-900'}`}>
-                                            {(appeal.userFirstName || appeal.userLastName)
-                                                ? `${appeal.userFirstName || ''} ${appeal.userLastName || ''}`.trim()
-                                                : appeal.userEmail}
-                                        </h4>
+                                        <div className="flex items-center gap-3">
+                                            <h4 className={`text-lg font-bold transition-colors duration-300 ${appeal.status === 'PROCESSED' ? 'text-gray-600' : 'text-gray-900'}`}>
+                                                {appeal.guestName 
+                                                    ? appeal.guestName 
+                                                    : (appeal.userFirstName || appeal.userLastName)
+                                                        ? `${appeal.userFirstName || ''} ${appeal.userLastName || ''}`.trim()
+                                                        : appeal.userEmail}
+                                            </h4>
+                                            {appeal.guestName && (
+                                                <span className="px-2.5 py-0.5 rounded-full bg-brand-light/30 text-brand-primary text-xs font-semibold border border-brand-primary/20">
+                                                    Гість (Лендінг)
+                                                </span>
+                                            )}
+                                        </div>
                                         <p className="text-xs text-gray-400 mt-0.5">
                                             {format(new Date(appeal.createdAt), 'dd MMMM yyyy, HH:mm', { locale: getDateLocale() })}
                                         </p>
@@ -452,13 +480,15 @@ export default function AdminAppealsPage() {
                                             <span className="font-medium truncate">{appeal.contactDetails}</span>
                                             <CopyButton text={appeal.contactDetails} />
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                                            <div className="w-5 flex justify-center flex-shrink-0">
-                                                <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                                        {appeal.userEmail && (
+                                            <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                                                <div className="w-5 flex justify-center flex-shrink-0">
+                                                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                                                </div>
+                                                <span className="truncate">{appeal.userEmail}</span>
+                                                <CopyButton text={appeal.userEmail} />
                                             </div>
-                                            <span className="truncate">{appeal.userEmail}</span>
-                                            <CopyButton text={appeal.userEmail} />
-                                        </div>
+                                        )}
                                     </div>
 
                                     {appeal.photos && appeal.photos.length > 0 && (

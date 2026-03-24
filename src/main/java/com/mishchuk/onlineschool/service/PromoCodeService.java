@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface PromoCodeService {
-    Page<PromoCodeResponseDto> getPaginatedPromoCodes(String search, String sortKey, String sortDir, String statusSort, Pageable pageable);
+    Page<PromoCodeResponseDto> getPaginatedPromoCodes(String search, String sortKey, String sortDir, String statusSort, Pageable pageable, String currentUsername);
     PromoCodeResponseDto createPromoCode(PromoCodeCreateDto createDto, String currentUsername);
     PromoCodeCheckResponseDto checkPromoCode(String code, String currentUsername);
     PromoCodeResponseDto updatePromoCode(UUID id, PromoCodeCreateDto updateDto, String currentUsername);

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-22T08:15:50+0100",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-03-24T12:00:37+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component
 public class FileMapperImpl implements FileMapper {
@@ -21,14 +21,14 @@ public class FileMapperImpl implements FileMapper {
 
         FileDto fileDto = new FileDto();
 
-        fileDto.setContentType( entity.getContentType() );
-        fileDto.setFileName( entity.getFileName() );
-        fileDto.setFileSize( entity.getFileSize() );
         fileDto.setId( entity.getId() );
+        fileDto.setFileName( entity.getFileName() );
         fileDto.setOriginalName( entity.getOriginalName() );
-        fileDto.setRelatedEntityId( entity.getRelatedEntityId() );
-        fileDto.setRelatedEntityType( entity.getRelatedEntityType() );
+        fileDto.setContentType( entity.getContentType() );
+        fileDto.setFileSize( entity.getFileSize() );
         fileDto.setUploadedAt( entity.getUploadedAt() );
+        fileDto.setRelatedEntityType( entity.getRelatedEntityType() );
+        fileDto.setRelatedEntityId( entity.getRelatedEntityId() );
 
         fileDto.setDownloadUrl( "/files/" + entity.getId() );
 

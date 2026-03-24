@@ -12,6 +12,7 @@ public interface AppealMapper {
     @Mapping(source = "user.firstName", target = "userFirstName")
     @Mapping(source = "user.lastName", target = "userLastName")
     @Mapping(source = "user.email", target = "userEmail")
+    @Mapping(source = "guestName", target = "guestName")
     @Mapping(target = "photos", ignore = true)
     AppealResponse toDto(AppealEntity entity);
 }

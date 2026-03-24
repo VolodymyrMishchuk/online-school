@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-22T08:15:49+0100",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
+    date = "2026-03-24T12:00:37+0100",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
 )
 @Component
 public class AppealMapperImpl implements AppealMapper {
@@ -27,12 +27,13 @@ public class AppealMapperImpl implements AppealMapper {
         appealResponse.setUserFirstName( entityUserFirstName( entity ) );
         appealResponse.setUserLastName( entityUserLastName( entity ) );
         appealResponse.setUserEmail( entityUserEmail( entity ) );
-        appealResponse.setContactDetails( entity.getContactDetails() );
-        appealResponse.setContactMethod( entity.getContactMethod() );
-        appealResponse.setCreatedAt( entity.getCreatedAt() );
+        appealResponse.setGuestName( entity.getGuestName() );
         appealResponse.setId( entity.getId() );
+        appealResponse.setContactMethod( entity.getContactMethod() );
+        appealResponse.setContactDetails( entity.getContactDetails() );
         appealResponse.setMessage( entity.getMessage() );
         appealResponse.setStatus( entity.getStatus() );
+        appealResponse.setCreatedAt( entity.getCreatedAt() );
 
         return appealResponse;
     }

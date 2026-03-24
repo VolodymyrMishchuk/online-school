@@ -16,6 +16,8 @@ public class AppealResponse {
     private String userLastName;
     private String userEmail;
 
+    private String guestName;
+
     private ContactMethod contactMethod;
     private String contactDetails;
     private String message;

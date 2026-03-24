@@ -10,6 +10,7 @@ public interface PromoCodeRepositoryCustom {
             String sortKey,
             String sortDir,
             String statusSort,
-            Pageable pageable
+            Pageable pageable,
+            java.util.UUID creatorId
     );
 }

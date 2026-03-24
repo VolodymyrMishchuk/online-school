@@ -31,8 +31,16 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<PromoCodeResponseDto> getPaginatedPromoCodes(String search, String sortKey, String sortDir, String statusSort, Pageable pageable) {
-        Page<PromoCodeEntity> entities = promoCodeRepository.findPaginatedPromoCodes(search, sortKey, sortDir, statusSort, pageable);
+    public Page<PromoCodeResponseDto> getPaginatedPromoCodes(String search, String sortKey, String sortDir, String statusSort, Pageable pageable, String currentUsername) {
+        PersonEntity admin = personRepository.findByEmail(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
+        
+        UUID creatorId = null;
+        if (admin.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN) {
+            creatorId = admin.getId();
+        }
+
+        Page<PromoCodeEntity> entities = promoCodeRepository.findPaginatedPromoCodes(search, sortKey, sortDir, statusSort, pageable, creatorId);
         
         List<PromoCodeResponseDto> dtos = entities.getContent().stream()
                 .map(this::mapToResponseDto)
@@ -288,11 +296,16 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Transactional
     public PromoCodeResponseDto updatePromoCode(UUID id, PromoCodeCreateDto dto, String currentUsername) {
         // verify admin
-        personRepository.findByEmail(currentUsername)
+        PersonEntity admin = personRepository.findByEmail(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
         PromoCodeEntity entity = promoCodeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Promo code not found"));
+
+        if (admin.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN 
+                && !entity.getCreatedBy().getId().equals(admin.getId())) {
+            throw new IllegalArgumentException("You can only modify your own promo codes");
+        }
 
         if (!entity.getCode().equalsIgnoreCase(dto.getCode())) {
             if (promoCodeRepository.findByCodeIgnoreCase(dto.getCode()).isPresent()) {
@@ -347,11 +360,16 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Override
     @Transactional
     public void deletePromoCode(UUID id, String currentUsername) {
-        personRepository.findByEmail(currentUsername)
+        PersonEntity admin = personRepository.findByEmail(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
                 
         PromoCodeEntity entity = promoCodeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Promo code not found"));
+
+        if (admin.getRole() == com.mishchuk.onlineschool.repository.entity.PersonRole.FAKE_ADMIN 
+                && !entity.getCreatedBy().getId().equals(admin.getId())) {
+            throw new IllegalArgumentException("You can only delete your own promo codes");
+        }
                 
         promoCodeRepository.delete(entity);
     }
