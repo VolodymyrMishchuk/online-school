@@ -1,1 +1,0 @@
-ALTER TABLE enrollments ADD COLUMN expires_at TIMESTAMP WITH TIME ZONE;
