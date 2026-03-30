@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     private final NotificationService notificationService;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @GetMapping
     public ResponseEntity<List<NotificationDto>> getUserNotifications(
@@ -39,7 +38,7 @@ public class NotificationController {
             return ResponseEntity.status(401).build();
         }
 
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<NotificationEntity> notifications = notificationService.getUserNotifications(person.getId(), pageable);
 
@@ -75,7 +74,7 @@ public class NotificationController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         return ResponseEntity.ok(notificationService.getUnreadCount(person.getId()));
     }
 
@@ -84,7 +83,7 @@ public class NotificationController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         notificationService.markAllAsRead(person.getId());
         return ResponseEntity.ok().build();
     }
@@ -94,7 +93,7 @@ public class NotificationController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         notificationService.markAllAsUnread(person.getId());
         return ResponseEntity.ok().build();
     }
@@ -104,7 +103,7 @@ public class NotificationController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         notificationService.deleteAll(person.getId());
         return ResponseEntity.noContent().build();
     }
@@ -125,7 +124,7 @@ public class NotificationController {
             @RequestBody @jakarta.validation.Valid com.mishchuk.onlineschool.controller.dto.BroadcastRequest request,
             Principal principal) {
         // Add Admin check
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         if (!person.getRole().name().equals("ADMIN") && !person.getRole().name().equals("FAKE_ADMIN")) {
             return ResponseEntity.status(403).build();
         }
@@ -139,7 +138,7 @@ public class NotificationController {
             @RequestBody @jakarta.validation.Valid com.mishchuk.onlineschool.controller.dto.TargetedNotificationRequest request,
             Principal principal) {
         // Add Admin check
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         if (!person.getRole().name().equals("ADMIN") && !person.getRole().name().equals("FAKE_ADMIN")) {
             return ResponseEntity.status(403).build();
         }

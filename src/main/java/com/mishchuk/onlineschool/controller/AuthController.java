@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -38,7 +37,7 @@ public class AuthController {
         private final AuthService authService;
         private final PasswordResetService passwordResetService;
         private final PersonService personService;
-        private final UserDetailsService userDetailsService;
+        private final CustomUserDetailsService userDetailsService;
 
         @PostMapping("/register")
         public ResponseEntity<AuthResponse> register(
@@ -129,8 +128,11 @@ public class AuthController {
         @PostMapping("/change-password")
         public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request,
                         java.security.Principal principal) {
+                if (principal == null) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
                 log.info("Change password request received for user: {}", principal.getName());
-                PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+                PersonEntity person = userDetailsService.getPerson(principal.getName());
                 personService.changePassword(person.getId(), request.oldPassword(), request.newPassword());
                 return ResponseEntity.ok().build();
         }

@@ -74,6 +74,9 @@ public class FileController {
     @GetMapping("/my-files")
     public ResponseEntity<List<FileDto>> getMyFiles(
             @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
         PersonEntity currentUser = getCurrentUser(userDetails);
         List<FileDto> files = fileStorageService.getFilesByUser(currentUser);
         return ResponseEntity.ok(files);

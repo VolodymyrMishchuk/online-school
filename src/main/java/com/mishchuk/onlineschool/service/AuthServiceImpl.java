@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
@@ -23,7 +22,7 @@ import java.util.UUID;
 public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
     private final JwtUtils jwtUtils;
     private final PersonService personService;
     private final RefreshTokenService refreshTokenService;
@@ -45,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.email());
         String accessToken = jwtUtils.generateToken(userDetails);
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(request.email());
+        PersonEntity person = userDetailsService.getPerson(request.email());
 
         // Create refresh token
         RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
@@ -88,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String accessToken = jwtUtils.generateToken(userDetails);
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(request.getEmail());
+        PersonEntity person = userDetailsService.getPerson(request.getEmail());
 
         RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
 
@@ -163,7 +162,7 @@ public class AuthServiceImpl implements AuthService {
         String email = jwtUtils.extractUsername(token);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         String accessToken = jwtUtils.generateToken(userDetails);
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(email);
+        PersonEntity person = userDetailsService.getPerson(email);
 
         RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
 

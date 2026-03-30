@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-24T12:00:37+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
+    date = "2026-03-29T19:02:08+0200",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class ModuleMapperImpl implements ModuleMapper {
@@ -59,8 +59,8 @@ public class ModuleMapperImpl implements ModuleMapper {
         ModuleEntity moduleEntity = new ModuleEntity();
 
         moduleEntity.setCourse( moduleCreateDtoToCourseEntity( dto ) );
-        moduleEntity.setName( dto.name() );
         moduleEntity.setDescription( dto.description() );
+        moduleEntity.setName( dto.name() );
 
         return moduleEntity;
     }
@@ -71,11 +71,11 @@ public class ModuleMapperImpl implements ModuleMapper {
             return;
         }
 
-        if ( dto.name() != null ) {
-            entity.setName( dto.name() );
-        }
         if ( dto.description() != null ) {
             entity.setDescription( dto.description() );
+        }
+        if ( dto.name() != null ) {
+            entity.setName( dto.name() );
         }
         if ( dto.status() != null ) {
             entity.setStatus( dto.status() );

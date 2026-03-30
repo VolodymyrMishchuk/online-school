@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class PersonController {
 
     private final PersonService personService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PostMapping
     public ResponseEntity<Void> createPerson(@RequestBody PersonCreateDto dto) {
         personService.createPerson(dto);
@@ -45,6 +47,7 @@ public class PersonController {
         return ResponseEntity.ok(persons);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updatePerson(@PathVariable UUID id, @RequestBody PersonUpdateDto dto) {
         try {
@@ -56,6 +59,7 @@ public class PersonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerson(@PathVariable UUID id) {
         personService.deletePerson(id);
@@ -84,6 +88,7 @@ public class PersonController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updatePersonStatus(@PathVariable UUID id, @RequestParam String status) {
         try {
@@ -94,6 +99,7 @@ public class PersonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @PostMapping("/{id}/enrollments/{courseId}")
     public ResponseEntity<Void> addCourseAccess(@PathVariable UUID id, @PathVariable UUID courseId) {
         try {
@@ -104,6 +110,7 @@ public class PersonController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
     @DeleteMapping("/{id}/enrollments/{courseId}")
     public ResponseEntity<Void> removeCourseAccess(@PathVariable UUID id, @PathVariable UUID courseId) {
         personService.removeCourseAccess(id, courseId);

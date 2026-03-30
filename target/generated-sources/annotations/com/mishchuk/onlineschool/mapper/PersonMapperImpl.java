@@ -20,8 +20,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-24T12:00:37+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
+    date = "2026-03-29T19:02:08+0200",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class PersonMapperImpl implements PersonMapper {
@@ -121,13 +121,13 @@ public class PersonMapperImpl implements PersonMapper {
 
         PersonEntity personEntity = new PersonEntity();
 
-        personEntity.setFirstName( dto.firstName() );
-        personEntity.setLastName( dto.lastName() );
         personEntity.setBornedAt( dto.bornedAt() );
-        personEntity.setPhoneNumber( dto.phoneNumber() );
         personEntity.setEmail( dto.email() );
-        personEntity.setPassword( dto.password() );
+        personEntity.setFirstName( dto.firstName() );
         personEntity.setLanguage( dto.language() );
+        personEntity.setLastName( dto.lastName() );
+        personEntity.setPassword( dto.password() );
+        personEntity.setPhoneNumber( dto.phoneNumber() );
 
         return personEntity;
     }
@@ -138,29 +138,29 @@ public class PersonMapperImpl implements PersonMapper {
             return;
         }
 
+        if ( dto.bornedAt() != null ) {
+            entity.setBornedAt( dto.bornedAt() );
+        }
+        if ( dto.email() != null ) {
+            entity.setEmail( dto.email() );
+        }
         if ( dto.firstName() != null ) {
             entity.setFirstName( dto.firstName() );
+        }
+        if ( dto.language() != null ) {
+            entity.setLanguage( dto.language() );
         }
         if ( dto.lastName() != null ) {
             entity.setLastName( dto.lastName() );
         }
-        if ( dto.bornedAt() != null ) {
-            entity.setBornedAt( dto.bornedAt() );
-        }
         if ( dto.phoneNumber() != null ) {
             entity.setPhoneNumber( dto.phoneNumber() );
-        }
-        if ( dto.email() != null ) {
-            entity.setEmail( dto.email() );
         }
         if ( dto.role() != null ) {
             entity.setRole( Enum.valueOf( PersonRole.class, dto.role() ) );
         }
         if ( dto.status() != null ) {
             entity.setStatus( Enum.valueOf( PersonStatus.class, dto.status() ) );
-        }
-        if ( dto.language() != null ) {
-            entity.setLanguage( dto.language() );
         }
     }
 

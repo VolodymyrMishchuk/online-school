@@ -17,6 +17,7 @@
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/service/AppealService.java
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/service/LessonService.java
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/repository/entity/CourseReviewRequestEntity.java
+/Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/config/AdminInitializer.java
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/controller/AppealController.java
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/service/MinioService.java
 /Users/volodymyr.mishchuk/IdeaProjects/online-school/src/main/java/com/mishchuk/onlineschool/service/RefreshTokenService.java

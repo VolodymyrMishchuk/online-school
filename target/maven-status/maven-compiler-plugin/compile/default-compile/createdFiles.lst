@@ -7,6 +7,7 @@ com/mishchuk/onlineschool/service/CourseServiceImpl.class
 com/mishchuk/onlineschool/repository/PersonRepositoryCustom.class
 com/mishchuk/onlineschool/repository/entity/PersonRole.class
 com/mishchuk/onlineschool/repository/EnrollmentRepository.class
+com/mishchuk/onlineschool/controller/dto/FileDto$FileDtoBuilder.class
 com/mishchuk/onlineschool/controller/dto/ForgotPasswordRequest.class
 com/mishchuk/onlineschool/repository/PersonRepositoryImpl.class
 com/mishchuk/onlineschool/security/CustomUserDetailsService.class
@@ -92,6 +93,7 @@ com/mishchuk/onlineschool/service/MinioServiceImpl.class
 com/mishchuk/onlineschool/repository/PromoCodeRepository.class
 com/mishchuk/onlineschool/service/RefreshTokenServiceImpl.class
 com/mishchuk/onlineschool/security/JwtUtils.class
+com/mishchuk/onlineschool/config/AdminInitializer.class
 com/mishchuk/onlineschool/exception/ResourceNotFoundException.class
 com/mishchuk/onlineschool/controller/dto/PersonDto.class
 com/mishchuk/onlineschool/repository/LessonRepository.class

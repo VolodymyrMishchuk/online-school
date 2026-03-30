@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-03-24T12:00:37+0100",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 23.0.2 (Oracle Corporation)"
+    date = "2026-03-29T19:02:08+0200",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.45.0.v20260224-0835, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class FileMapperImpl implements FileMapper {
@@ -19,19 +19,19 @@ public class FileMapperImpl implements FileMapper {
             return null;
         }
 
-        FileDto fileDto = new FileDto();
+        FileDto.FileDtoBuilder fileDto = FileDto.builder();
 
-        fileDto.setId( entity.getId() );
-        fileDto.setFileName( entity.getFileName() );
-        fileDto.setOriginalName( entity.getOriginalName() );
-        fileDto.setContentType( entity.getContentType() );
-        fileDto.setFileSize( entity.getFileSize() );
-        fileDto.setUploadedAt( entity.getUploadedAt() );
-        fileDto.setRelatedEntityType( entity.getRelatedEntityType() );
-        fileDto.setRelatedEntityId( entity.getRelatedEntityId() );
+        fileDto.contentType( entity.getContentType() );
+        fileDto.fileName( entity.getFileName() );
+        fileDto.fileSize( entity.getFileSize() );
+        fileDto.id( entity.getId() );
+        fileDto.originalName( entity.getOriginalName() );
+        fileDto.relatedEntityId( entity.getRelatedEntityId() );
+        fileDto.relatedEntityType( entity.getRelatedEntityType() );
+        fileDto.uploadedAt( entity.getUploadedAt() );
 
-        fileDto.setDownloadUrl( "/files/" + entity.getId() );
+        fileDto.downloadUrl( "/files/" + entity.getId() );
 
-        return fileDto;
+        return fileDto.build();
     }
 }

@@ -4,46 +4,113 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13424e7d-094a-4445-9707-de5978388bf9" name="Changes" comment="really a big commit">
-      <change afterPath="$PROJECT_DIR$/frontend/public/images/author-kateryna.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/public/images/author-photo.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/AuthorSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/ContactFormSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/Footer.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/ForWhomSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/HeroSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/HowItWorksSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/Navbar.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/PricingSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/ProgramSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/ReviewsSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/landing/TopicsSection.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/PublicAppealCreateRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/db/changelog/changesing/034-alter-appeals-for-guests.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PublicAppealCreateRequest.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeServiceImpl$1.class" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/target/classes/db/changelog/changesing/034-alter-appeals-for-guests.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+    <list default="true" id="13424e7d-094a-4445-9707-de5978388bf9" name="Changes" comment="Start working on tests. Controller tests are fully covered">
+      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/config/AdminInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/AppealControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/AuthControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/CourseControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/EnrollmentControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/FileControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/LessonControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/ModuleControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/NotificationControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/PersonControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/PromoCodeControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/ReferenceControllerTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller/TestSecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/security/TestSecurityConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/AppealServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/AuthServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/CourseServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/EmailServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/EnrollmentServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/FileStorageServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/LessonServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/MinioServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/ModuleServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/NotificationServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/PasswordResetServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/PersonServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/PromoCodeServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/service/RefreshTokenServiceImplTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/config/AdminInitializer.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/FileDto$FileDtoBuilder.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.AppealControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.AuthControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.CourseControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.EnrollmentControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.FileControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.LessonControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.ModuleControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.NotificationControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.PersonControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.PromoCodeControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/TEST-com.mishchuk.onlineschool.controller.ReferenceControllerTest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.AppealControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.AuthControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.CourseControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.EnrollmentControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.FileControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.LessonControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.ModuleControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.NotificationControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.PersonControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.PromoCodeControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/surefire-reports/com.mishchuk.onlineschool.controller.ReferenceControllerTest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/AppealControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/AuthControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/CourseControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/EnrollmentControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/FileControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/LessonControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/ModuleControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/NotificationControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/PersonControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/PromoCodeControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/ReferenceControllerTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/controller/TestSecurityConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/security/TestSecurityConfig.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/AppealServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/AuthServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/CourseServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/EmailServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/EnrollmentServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/FileStorageServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/LessonServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/MinioServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/ModuleServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/NotificationServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/PasswordResetServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/PersonServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/PromoCodeServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/target/test-classes/com/mishchuk/onlineschool/service/RefreshTokenServiceImplTest.class" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/reviews/1aef20a3-1377-4d46-8613-b35096ba8b63/42655ec2-e473-46d5-8b3f-cb37697b9b70_review.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/reviews/4a136b86-c077-4d72-8f82-4d47a336eee0/fb713c57-847a-494f-9154-e4933f5c9623_review.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/reviews/898bf635-0712-460b-a614-29a8933519e9/0e8de878-d04c-4162-ab1e-1d588401c7ab_review.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/reviews/9fbc1143-5f93-450f-ad1a-08adcfb45391/544410b3-6e46-432d-9f2b-f8cf92688c06_review.mp4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/uploads/reviews/e4880b6b-c322-45a1-a712-77fc52cef9b5/2a7d1d4d-945f-4caa-b6b7-3f09c9cd2bb8_review.mp4" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api/appeals.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api/appeals.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/AppealSuccessModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/AppealSuccessModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminAppealsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminAppealsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LandingPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LandingPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/OnlineSchoolApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/OnlineSchoolApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/AppealController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/AppealController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/PromoCodeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/PromoCodeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/AppealResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/AppealResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/mapper/AppealMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/mapper/AppealMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/PromoCodeRepositoryCustom.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/PromoCodeRepositoryCustom.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/PromoCodeRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/PromoCodeRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/entity/AppealEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/repository/entity/AppealEntity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/security/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AppealService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AppealService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AppealServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AppealServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/PromoCodeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/PromoCodeService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/PromoCodeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/PromoCodeServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/db/changelog/db.changelog-master.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/db/changelog/db.changelog-master.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/EnrollmentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/EnrollmentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/FileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/FileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/NotificationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/NotificationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/PersonController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/PersonController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/CourseCreateDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/CourseCreateDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/CourseDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/CourseDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/FileDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/FileDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/PersonCreateDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/PersonCreateDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/ResetPasswordRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/controller/dto/ResetPasswordRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/exception/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/security/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/security/JwtAuthenticationFilter.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/mishchuk/onlineschool/service/AuthServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/OnlineSchoolApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/OnlineSchoolApplication.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/config/MinioConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/config/MinioConfig.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/config/WebConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/config/WebConfig.class" afterDir="false" />
@@ -85,6 +152,7 @@
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonDto.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonUpdateDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonUpdateDto.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonWithEnrollmentsDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PersonWithEnrollmentsDto.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PublicAppealCreateRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/PublicAppealCreateRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/ResetPasswordRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/ResetPasswordRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/TargetedNotificationRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/controller/dto/TargetedNotificationRequest.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/dto/CourseWithPromoDto.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/dto/CourseWithPromoDto.class" afterDir="false" />
@@ -189,10 +257,10 @@
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PersonService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PersonService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PersonServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PersonServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeServiceImpl$1.class" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/PromoCodeServiceImpl.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/RefreshTokenService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/RefreshTokenService.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/RefreshTokenServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/mishchuk/onlineschool/service/RefreshTokenServiceImpl.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/db/changelog/db.changelog-master.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/db/changelog/db.changelog-master.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/AppealMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/AppealMapperImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/CourseMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/CourseMapperImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/EnrollmentMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/mishchuk/onlineschool/mapper/EnrollmentMapperImpl.java" afterDir="false" />
@@ -249,41 +317,61 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Docker.docker-compose.yml: Compose Deployment.executor&quot;: &quot;Run&quot;,
-    &quot;Maven.online-school [clean].executor&quot;: &quot;Run&quot;,
-    &quot;Maven.online-school [install].executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.OnlineSchoolApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/volodymyr.mishchuk/IdeaProjects/online-school&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.Confirmation&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/volodymyr.mishchuk/IdeaProjects/online-school/frontend/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Docker.docker-compose.yml: Compose Deployment.executor": "Run",
+    "JUnit.AppealControllerTest.createAppeal_authenticatedValidRequest_returns201.executor": "Run",
+    "JUnit.AppealControllerTest.executor": "Run",
+    "JUnit.AuthControllerTest.executor": "Run",
+    "JUnit.CourseControllerTest.executor": "Run",
+    "JUnit.EnrollmentControllerTest.executor": "Run",
+    "JUnit.FileControllerTest.executor": "Run",
+    "JUnit.LessonControllerTest.deleteLesson_asAdmin_returns204.executor": "Run",
+    "JUnit.LessonControllerTest.executor": "Run",
+    "JUnit.LessonControllerTest.getAllLessons_asAdmin_returns200.executor": "Run",
+    "JUnit.LessonControllerTest.getLesson_found_returns200.executor": "Run",
+    "JUnit.ModuleControllerTest.executor": "Run",
+    "JUnit.NotificationControllerTest.executor": "Run",
+    "JUnit.PersonControllerTest.executor": "Run",
+    "JUnit.PromoCodeControllerTest.executor": "Run",
+    "JUnit.ReferenceControllerTest.executor": "Run",
+    "Maven.online-school [clean].executor": "Run",
+    "Maven.online-school [install].executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Spring Boot.OnlineSchoolApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/volodymyr.mishchuk/IdeaProjects/online-school/src/test/java/com/mishchuk/onlineschool/controller",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.Confirmation",
+    "ts.external.directory.path": "/Users/volodymyr.mishchuk/IdeaProjects/online-school/frontend/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/controller" />
+      <recent name="$PROJECT_DIR$/src/test/java/com/mishchuk/onlineschool/security" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/resources" />
     </key>
   </component>
-  <component name="RunManager" selected="Spring Boot.OnlineSchoolApplication">
+  <component name="RunManager" selected="JUnit.ReferenceControllerTest">
     <configuration default="true" type="AZURE_FUNCTION_SUPPORT" factoryName="Run Functions">
       <option name="appName" />
       <option name="appServicePlanName" />
@@ -314,6 +402,81 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="ModuleControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="online-school" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.mishchuk.onlineschool.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.mishchuk.onlineschool.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.mishchuk.onlineschool.controller.ModuleControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="NotificationControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="online-school" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.mishchuk.onlineschool.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.mishchuk.onlineschool.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.mishchuk.onlineschool.controller.NotificationControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PersonControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="online-school" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.mishchuk.onlineschool.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.mishchuk.onlineschool.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.mishchuk.onlineschool.controller.PersonControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PromoCodeControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="online-school" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.mishchuk.onlineschool.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.mishchuk.onlineschool.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.mishchuk.onlineschool.controller.PromoCodeControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="ReferenceControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="online-school" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.mishchuk.onlineschool.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.mishchuk.onlineschool.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.mishchuk.onlineschool.controller.ReferenceControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="OnlineSchoolApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <envs>
         <env name="JWT_SECRET" value="404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970" />
@@ -330,21 +493,21 @@
       </deployment>
       <method v="2" />
     </configuration>
-    <configuration name="docker-compose.yml: Compose Deployment" type="docker-deploy" factoryName="docker-compose.yml" temporary="true" server-name="Docker">
-      <deployment type="docker-compose.yml">
-        <settings>
-          <option name="sourceFilePath" value="docker-compose.yml" />
-        </settings>
-      </deployment>
-      <method v="2" />
-    </configuration>
     <list>
-      <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
+      <item itemvalue="JUnit.ModuleControllerTest" />
+      <item itemvalue="JUnit.NotificationControllerTest" />
+      <item itemvalue="JUnit.PersonControllerTest" />
+      <item itemvalue="JUnit.PromoCodeControllerTest" />
+      <item itemvalue="JUnit.ReferenceControllerTest" />
       <item itemvalue="Spring Boot.OnlineSchoolApplication" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Docker.docker-compose.yml: Compose Deployment" />
+        <item itemvalue="JUnit.ReferenceControllerTest" />
+        <item itemvalue="JUnit.PromoCodeControllerTest" />
+        <item itemvalue="JUnit.PersonControllerTest" />
+        <item itemvalue="JUnit.NotificationControllerTest" />
+        <item itemvalue="JUnit.ModuleControllerTest" />
       </list>
     </recent_temporary>
   </component>
@@ -388,7 +551,8 @@
       <workItem from="1771757802612" duration="19050000" />
       <workItem from="1772274798593" duration="39036000" />
       <workItem from="1772878067964" duration="44886000" />
-      <workItem from="1774163746084" duration="14509000" />
+      <workItem from="1774163746084" duration="70799000" />
+      <workItem from="1774851054263" duration="4454000" />
     </task>
     <task id="LOCAL-00001" summary="first commit">
       <option name="closed" value="true" />
@@ -646,14 +810,21 @@
       <option name="project" value="LOCAL" />
       <updated>1774189932156</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="really a big commit">
+      <option name="closed" value="true" />
+      <created>1774384616906</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1774384616906</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Implementation of password recovery, personal data editing, and other minor improvements" />
     <MESSAGE value="Enhanced sorting logic" />
     <MESSAGE value="Small UI improvements" />
     <MESSAGE value="Implementation of the Notifications feature and partial implementation of the logic to extend course access after the access period expires." />
@@ -678,7 +849,8 @@
     <MESSAGE value="Minor UI improvement" />
     <MESSAGE value="a big strange commit" />
     <MESSAGE value="really a big commit" />
-    <option name="LAST_COMMIT_MESSAGE" value="really a big commit" />
+    <MESSAGE value="Start working on tests. Controller tests are fully covered" />
+    <option name="LAST_COMMIT_MESSAGE" value="Start working on tests. Controller tests are fully covered" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

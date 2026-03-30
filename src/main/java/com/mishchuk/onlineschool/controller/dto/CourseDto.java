@@ -1,9 +1,13 @@
 package com.mishchuk.onlineschool.controller.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public record CourseDto(
-        java.util.UUID id,
+        UUID id,
         String name,
         String description,
         Integer modulesNumber,
@@ -11,21 +15,21 @@ public record CourseDto(
         Integer durationMinutes,
         String status,
         String version,
-        java.math.BigDecimal price,
-        java.math.BigDecimal discountAmount,
+        BigDecimal price,
+        BigDecimal discountAmount,
         Integer discountPercentage,
         Integer accessDuration,
         Integer promotionalDiscountPercentage,
-        java.math.BigDecimal promotionalDiscountAmount,
-        java.util.UUID nextCourseId,
+        BigDecimal promotionalDiscountAmount,
+        UUID nextCourseId,
         String nextCourseName,
-        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime createdAt,
-        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime updatedAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) OffsetDateTime createdAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) OffsetDateTime updatedAt,
         Boolean isEnrolled,
-        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime enrolledAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) OffsetDateTime enrolledAt,
         String enrollmentStatus,
         String coverImageUrl,
-        @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING) OffsetDateTime expiresAt,
+        @JsonFormat(shape = JsonFormat.Shape.STRING) OffsetDateTime expiresAt,
         String averageColor,
         CreatedByDto createdBy) {
 }

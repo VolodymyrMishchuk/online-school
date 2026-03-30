@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +31,7 @@ import java.util.UUID;
 public class AppealController {
 
     private final AppealService appealService;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AppealResponse> createAppeal(
@@ -44,7 +43,7 @@ public class AppealController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        PersonEntity person = ((CustomUserDetailsService) userDetailsService).getPerson(principal.getName());
+        PersonEntity person = userDetailsService.getPerson(principal.getName());
         AppealResponse response = appealService.createAppeal(person.getId(), request, photos);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
