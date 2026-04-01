@@ -115,7 +115,7 @@ public class EmailServiceImpl implements EmailService {
             javaMailSender.send(mimeMessage);
             log.info("Email sent successfully to {}", to);
         } catch (Exception e) {
-            log.error("Failed to send email to {}", to, e);
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
             // In a real app, might want to retry or store failed emails
         }
     }

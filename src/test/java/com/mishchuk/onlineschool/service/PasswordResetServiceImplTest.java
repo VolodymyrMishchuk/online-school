@@ -49,7 +49,7 @@ class PasswordResetServiceImplTest {
                 OffsetDateTime.now().minusMinutes(30));
     }
 
-    // --- initiatePasswordReset ---
+    // ─────────────────────── initiatePasswordReset ───────────────────────
 
     @Test
     @DisplayName("initiatePasswordReset — створює токен і надсилає email якщо email знайдено")
@@ -71,14 +71,13 @@ class PasswordResetServiceImplTest {
     void initiatePasswordReset_userNotFound_doesNothing() {
         when(personRepository.findByEmail("noone@test.com")).thenReturn(Optional.empty());
 
-        // Should NOT throw — must be silent to avoid user enumeration
         passwordResetService.initiatePasswordReset("noone@test.com");
 
         verify(tokenRepository, never()).save(any());
         verify(emailService, never()).sendPasswordResetEmail(any(), any(), any());
     }
 
-    // --- resetPassword ---
+    // ─────────────────────── resetPassword ───────────────────────
 
     @Test
     @DisplayName("resetPassword — успішна зміна пароля")
