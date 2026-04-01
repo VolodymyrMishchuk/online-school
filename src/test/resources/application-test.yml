@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: ${TC_DATASOURCE_URL:jdbc:tc:postgresql:15:///testdb}
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+application:
+  security:
+    jwt:
+      secret-key: dGVzdC1zZWNyZXQta2V5LWZvci11bml0LXRlc3RzLW9ubHk=
+      expiration: 900000
+      refresh-token-expiration: 604800000
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: minioadmin
+  bucket-name: online-school-files
