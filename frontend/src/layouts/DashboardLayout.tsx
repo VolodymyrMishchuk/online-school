@@ -12,6 +12,32 @@ export default function DashboardLayout() {
     const navigate = useNavigate();
     const mainRef = useRef<HTMLElement>(null);
     const [user, setUser] = useState<any>(() => {
+        // Only on initial load: check if URL contains OAuth2 redirect parameters
+        const searchParams = new URLSearchParams(window.location.search);
+        const token = searchParams.get('token');
+        const searchUserId = searchParams.get('userId');
+        
+        if (token && searchUserId) {
+            const role = searchParams.get('role') || 'USER';
+            const firstName = searchParams.get('firstName') || '';
+            const lastName = searchParams.get('lastName') || '';
+            const email = searchParams.get('email') || '';
+            const avatarUrl = searchParams.get('avatarUrl') || '';
+            
+            const oauthUser = { userId: searchUserId, role, firstName, lastName, email, avatarUrl };
+            
+            // Save to localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('userId', searchUserId);
+            localStorage.setItem('userRole', role);
+            localStorage.setItem('user', JSON.stringify(oauthUser));
+            
+            // Clean up the URL to remove the sensitive parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            return oauthUser;
+        }
+
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
     });
@@ -97,9 +123,13 @@ export default function DashboardLayout() {
                 {/* Logo/Header */}
                 <div className="p-6 border-b border-white/20">
                     <div className="flex items-center gap-3">
-                        <div className="bg-white/50 p-2 rounded-full backdrop-blur-sm">
-                            <Heart className="w-5 h-5 text-brand-secondary fill-brand-secondary" />
-                        </div>
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover shadow-sm bg-white" referrerPolicy="no-referrer" />
+                        ) : (
+                            <div className="bg-white/50 p-2.5 rounded-full backdrop-blur-sm">
+                                <Heart className="w-5 h-5 text-brand-secondary fill-brand-secondary" />
+                            </div>
+                        )}
                         <div>
                             <h2 className="font-bold text-gray-800 text-lg">{t('sidebar.dashboardTitle', 'Дошбоард')}</h2>
                             <p className="text-xs text-gray-500 font-medium">

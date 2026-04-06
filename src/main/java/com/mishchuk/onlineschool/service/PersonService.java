@@ -19,10 +19,10 @@ public interface PersonService {
     List<PersonDto> getAllPersons();
 
     void updatePerson(UUID id, PersonUpdateDto dto);
+    void updateLanguage(UUID id, String language);
 
     void deletePerson(UUID id);
 
-    // Users Management
     List<PersonWithEnrollmentsDto> getAllPersonsWithEnrollments();
 
     Page<PersonWithEnrollmentsDto> getPaginatedPersons(

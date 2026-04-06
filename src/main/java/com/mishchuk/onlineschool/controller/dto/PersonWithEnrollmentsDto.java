@@ -12,6 +12,7 @@ public record PersonWithEnrollmentsDto(
         String phoneNumber,
         String email,
         String language,
+        String avatarUrl,
         String role,
         String status,
         List<EnrollmentDto> enrollments,

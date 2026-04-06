@@ -35,6 +35,10 @@ export const updatePerson = async (id: string, data: PersonUpdateDto): Promise<v
     await client.put(`/persons/${id}`, data);
 };
 
+export const updateLanguage = async (id: string, language: string): Promise<void> => {
+    await client.patch(`/persons/${id}/language`, { language });
+};
+
 export const getAllPersons = async (): Promise<PersonDto[]> => {
     const response = await client.get<PersonDto[]>('/persons');
     return response.data || [];

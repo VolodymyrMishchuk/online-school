@@ -293,6 +293,9 @@ export const UsersPage: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200/50">
                     <thead className="bg-white/30 backdrop-blur-sm">
                         <tr>
+                            <th scope="col" className="px-6 py-3 text-center text-xs font-bold text-gray-600 uppercase tracking-wider whitespace-nowrap w-1">
+                                #
+                            </th>
                             <th
                                 scope="col"
                                 className="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-white/40 transition-colors whitespace-nowrap w-1"
@@ -477,9 +480,19 @@ export const UsersPage: React.FC = () => {
                             const isLast = index === users.length - 1;
                             return (
                                 <tr key={user.id} ref={isLast ? lastUserElementRef : null} className="hover:bg-white/40 transition-colors">
+                                    <td className="px-6 py-2 whitespace-nowrap w-1 text-center text-sm font-medium text-gray-500 border-r border-gray-200/50">
+                                        {index + 1}
+                                    </td>
                                     <td className="px-6 py-2 whitespace-nowrap w-1">
                                     <div className="flex items-center gap-2">
-                                        <div className="text-sm font-medium text-gray-900">
+                                        {user.avatarUrl ? (
+                                            <img src={user.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full object-cover shrink-0 border border-gray-200" referrerPolicy="no-referrer" />
+                                        ) : (
+                                            <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200">
+                                                <Icons.User size={12} className="text-gray-400" />
+                                            </div>
+                                        )}
+                                        <div className="text-sm font-medium text-gray-900 border-l pl-2 ml-1 border-gray-200/60">
                                             {user.firstName} {user.lastName}
                                         </div>
                                         {user.role === 'ADMIN' && (

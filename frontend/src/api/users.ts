@@ -20,6 +20,7 @@ export interface PersonWithEnrollments {
     role: string;
     status: string;
     language: string;
+    avatarUrl?: string;
     enrollments: EnrollmentDto[];
     createdAt?: string;
     updatedAt?: string;

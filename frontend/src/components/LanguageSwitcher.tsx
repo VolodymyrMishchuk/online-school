@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
-import { updatePerson } from '../api/persons';
+import { updateLanguage } from '../api/persons';
 
 const LANGUAGES = [
     { code: 'uk', label: 'Українська', flag: '🇺🇦', flagUrl: 'https://flagcdn.com/ua.svg' },
@@ -34,7 +34,7 @@ export function LanguageSwitcher() {
         const userId = localStorage.getItem('userId');
         if (userId) {
             try {
-                await updatePerson(userId, { language: lng });
+                await updateLanguage(userId, lng);
 
                 // Also update local storage user object
                 const userStr = localStorage.getItem('user');

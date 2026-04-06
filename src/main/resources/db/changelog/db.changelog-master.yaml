@@ -101,3 +101,9 @@ databaseChangeLog:
   - include:
       file: changesing/034-alter-appeals-for-guests.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/035-alter-persons-add-provider.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/036-alter-persons-add-avatar-url.sql
+      relativeToChangelogFile: true

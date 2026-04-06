@@ -35,6 +35,8 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -71,6 +73,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/files/**").authenticated()
                         .requestMatchers("/files/**").authenticated()
                         .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                )
                 .exceptionHandling(e -> e.authenticationEntryPoint(
                         new org.springframework.security.web.authentication.HttpStatusEntryPoint(
                                 org.springframework.http.HttpStatus.UNAUTHORIZED)))

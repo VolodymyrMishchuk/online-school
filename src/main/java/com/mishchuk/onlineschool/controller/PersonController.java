@@ -47,7 +47,7 @@ public class PersonController {
         return ResponseEntity.ok(persons);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/{id}")
     public ResponseEntity<Void> updatePerson(@PathVariable UUID id, @RequestBody PersonUpdateDto dto) {
         try {
@@ -55,6 +55,23 @@ public class PersonController {
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             // In a real app, use @ControllerAdvice
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/{id}/language")
+    public ResponseEntity<Void> updateLanguage(@PathVariable UUID id, @RequestBody java.util.Map<String, String> payload) {
+        String language = payload.get("language");
+        if (language == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            personService.updateLanguage(id, language);
+            return ResponseEntity.noContent().build();
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }

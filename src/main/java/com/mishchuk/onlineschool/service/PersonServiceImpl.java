@@ -120,12 +120,48 @@ public class PersonServiceImpl implements PersonService {
             // FAKE_ADMIN can only edit themselves or users they created
             if (!entity.getId().equals(currentUser.getId()) &&
                     (entity.getCreatedBy() == null || !entity.getCreatedBy().getId().equals(currentUser.getId()))) {
-                throw new AccessDeniedException(
+                throw new org.springframework.security.access.AccessDeniedException(
                         "FAKE_ADMIN can only modify their own entities.");
             }
+        } else if (currentUser.getRole() == PersonRole.USER) {
+            // USER can only edit themselves
+            if (!entity.getId().equals(currentUser.getId())) {
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "You can only modify your own profile.");
+            }
+            // Sanitize DTO to prevent privilege escalation
+            dto = new PersonUpdateDto(
+                null, // restrict role update
+                dto.firstName(),
+                dto.lastName(),
+                dto.bornedAt(),
+                dto.phoneNumber(),
+                null, // restrict email update
+                null, // restrict password update
+                null, // restrict status update
+                dto.language()
+            );
         }
 
         personMapper.updateEntityFromDto(dto, entity);
+        personRepository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public void updateLanguage(UUID id, String language) {
+        PersonEntity entity = personRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        PersonEntity currentUser = personRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!entity.getId().equals(currentUser.getId()) && currentUser.getRole() != PersonRole.ADMIN && currentUser.getRole() != PersonRole.FAKE_ADMIN) {
+            throw new org.springframework.security.access.AccessDeniedException("You can only change your own language.");
+        }
+
+        entity.setLanguage(language);
         personRepository.save(entity);
     }
 

@@ -35,6 +35,13 @@ public class PersonEntity {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "provider")
+    private AuthProvider provider = AuthProvider.LOCAL;
+
+    @Column(name = "provider_id")
+    private String providerId;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private PersonRole role = PersonRole.USER;
 
@@ -44,6 +51,9 @@ public class PersonEntity {
 
     @Column(name = "language", nullable = false)
     private String language = "uk";
+
+    @Column(name = "avatar_url", length = 1024)
+    private String avatarUrl;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<EnrollmentEntity> enrollments;

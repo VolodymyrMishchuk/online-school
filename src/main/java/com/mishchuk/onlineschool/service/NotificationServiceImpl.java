@@ -51,8 +51,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void broadcastToAdmins(String title, String message, NotificationType type, String buttonUrl) {
-        String userEmail = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        String userEmail = null;
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        }
         List<PersonEntity> adminsToNotify = new ArrayList<>();
 
         if (userEmail != null) {
@@ -91,8 +93,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void sendToAllUsers(String title, String message, String buttonUrl) {
-        String userEmail = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        String userEmail = null;
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        }
         List<PersonEntity> usersToNotify = new ArrayList<>();
 
         if (userEmail != null) {
@@ -130,8 +134,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void sendToUsers(String title, String message, List<UUID> userIds, String buttonUrl) {
-        String userEmail = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        String userEmail = null;
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        }
         List<PersonEntity> recipients = personRepository.findAllById(userIds);
 
         if (userEmail != null) {

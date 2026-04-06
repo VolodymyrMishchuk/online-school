@@ -10,6 +10,7 @@ public record PersonDto(
                 String phoneNumber,
                 String email,
                 String language,
+                String avatarUrl,
                 String role,
                 String status,
                 OffsetDateTime createdAt,
