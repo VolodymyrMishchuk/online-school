@@ -12,9 +12,11 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", uses = { EnrollmentMapper.class })
 public interface PersonMapper {
+    @Mapping(target = "hasPassword", expression = "java(entity.getPassword() != null && entity.getPassword().startsWith(\"$\"))")
     @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     PersonDto toDto(PersonEntity entity);
 
+    @Mapping(target = "hasPassword", expression = "java(entity.getPassword() != null && entity.getPassword().startsWith(\"$\"))")
     @Mapping(target = "createdBy", expression = "java(entity.getCreatedBy() != null ? new com.mishchuk.onlineschool.controller.dto.CreatedByDto(entity.getCreatedBy().getId(), entity.getCreatedBy().getFirstName(), entity.getCreatedBy().getLastName(), entity.getCreatedBy().getEmail()) : null)")
     com.mishchuk.onlineschool.controller.dto.PersonWithEnrollmentsDto toDtoWithEnrollments(PersonEntity entity);
 

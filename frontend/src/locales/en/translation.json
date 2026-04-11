@@ -26,6 +26,7 @@
     "birthDate": "Birth Date",
     "interfaceLanguage": "Interface Language",
     "changePassword": "Change Password",
+    "addPassword": "Add Password",
     "saveSuccess": "Settings saved successfully",
     "saveError": "Failed to save settings",
     "languages": {
@@ -372,6 +373,10 @@
       "features": "Features",
       "about": "About Us"
     },
+    "coursesSubtitle": "Our Courses",
+    "coursesTitle": "Available Courses",
+    "coursesDesc": "Choose the course that suits you best",
+    "noCourses": "No courses available at the moment",
     "hero": {
       "title": "Master Your Future",
       "subtitle": "Accessible and quality education for everyone. Start your path to success today.",
@@ -480,6 +485,7 @@
   },
   "changePassword": {
     "titleChange": "Change Password",
+    "titleAdd": "Add Password",
     "titleForgot": "Password Recovery",
     "titleSuccess": "Success!",
     "oldPassword": "Old Password",
@@ -488,12 +494,15 @@
     "forgotPasswordLink": "Forgot password?",
     "forgotDescription": "Is this your email? Well send a recovery link there.",
     "passwordChanged": "Password changed successfully",
+    "passwordAdded": "Password added successfully",
     "resetLinkSentTo": "Recovery link sent to {{email}}",
     "passwordsMismatch": "Passwords do not match",
     "minPasswordLength": "New password must contain at least 6 characters",
     "changeError": "Failed to change password. Check your old password.",
+    "addError": "Failed to add password.",
     "resetError": "Failed to send link. Try again.",
     "changeBtn": "Change",
+    "addBtn": "Add",
     "sendBtn": "Send"
   },
   "notificationModal": {

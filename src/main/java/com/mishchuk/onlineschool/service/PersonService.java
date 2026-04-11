@@ -40,4 +40,6 @@ public interface PersonService {
     void removeCourseAccess(UUID personId, UUID courseId);
 
     void changePassword(UUID personId, String oldPassword, String newPassword);
+    
+    void addPassword(UUID personId, String newPassword);
 }

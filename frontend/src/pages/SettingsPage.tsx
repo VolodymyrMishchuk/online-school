@@ -11,7 +11,7 @@ import { useCountryCode } from '../hooks/useCountryCode';
 
 export default function SettingsPage() {
     const userId = localStorage.getItem('userId');
-    const [, setProfile] = useState<PersonDto | null>(null);
+    const [profile, setProfile] = useState<PersonDto | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -266,7 +266,9 @@ export default function SettingsPage() {
                                         onClick={() => setIsChangePasswordModalOpen(true)}
                                         className="w-full px-4 py-3 text-sm rounded-lg bg-white text-brand-primary font-bold hover:bg-brand-primary hover:text-white transition-colors shadow-sm"
                                     >
-                                        {t('settings.changePassword', 'Change Password')}
+                                        {profile?.hasPassword 
+                                            ? t('settings.changePassword', 'Change Password') 
+                                            : t('settings.addPassword', 'Add Password')}
                                     </button>
                                 </div>
                             </div>
@@ -304,8 +306,13 @@ export default function SettingsPage() {
 
             <ChangePasswordModal
                 isOpen={isChangePasswordModalOpen}
-                onClose={() => setIsChangePasswordModalOpen(false)}
+                onClose={() => {
+                    setIsChangePasswordModalOpen(false);
+                    // Refresh profile after adding/changing password so the button text updates
+                    if (userId) fetchProfile(userId);
+                }}
                 userEmail={email}
+                mode={profile?.hasPassword ? 'change' : 'add'}
             />
         </div>
     );

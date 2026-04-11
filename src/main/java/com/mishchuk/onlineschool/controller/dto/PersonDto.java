@@ -15,5 +15,6 @@ public record PersonDto(
                 String status,
                 OffsetDateTime createdAt,
                 OffsetDateTime updatedAt,
+                boolean hasPassword,
                 CreatedByDto createdBy) {
 }

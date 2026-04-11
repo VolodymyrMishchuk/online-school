@@ -395,4 +395,18 @@ public class PersonServiceImpl implements PersonService {
         person.setPassword(passwordEncoder.encode(newPassword));
         personRepository.save(person);
     }
+
+    @Override
+    @Transactional
+    public void addPassword(UUID personId, String newPassword) {
+        PersonEntity person = personRepository.findById(personId)
+                .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + personId));
+
+        if (person.getPassword() != null && person.getPassword().startsWith("$")) {
+            throw new IllegalArgumentException("User already has a valid password. Use changePassword instead.");
+        }
+
+        person.setPassword(passwordEncoder.encode(newPassword));
+        personRepository.save(person);
+    }
 }

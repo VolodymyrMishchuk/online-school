@@ -13,6 +13,8 @@ import com.mishchuk.onlineschool.repository.entity.PersonEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -32,6 +34,18 @@ public class EnrollmentServiceImpl implements EnrollmentService {
         @Override
         @Transactional
         public void createEnrollment(EnrollmentCreateDto dto) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_FAKE_ADMIN"));
+
+                if (auth != null && !isAdmin) {
+                        PersonEntity currentPerson = personRepository.findByEmail(auth.getName())
+                                        .orElseThrow(() -> new RuntimeException("Current user not found"));
+                        if (!currentPerson.getId().equals(dto.studentId())) {
+                                throw new RuntimeException("Access denied: You can only enroll yourself");
+                        }
+                }
+
                 if (enrollmentRepository.findByStudentIdAndCourseId(dto.studentId(), dto.courseId()).isPresent()) {
                         throw new RuntimeException("Enrollment already exists");
                 }

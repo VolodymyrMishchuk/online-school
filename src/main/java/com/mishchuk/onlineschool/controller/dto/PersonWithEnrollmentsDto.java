@@ -18,5 +18,6 @@ public record PersonWithEnrollmentsDto(
         List<EnrollmentDto> enrollments,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
+        boolean hasPassword,
         CreatedByDto createdBy) {
 }

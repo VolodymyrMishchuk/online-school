@@ -26,6 +26,7 @@
     "birthDate": "Geburtsdatum",
     "interfaceLanguage": "Interface-Sprache",
     "changePassword": "Passwort ändern",
+    "addPassword": "Passwort hinzufügen",
     "saveSuccess": "Einstellungen erfolgreich gespeichert",
     "saveError": "Fehler beim Speichern der Einstellungen",
     "languages": {
@@ -372,6 +373,10 @@
       "features": "Vorteile",
       "about": "Über uns"
     },
+    "coursesSubtitle": "Unsere Kurse",
+    "coursesTitle": "Verfügbare Kurse",
+    "coursesDesc": "Wählen Sie den Kurs, der am besten zu Ihnen passt",
+    "noCourses": "Derzeit sind keine Kurse verfügbar",
     "hero": {
       "title": "Meistern Sie Ihre Zukunft",
       "subtitle": "Zugängliche und qualitativ hochwertige Bildung für alle. Beginnen Sie noch heute Ihren Weg zum Erfolg.",
@@ -480,6 +485,7 @@
   },
   "changePassword": {
     "titleChange": "Passwort ändern",
+    "titleAdd": "Passwort hinzufügen",
     "titleForgot": "Passwort-Wiederherstellung",
     "titleSuccess": "Erfolg!",
     "oldPassword": "Altes Passwort",
@@ -488,12 +494,15 @@
     "forgotPasswordLink": "Passwort vergessen?",
     "forgotDescription": "Ist dies Ihre E-Mail? Wir senden einen Wiederherstellungslink dorthin.",
     "passwordChanged": "Passwort erfolgreich geändert",
+    "passwordAdded": "Passwort erfolgreich hinzugefügt",
     "resetLinkSentTo": "Wiederherstellungslink an {{email}} gesendet",
     "passwordsMismatch": "Passwörter stimmen nicht üбереin",
     "minPasswordLength": "Das neue Passwort muss mindestens 6 Zeichen enthalten",
     "changeError": "Passwort konnte nicht geändert werden. Überprüfen Sie Ihr altes Passwort.",
+    "addError": "Passwort konnte nicht hinzugefügt werden.",
     "resetError": "Link konnte nicht gesendet werden. Versuchen Sie es erneut.",
     "changeBtn": "Ändern",
+    "addBtn": "Hinzufügen",
     "sendBtn": "Senden"
   },
   "notificationModal": {

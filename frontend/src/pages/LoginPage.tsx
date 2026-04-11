@@ -23,8 +23,13 @@ export default function LoginPage() {
             localStorage.setItem('userRole', role);
             localStorage.setItem('user', JSON.stringify({ userId, role, firstName, lastName, email }));
             navigate('/dashboard');
-        } catch (err) {
-            setError(t('auth.login.invalidCredentials', 'Невірний email або пароль'));
+        } catch (err: any) {
+            const message = err.response?.data?.message;
+            if (message && (message.toLowerCase().includes('google') || message.toLowerCase().includes('apple'))) {
+                setError(message);
+            } else {
+                setError(t('auth.login.invalidCredentials', 'Невірний email або пароль'));
+            }
         }
     };
 

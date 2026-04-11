@@ -19,7 +19,7 @@ public class EnrollmentController {
 
     private final EnrollmentService enrollmentService;
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'FAKE_ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<Void> createEnrollment(@RequestBody EnrollmentCreateDto dto) {
         try {

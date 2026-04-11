@@ -137,6 +137,22 @@ public class AuthController {
                 return ResponseEntity.ok().build();
         }
 
+        @PostMapping("/add-password")
+        public ResponseEntity<Void> addPassword(@Valid @RequestBody com.mishchuk.onlineschool.controller.dto.AddPasswordRequest request,
+                        java.security.Principal principal) {
+                if (principal == null) {
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                }
+                log.info("Add password request received for user: {}", principal.getName());
+                PersonEntity person = userDetailsService.getPerson(principal.getName());
+                try {
+                        personService.addPassword(person.getId(), request.newPassword());
+                        return ResponseEntity.ok().build();
+                } catch (IllegalArgumentException e) {
+                        return ResponseEntity.badRequest().build();
+                }
+        }
+
         // Helper methods for cookie management
 
         private void setRefreshTokenCookie(HttpServletResponse response, String refreshToken) {

@@ -1,6 +1,8 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket } from 'lucide-react';
 import { getPerson } from '../api/persons';
+import { enrollInCourse } from '../api/enrollments';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useEffect, useState, useRef } from 'react';
 import { getUnreadCount } from '../api/notifications';
@@ -10,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function DashboardLayout() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const mainRef = useRef<HTMLElement>(null);
     const [user, setUser] = useState<any>(() => {
         // Only on initial load: check if URL contains OAuth2 redirect parameters
@@ -94,6 +97,24 @@ export default function DashboardLayout() {
         const interval = setInterval(fetchUnreadCount, 60000); // Every minute
         return () => clearInterval(interval);
     }, []);
+
+    // Handle pending enrollments (e.g. from landing page)
+    useEffect(() => {
+        const pendingCourseId = localStorage.getItem('pendingEnrollment');
+        const id = localStorage.getItem('userId');
+        const tokenStr = localStorage.getItem('token');
+        
+        if (pendingCourseId && id && tokenStr) {
+            localStorage.removeItem('pendingEnrollment'); // clear to prevent loop
+            enrollInCourse(id, pendingCourseId)
+                .then(() => {
+                    queryClient.invalidateQueries({ queryKey: ['myCourses'] });
+                })
+                .catch(err => {
+                    console.error('Failed to process pending enrollment:', err);
+                });
+        }
+    }, [user, queryClient]);
 
     const navItems = [
         { to: '/dashboard/all-courses', icon: BookOpen, label: t('sidebar.all_courses') },

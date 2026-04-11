@@ -7,7 +7,7 @@ const navLinks = [
     { label: 'Про курс', href: '#about' },
     { label: 'Програма', href: '#program' },
     { label: 'Автор', href: '#author' },
-    { label: 'Тарифи', href: '#pricing' },
+    { label: 'Курси', href: '#courses' },
     { label: 'Відгуки', href: '#reviews' },
 ];
 
@@ -63,7 +63,7 @@ export default function Navbar() {
                             Увійти
                         </Link>
                         <button
-                            onClick={() => scrollTo('#pricing')}
+                            onClick={() => scrollTo('#courses')}
                             className="px-5 py-2.5 rounded-full bg-brand-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand-primary/25 cursor-pointer"
                         >
                             Приєднатися
@@ -108,7 +108,7 @@ export default function Navbar() {
                             </Link>
                             
                             <button
-                                onClick={() => scrollTo('#pricing')}
+                                onClick={() => scrollTo('#courses')}
                                 className="mt-2 px-5 py-3 rounded-full bg-brand-primary text-white text-sm font-semibold w-full"
                             >
                                 Приєднатися до курсу

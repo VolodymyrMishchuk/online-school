@@ -7,9 +7,10 @@ interface ChangePasswordModalProps {
     isOpen: boolean;
     onClose: () => void;
     userEmail: string;
+    mode?: 'change' | 'add';
 }
 
-export default function ChangePasswordModal({ isOpen, onClose, userEmail }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({ isOpen, onClose, userEmail, mode = 'change' }: ChangePasswordModalProps) {
     const { t } = useTranslation();
     const [view, setView] = useState<'change' | 'forgot' | 'success'>('change');
 
@@ -58,11 +59,16 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
 
         setLoading(true);
         try {
-            await changePassword({ oldPassword, newPassword });
-            setSuccessMessage(t('changePassword.passwordChanged', 'Пароль успішно змінено'));
+            if (mode === 'add') {
+                await import('../api/auth').then(m => m.addPassword({ newPassword }));
+                setSuccessMessage(t('changePassword.passwordAdded', 'Пароль успішно додано'));
+            } else {
+                await changePassword({ oldPassword, newPassword });
+                setSuccessMessage(t('changePassword.passwordChanged', 'Пароль успішно змінено'));
+            }
             setView('success');
         } catch (err: any) {
-            setError(t('changePassword.changeError', 'Не вдалося змінити пароль. Перевірте старий пароль.'));
+            setError(mode === 'add' ? t('changePassword.addError', 'Не вдалося додати пароль.') : t('changePassword.changeError', 'Не вдалося змінити пароль. Перевірте старий пароль.'));
         } finally {
             setLoading(false);
         }
@@ -97,7 +103,8 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-brand-dark">
-                                {view === 'change' && t('changePassword.titleChange', 'Зміна паролю')}
+                                {view === 'change' && mode === 'change' && t('changePassword.titleChange', 'Зміна паролю')}
+                                {view === 'change' && mode === 'add' && t('changePassword.titleAdd', 'Додавання паролю')}
                                 {view === 'forgot' && t('changePassword.titleForgot', 'Відновлення паролю')}
                                 {view === 'success' && t('changePassword.titleSuccess', 'Успіх!')}
                             </h2>
@@ -122,6 +129,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                     {view === 'change' && (
                         <form id="change-password-form" onSubmit={handleChangePassword} className="space-y-5">
                             {/* Old Password */}
+                            {mode === 'change' && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2 ml-1">{t('changePassword.oldPassword', 'Старий пароль')}</label>
                                 <div className="relative">
@@ -131,7 +139,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                         onChange={(e) => setOldPassword(e.target.value)}
                                         className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white pr-10"
                                         placeholder="••••••••"
-                                        required
+                                        required={mode === 'change'}
                                     />
                                     <button
                                         type="button"
@@ -142,6 +150,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                     </button>
                                 </div>
                             </div>
+                            )}
 
                             {/* New Password */}
                             <div>
@@ -188,6 +197,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                             </div>
 
                             <div className="flex justify-end">
+                                {mode === 'change' && (
                                 <button
                                     type="button"
                                     onClick={() => setView('forgot')}
@@ -195,6 +205,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                 >
                                     {t('changePassword.forgotPasswordLink', 'Забули пароль?')}
                                 </button>
+                                )}
                             </div>
 
                             {error && (
@@ -253,7 +264,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }: Chan
                                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white"></div>
                                         <span>{t('common.saving', 'Збереження...')}</span>
                                     </div>
-                                ) : t('changePassword.changeBtn', 'Змінити')}
+                                ) : (mode === 'change' ? t('changePassword.changeBtn', 'Змінити') : t('changePassword.addBtn', 'Додати'))}
                             </button>
                         </>
                     )}

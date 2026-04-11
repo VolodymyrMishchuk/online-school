@@ -6,7 +6,7 @@ import HowItWorksSection from '../components/landing/HowItWorksSection';
 import TopicsSection from '../components/landing/TopicsSection';
 import ProgramSection from '../components/landing/ProgramSection';
 import AuthorSection from '../components/landing/AuthorSection';
-import PricingSection from '../components/landing/PricingSection';
+import CoursesSection from '../components/landing/CoursesSection';
 import ReviewsSection from '../components/landing/ReviewsSection';
 import ContactFormSection from '../components/landing/ContactFormSection';
 import Footer from '../components/landing/Footer';
@@ -41,8 +41,8 @@ export default function LandingPage() {
                 <TopicsSection />
                 <ProgramSection />
                 <AuthorSection />
+                <CoursesSection />
                 <ReviewsSection />
-                <PricingSection />
                 <ContactFormSection />
             </main>
 

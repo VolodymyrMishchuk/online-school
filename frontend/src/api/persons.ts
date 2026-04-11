@@ -10,6 +10,7 @@ export interface PersonDto {
     role: string;
     status: string;
     language: string;
+    hasPassword: boolean;
     createdAt: string;
     updatedAt: string;
 }

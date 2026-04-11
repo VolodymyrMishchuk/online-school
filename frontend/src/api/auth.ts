@@ -91,3 +91,11 @@ export interface ChangePasswordRequest {
 export const changePassword = async (request: ChangePasswordRequest): Promise<void> => {
     await client.post('/auth/change-password', request);
 };
+
+export interface AddPasswordRequest {
+    newPassword: string;
+}
+
+export const addPassword = async (request: AddPasswordRequest): Promise<void> => {
+    await client.post('/auth/add-password', request);
+};

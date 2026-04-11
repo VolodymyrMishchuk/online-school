@@ -82,12 +82,38 @@ public class AuthServiceImpl implements AuthService {
     public AuthResultDto authenticateUser(AuthRequest request) {
         log.info("Authenticating user: {}", request.getEmail());
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        PersonEntity person = null;
+        try {
+            person = userDetailsService.getPerson(request.getEmail());
+        } catch (org.springframework.security.core.userdetails.UsernameNotFoundException e) {
+            // Ignore, let authenticationManager handle missing user
+        }
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            // If authentication failed AND it's an OAuth user who hasn't set a local password yet
+            if (person != null && person.getProvider() != null 
+                    && person.getProvider() != com.mishchuk.onlineschool.repository.entity.AuthProvider.LOCAL) {
+                // If the user's password doesn't start with the BCrypt prefix, they never set a local password
+                if (person.getPassword() != null && !person.getPassword().startsWith("$")) {
+                    throw new org.springframework.security.authentication.BadCredentialsException(
+                            "Цей обліковий запис створено через " + person.getProvider()
+                                    + ". Будь ласка, використайте відповідну кнопку для входу. Також Ви можете скористатися функцією Забули пароль, або ввійти за допомогою "
+                                    + person.getProvider()
+                                    + " і у вкладці Налаштування через функцію Додати пароль встановити власний пароль");
+                }
+            }
+            throw e; // Standard bad credentials (e.g. wrong password)
+        }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
         String accessToken = jwtUtils.generateToken(userDetails);
-        PersonEntity person = userDetailsService.getPerson(request.getEmail());
+        // person is already fetched above, but we can reuse the one we fetched
+        if (person == null) {
+            person = userDetailsService.getPerson(request.getEmail());
+        }
 
         RefreshTokenEntity refreshToken = refreshTokenService.createRefreshToken(person.getId());
 

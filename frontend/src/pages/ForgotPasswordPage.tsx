@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
 
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.login.emailLabel')}</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 ml-1">{t('auth.login.emailLabel', 'Email')}</label>
                         <input
                             type="email"
                             required
