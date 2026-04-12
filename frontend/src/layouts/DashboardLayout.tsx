@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket, ShieldCheck } from 'lucide-react';
 import { getPerson } from '../api/persons';
 import { enrollInCourse } from '../api/enrollments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -193,9 +193,21 @@ export default function DashboardLayout() {
 
                 {/* Bottom Actions */}
                 <div className="p-4 border-t border-gray-100 flex flex-col gap-2">
+                    <NavLink
+                        to="/dashboard/legal"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${isActive
+                                ? 'bg-brand-primary/10 text-brand-primary shadow-[inset_0px_0px_0px_1px_rgba(var(--color-brand-primary),0.2)]'
+                                : 'text-gray-600 hover:bg-white/40 hover:text-brand-primary'
+                            }`
+                        }
+                    >
+                        <ShieldCheck className="w-5 h-5" />
+                        <span>{t('sidebar.legal', 'Правова інформація')}</span>
+                    </NavLink>
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 transition-all"
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-500 hover:bg-red-50 transition-all cursor-pointer"
                     >
                         <LogOut className="w-5 h-5" />
                         <span>{t('sidebar.logout')}</span>

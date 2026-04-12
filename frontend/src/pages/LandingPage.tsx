@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import Navbar from '../components/landing/Navbar';
 import HeroSection from '../components/landing/HeroSection';
 import ForWhomSection from '../components/landing/ForWhomSection';
 import HowItWorksSection from '../components/landing/HowItWorksSection';
@@ -9,7 +8,6 @@ import AuthorSection from '../components/landing/AuthorSection';
 import CoursesSection from '../components/landing/CoursesSection';
 import ReviewsSection from '../components/landing/ReviewsSection';
 import ContactFormSection from '../components/landing/ContactFormSection';
-import Footer from '../components/landing/Footer';
 
 export default function LandingPage() {
     useEffect(() => {
@@ -31,9 +29,7 @@ export default function LandingPage() {
     }, []);
 
     return (
-        <div className="min-h-screen bg-[#FFF9F8] font-sans text-stone-800 overflow-x-hidden selection:bg-brand-primary selection:text-white">
-            <Navbar />
-            
+        <div className="w-full">
             <main>
                 <HeroSection />
                 <ForWhomSection />
@@ -45,8 +41,6 @@ export default function LandingPage() {
                 <ReviewsSection />
                 <ContactFormSection />
             </main>
-
-            <Footer />
         </div>
     );
 }

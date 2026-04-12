@@ -20,6 +20,11 @@ import SettingsPage from './pages/SettingsPage';
 import AdminAppealsPage from './pages/AdminAppealsPage';
 import UserAppealPage from './pages/UserAppealPage';
 import PromoCodesRouter from './pages/PromoCodesRouter';
+import PublicLayout from './layouts/PublicLayout';
+import ImpressumPage from './pages/ImpressumPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsPage from './pages/TermsPage';
+import LegalPage from './pages/LegalPage';
 
 const queryClient = new QueryClient();
 
@@ -37,13 +42,18 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/catalog" element={<CatalogPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/magic-login" element={<MagicLoginPage />} />
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/catalog" element={<CatalogPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/magic-login" element={<MagicLoginPage />} />
+            <Route path="/impressum" element={<ImpressumPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+          </Route>
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Navigate to="/dashboard/my-courses" replace />} />
             <Route path="all-courses" element={<AllCoursesPage />} />
@@ -57,6 +67,7 @@ function App() {
             <Route path="appeals" element={<AdminRoute><AdminAppealsPage /></AdminRoute>} />
             <Route path="appeal" element={<UserAppealPage />} />
             <Route path="promo-codes" element={<PromoCodesRouter />} />
+            <Route path="legal" element={<LegalPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

@@ -12,7 +12,49 @@
     "logout": "Abmelden",
     "promo_codes": "Gutscheine",
     "dashboardTitle": "Dashboard",
-    "user": "Benutzer"
+    "user": "Benutzer",
+    "legal": "Rechtliche Informationen"
+  },
+  "landing": {
+    "navbar": {
+      "about": "Über",
+      "program": "Programm",
+      "author": "Autorin",
+      "courses": "Kurse",
+      "reviews": "Bewertungen",
+      "login": "Anmelden",
+      "join": "Beitreten",
+      "loginCabinet": "Zum Portal",
+      "joinCourse": "Kurs beitreten"
+    },
+    "hero": {
+      "badge": "Online-Kurs für werdende Mütter",
+      "title1": "Vorbereitung auf eine ",
+      "titleHighlight": "gesunde",
+      "title2": " Geburt und glückliche Mutterschaft",
+      "desc": "Geburt und Mutterschaft ohne Schmerz, Angst und Zweifel. Mehr als 1000 Frauen sind diesen Weg bereits mit uns gegangen.",
+      "joinBtn": "Kurs beitreten",
+      "learnMoreBtn": "Mehr erfahren",
+      "statNumber": "1000+",
+      "statText": "glückliche Mütter",
+      "imgAlt": "Glückliche schwangere Frau"
+    }
+  },
+  "legal": {
+    "title": "Rechtliche Informationen",
+    "subtitle": "Offizielle Informationen und Nutzungsbedingungen",
+    "impressum": "Impressum",
+    "privacy": "Datenschutzerklärung",
+    "terms": "Nutzungsbedingungen",
+    "impressumDesc": "Impressum und Kontaktdaten.",
+    "privacyDesc": "Wie wir Ihre Daten erheben und verarbeiten.",
+    "termsDesc": "Regeln und Bedingungen für die Nutzung unseres Dienstes."
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten.",
+    "impressum": "Impressum",
+    "privacy": "Datenschutzerklärung",
+    "terms": "Nutzungsbedingungen"
   },
   "settings": {
     "title": "Einstellungen",

@@ -76,9 +76,7 @@ export function ModuleExpandableItem({ module, isLocked = false, onEditLesson, o
                         <div className="flex items-center gap-1.5">
                             <BookOpen size={16} />
                             <span>
-                                {module.lessonsNumber || 0} {
-                                    t('moduleExpandableItem.lessonsCount', { count: module.lessonsNumber || 0 })
-                                }
+                                {t('common.lessonsCount', { count: module.lessonsNumber || 0 })}
                             </span>
                         </div>
                         {module.durationMinutes && module.durationMinutes > 0 && (

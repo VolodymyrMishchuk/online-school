@@ -12,7 +12,49 @@
     "logout": "Logout",
     "promo_codes": "Promo Codes",
     "dashboardTitle": "Dashboard",
-    "user": "User"
+    "user": "User",
+    "legal": "Legal Information"
+  },
+  "landing": {
+    "navbar": {
+      "about": "About",
+      "program": "Program",
+      "author": "Author",
+      "courses": "Courses",
+      "reviews": "Reviews",
+      "login": "Login",
+      "join": "Join",
+      "loginCabinet": "Go to Cabinet",
+      "joinCourse": "Join Course"
+    },
+    "hero": {
+      "badge": "Online Course for Future Mothers",
+      "title1": "Preparation for ",
+      "titleHighlight": "healthy",
+      "title2": " birth and happy motherhood",
+      "desc": "Birth and motherhood without pain, fear, or doubts. Over 1000 women have already walked this path with us.",
+      "joinBtn": "Join the course",
+      "learnMoreBtn": "Learn more",
+      "statNumber": "1000+",
+      "statText": "happy mothers",
+      "imgAlt": "Happy pregnant woman"
+    }
+  },
+  "legal": {
+    "title": "Legal Information",
+    "subtitle": "Official information and terms of service usage",
+    "impressum": "Impressum",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "impressumDesc": "Company details and contact information.",
+    "privacyDesc": "How we collect and manage your data.",
+    "termsDesc": "Rules and guidelines for using our service."
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "impressum": "Impressum",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
   },
   "settings": {
     "title": "Settings",

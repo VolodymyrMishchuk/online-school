@@ -1,10 +1,13 @@
 
 import { motion } from 'framer-motion';
 import { ArrowDown, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const HERO_IMG = 'https://media.base44.com/images/public/69c007c8e122ca819f9b1851/ac8417c63_generated_c6acbbd3.png';
 
 export default function HeroSection() {
+    const { t } = useTranslation();
+    
     const scrollTo = (href: string) => {
         const el = document.querySelector(href);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -38,29 +41,29 @@ export default function HeroSection() {
                     >
                         <div className="inline-flex items-center gap-2 glass-panel rounded-full px-4 py-2 mb-8">
                             <span className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />
-                            <span className="text-sm font-medium text-stone-500">Онлайн-курс для майбутніх мам</span>
+                            <span className="text-sm font-medium text-stone-500">{t('landing.hero.badge', 'Онлайн-курс для майбутніх мам')}</span>
                         </div>
                         <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-stone-800">
-                            Підготовка до{' '}
-                            <span className="text-brand-primary italic">здорових</span>{' '}
-                            пологів та щасливого материнства
+                            {t('landing.hero.title1', 'Підготовка до ')}
+                            <span className="text-brand-primary italic">{t('landing.hero.titleHighlight', 'здорових')}</span>{' '}
+                            {t('landing.hero.title2', ' пологів та щасливого материнства')}
                         </h1>
                         <p className="text-lg text-stone-500 leading-relaxed mb-10 max-w-lg">
-                            Народження та материнство без болю, страху та сумнівів. Більше 1000 жінок вже пройшли цей шлях разом з нами.
+                            {t('landing.hero.desc', 'Народження та материнство без болю, страху та сумнівів. Більше 1000 жінок вже пройшли цей шлях разом з нами.')}
                         </p>
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={() => scrollTo('#pricing')}
                                 className="px-8 py-4 rounded-full bg-brand-primary text-white font-semibold text-base hover:opacity-90 transition-all shadow-xl shadow-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/40 hover:-translate-y-0.5 cursor-pointer"
                             >
-                                Приєднатися до курсу
+                                {t('landing.hero.joinBtn', 'Приєднатися до курсу')}
                             </button>
                             <button
                                 onClick={() => scrollTo('#about')}
                                 className="px-8 py-4 rounded-full glass-panel font-semibold text-base text-stone-800 hover:bg-white/50 transition-all flex items-center gap-2 group cursor-pointer"
                             >
                                 <Play className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                Дізнатися більше
+                                {t('landing.hero.learnMoreBtn', 'Дізнатися більше')}
                             </button>
                         </div>
                     </motion.div>
@@ -76,7 +79,7 @@ export default function HeroSection() {
                             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-brand-primary/20 to-brand-secondary/30 blur-2xl" />
                             <img
                                 src={HERO_IMG}
-                                alt="Щаслива вагітна жінка"
+                                alt={t('landing.hero.imgAlt', 'Щаслива вагітна жінка')}
                                 className="relative rounded-3xl w-full max-w-md lg:max-w-lg object-cover shadow-2xl"
                             />
                             {/* Glass stat card */}
@@ -86,8 +89,8 @@ export default function HeroSection() {
                                 transition={{ delay: 1, duration: 0.5 }}
                                 className="absolute -bottom-6 -left-6 glass-strong rounded-2xl px-6 py-4"
                             >
-                                <p className="text-3xl font-bold text-brand-primary">1000+</p>
-                                <p className="text-sm text-stone-500">щасливих мам</p>
+                                <p className="text-3xl font-bold text-brand-primary">{t('landing.hero.statNumber', '1000+')}</p>
+                                <p className="text-sm text-stone-500">{t('landing.hero.statText', 'щасливих мам')}</p>
                             </motion.div>
                         </div>
                     </motion.div>

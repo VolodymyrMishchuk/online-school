@@ -1,19 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Heart, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
-const navLinks = [
-    { label: 'Про курс', href: '#about' },
-    { label: 'Програма', href: '#program' },
-    { label: 'Автор', href: '#author' },
-    { label: 'Курси', href: '#courses' },
-    { label: 'Відгуки', href: '#reviews' },
-];
 
 export default function Navbar() {
+    const { t } = useTranslation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileOpen, setMobileOpen] = useState(false);
+
+    const navLinks = [
+        { label: t('landing.navbar.about', 'Про курс'), href: '#about' },
+        { label: t('landing.navbar.program', 'Програма'), href: '#program' },
+        { label: t('landing.navbar.author', 'Автор'), href: '#author' },
+        { label: t('landing.navbar.courses', 'Курси'), href: '#courses' },
+        { label: t('landing.navbar.reviews', 'Відгуки'), href: '#reviews' },
+    ];
+
+    const location = useLocation();
+    const navigate = useNavigate();
+    const isLanding = location.pathname === '/';
 
     useEffect(() => {
         const handler = () => setScrolled(window.scrollY > 40);
@@ -23,9 +31,14 @@ export default function Navbar() {
 
     const scrollTo = (href: string) => {
         setMobileOpen(false);
-        const el = document.querySelector(href);
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
+        if (!isLanding) {
+            navigate(`/${href}`);
+        } else {
+            const el = document.querySelector(href);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
     };
+
 
     return (
         <motion.nav
@@ -33,11 +46,14 @@ export default function Navbar() {
             animate={{ y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-                scrolled ? 'glass-strong py-3' : 'bg-transparent py-5'
+                (scrolled || !isLanding) ? 'glass-strong py-3' : 'bg-transparent py-5'
             }`}
         >
             <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-                <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2 group cursor-pointer">
+                <button onClick={() => {
+                    if (!isLanding) navigate('/');
+                    else window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} className="flex items-center gap-2 group cursor-pointer">
                     <Heart className="w-7 h-7 text-brand-primary fill-brand-primary group-hover:scale-110 transition-transform" />
                     <span className="font-sans text-xl font-semibold tracking-tight text-stone-800">
                         Під<span className="text-brand-primary">Серцем</span>
@@ -60,14 +76,16 @@ export default function Navbar() {
                             to="/login"
                             className="text-sm font-semibold text-stone-700 hover:text-brand-primary transition-colors"
                         >
-                            Увійти
+                            {t('landing.navbar.login', 'Увійти')}
                         </Link>
                         <button
                             onClick={() => scrollTo('#courses')}
                             className="px-5 py-2.5 rounded-full bg-brand-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-brand-primary/25 cursor-pointer"
                         >
-                            Приєднатися
+                            {t('landing.navbar.join', 'Приєднатися')}
                         </button>
+                        <div className="h-8 border-l border-stone-200 mx-1"></div>
+                        <LanguageSwitcher />
                     </div>
                 </div>
                 
@@ -104,15 +122,19 @@ export default function Navbar() {
                                 to="/login"
                                 className="text-center py-2 text-base font-semibold text-stone-700 hover:text-brand-primary transition-colors"
                             >
-                                Увійти до кабінету
+                                {t('landing.navbar.loginCabinet', 'Увійти до кабінету')}
                             </Link>
                             
                             <button
                                 onClick={() => scrollTo('#courses')}
                                 className="mt-2 px-5 py-3 rounded-full bg-brand-primary text-white text-sm font-semibold w-full"
                             >
-                                Приєднатися до курсу
+                                {t('landing.navbar.joinCourse', 'Приєднатися до курсу')}
                             </button>
+                            
+                            <div className="flex justify-center mt-2">
+                                <LanguageSwitcher />
+                            </div>
                         </div>
                     </motion.div>
                 )}

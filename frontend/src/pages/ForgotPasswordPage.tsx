@@ -28,7 +28,7 @@ export default function ForgotPasswordPage() {
 
     if (submitted) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-brand-light/30 px-4 sm:px-6 lg:px-8 font-sans">
+            <div className="h-full flex-grow flex flex-col items-center justify-center py-12 bg-brand-light/30 px-4 sm:px-6 lg:px-8 font-sans">
                 <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md border border-brand-light text-center">
                     <div className="inline-block bg-green-100 p-4 rounded-full mb-6">
                         <Mail className="w-8 h-8 text-green-600" />
@@ -46,7 +46,7 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-brand-light/30 px-4 sm:px-6 lg:px-8 font-sans">
+        <div className="h-full flex-grow flex flex-col items-center justify-center py-12 bg-brand-light/30 px-4 sm:px-6 lg:px-8 font-sans">
             <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md border border-brand-light">
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-block bg-brand-light p-3 rounded-full mb-4">
