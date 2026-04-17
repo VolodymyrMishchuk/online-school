@@ -17,16 +17,16 @@ class PersonRepositoryTest extends AbstractRepositoryTest {
     @Autowired private PersonRepository personRepository;
 
     private PersonEntity admin;
-    private PersonEntity alice;
-    private PersonEntity bob;
     private PersonEntity creator;
+    // alice і bob — збережені через setUp, використовуються у findAllByRole/findAllByCreatedById через запити
 
     @BeforeEach
     void setUp() {
         creator = personRepository.save(person("creator@test.com", PersonRole.ADMIN));
         admin   = personRepository.save(person("admin@test.com",   PersonRole.ADMIN));
-        alice   = personRepository.save(personCreatedBy("alice@test.com", PersonRole.USER, creator));
-        bob     = personRepository.save(personCreatedBy("bob@test.com",   PersonRole.USER, creator));
+        // alice i bob — збережені в БД, доступні через findAll запити
+        personRepository.save(personCreatedBy("alice@test.com", PersonRole.USER, creator));
+        personRepository.save(personCreatedBy("bob@test.com",   PersonRole.USER, creator));
     }
 
     // ─────────────────────── findByEmail ───────────────────────

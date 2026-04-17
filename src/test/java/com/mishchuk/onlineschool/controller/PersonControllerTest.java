@@ -391,13 +391,13 @@ class PersonControllerTest {
     @NotNull
     @Contract("_, _ -> new")
     private PersonDto personDto(UUID id, String firstName) {
-        return new PersonDto(id, firstName, "LastName", null, "123", "test@test.com", "UK", "USER", "ACTIVE", null, null, null);
+        return new PersonDto(id, firstName, "LastName", null, "123", "test@test.com", "UK", null, "USER", "ACTIVE", null, null, true, null);
     }
 
     @NotNull
     @Contract("_, _ -> new")
     private PersonWithEnrollmentsDto personWithEnrollmentsDto(UUID id, String firstName) {
-        return new PersonWithEnrollmentsDto(id, firstName, "LastName", null, "123", "test@test.com", "UK", "USER", "ACTIVE", List.of(), null, null, null);
+        return new PersonWithEnrollmentsDto(id, firstName, "LastName", null, "123", "test@test.com", "UK", null, "USER", "ACTIVE", List.of(), null, null, true, null);
     }
 
     @NotNull

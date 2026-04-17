@@ -187,7 +187,7 @@ class PersonServiceImplTest {
     @DisplayName("getPerson — повертає Optional<PersonDto> якщо знайдено")
     void getPerson_found_returnsMappedDto() {
         PersonDto expected = new PersonDto(personId, "Іван", "Тест", null, null,
-                "user@test.com", "uk", "USER", null, null, null, null);
+                "user@test.com", "uk", null, "USER", null, null, null, true, null);
         when(personRepository.findById(personId)).thenReturn(Optional.of(personEntity));
         when(personMapper.toDto(personEntity)).thenReturn(expected);
 
@@ -212,7 +212,7 @@ class PersonServiceImplTest {
     @DisplayName("getAllPersons — повертає mapped список всіх осіб")
     void getAllPersons_returnsMappedList() {
         PersonDto dto = new PersonDto(personId, "Іван", "Тест", null, null,
-                "user@test.com", "uk", "USER", null, null, null, null);
+                "user@test.com", "uk", null, "USER", null, null, null, true, null);
 
         when(personRepository.findAll()).thenReturn(List.of(personEntity));
         when(personMapper.toDto(personEntity)).thenReturn(dto);
@@ -237,8 +237,8 @@ class PersonServiceImplTest {
     @DisplayName("getAllPersonsWithEnrollments — повертає mapped список з зарахуваннями")
     void getAllPersonsWithEnrollments_returnsMappedList() {
         PersonWithEnrollmentsDto dto = new PersonWithEnrollmentsDto(
-                personId, "Іван", "Тест", null, null, "user@test.com", "uk", "USER", "ACTIVE",
-                List.of(), null, null, null);
+                personId, "Іван", "Тест", null, null, "user@test.com", "uk", null, "USER", "ACTIVE",
+                List.of(), null, null, true, null);
 
         when(personRepository.findAll()).thenReturn(List.of(personEntity));
         when(personMapper.toDtoWithEnrollments(personEntity)).thenReturn(dto);

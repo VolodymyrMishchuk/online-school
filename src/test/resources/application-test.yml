@@ -10,6 +10,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  mail:
+    host: localhost
+    port: 1025
+    test-connection: false   # вимикає MailSenderValidatorAutoConfiguration
 
 application:
   security:
@@ -23,3 +27,4 @@ minio:
   access-key: minioadmin
   secret-key: minioadmin
   bucket-name: online-school-files
+

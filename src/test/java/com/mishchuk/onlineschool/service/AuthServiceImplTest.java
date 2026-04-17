@@ -158,6 +158,6 @@ class AuthServiceImplTest {
 
     private PersonDto buildPersonDto(UUID id, String role) {
         return new PersonDto(id, "Тест", "Юзер", null, null,
-                "user@test.com", "uk", role, null, null, null, null);
+                "user@test.com", "uk", null, role, null, null, null, true, null);
     }
 }
