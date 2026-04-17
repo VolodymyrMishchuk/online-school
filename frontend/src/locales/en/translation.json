@@ -1,4 +1,192 @@
 {
+  "landing": {
+    "navbar": {
+      "about": "About course",
+      "program": "Program",
+      "author": "Author",
+      "courses": "Courses",
+      "reviews": "Reviews",
+      "login": "Log in",
+      "join": "Join",
+      "loginCabinet": "Log in to cabinet",
+      "joinCourse": "Join the course"
+    },
+    "hero": {
+      "tag": "Online course for future mothers",
+      "title1": "Preparation for ",
+      "titleHighlight": "healthy",
+      "title2": " birth and happy motherhood",
+      "description": "Childbirth and motherhood without pain, fear, and doubts. More than 1000 women have already walked this path with us.",
+      "joinBtn": "Join the course",
+      "moreBtn": "Learn more",
+      "statsAmount": "1000+",
+      "statsLabel": "happy mothers"
+    },
+    "forWhom": {
+      "tag": "For whom",
+      "title": "Who is the «Under the Heart» course for?",
+      "audience1Title": "For first-time mothers",
+      "audience1p1": "Who wants to manage pain",
+      "audience1p2": "Who wants to give birth without unnecessary medical interventions",
+      "audience1p3": "Who wishes to know everything necessary about natural childbirth",
+      "audience1p4": "Who wants to give birth without fear",
+      "audience2Title": "For experienced mothers",
+      "audience2p1": "Who plan vaginal birth after a Cesarean section (VBAC)",
+      "audience2p2": "Who had a negative experience and does not want to repeat it",
+      "audience2p3": "Who wants to breastfeed or has doubts",
+      "audience2p4": "Who wants to know how to properly recover after childbirth"
+    },
+    "howItWorks": {
+      "tag": "Format",
+      "title": "How does it work?",
+      "step1Title": "Lectures in the personal cabinet",
+      "step1Desc": "All course modules are available immediately. Access arrives via email on the day of payment.",
+      "step2Title": "Closed Telegram chat",
+      "step2Desc": "For support, communication, and answers to questions.",
+      "step3Title": "Homework assignments",
+      "step3Desc": "Homework and tests after each module.",
+      "step4Title": "Additional materials",
+      "step4Desc": "Documents, videos, and protocols to consolidate knowledge.",
+      "step5Title": "Zoom meetings",
+      "step5Desc": "Weekly online Q&A meetings + recording."
+    },
+    "topics": {
+      "tag": "Program",
+      "title": "What will you learn?",
+      "topic1Title": "Physiology of pregnancy and childbirth",
+      "topic1Desc": "How the body, hormones, and brain work at each stage of childbirth. What happens after childbirth and how to recover.",
+      "topic2Title": "Natural childbirth",
+      "topic2Desc": "How to remember childbirth as a celebration and preserve health for you and your baby. CS, VBAC, breech birth.",
+      "topic3Title": "Baby",
+      "topic3Desc": "How to understand your baby, fulfill basic needs, and organize daily life.",
+      "topic4Title": "Pain during childbirth",
+      "topic4Desc": "Why it hurts and effective non-medical pain relief methods. Massage, breathing, and relaxation.",
+      "topic5Title": "Breastfeeding",
+      "topic5Desc": "How lactation works. How to breastfeed easily and overcome difficulties.",
+      "topic6Title": "Maternity hospital",
+      "topic6Desc": "Your rights and medical staff's responsibilities. How to communicate with the doctor. Medical procedures."
+    },
+    "program": {
+      "tag": "Education",
+      "title": "Lesson Program",
+      "desc": "8 modules covering everything — from pregnancy to postpartum recovery",
+      "modules": [
+        {
+          "title": "Module 1. Pregnancy",
+          "lessons": [
+            "I'm pregnant - what to do? Tests, examinations",
+            "Surprises of pregnancy. What should you be ready for?"
+          ]
+        },
+        {
+          "title": "Module 2. Preparation for childbirth",
+          "lessons": [
+            "Recognizing signs of labor",
+            "Determining the due date. What to do when labor starts",
+            "When to go to the hospital? Simulating rapid labor",
+            "Birth plan. Choosing your team"
+          ]
+        },
+        {
+          "title": "Module 3. Physiology of childbirth",
+          "lessons": [
+            "How to recognize contractions? Labor vs Braxton Hicks?",
+            "Pushing. Birthing positions. Greeting the baby properly",
+            "Umbilical cord. Delivery of the placenta. Birth hormones",
+            "Women's rights. Medical procedures"
+          ]
+        },
+        {
+          "title": "Module 4. Sensations during childbirth",
+          "lessons": [
+            "Natural sensations are NOT pain",
+            "The vicious circle of fear-pain-tension",
+            "Massage, breathing, and other relief methods",
+            "Learning to relax"
+          ]
+        },
+        {
+          "title": "Module 5. My baby",
+          "lessons": [
+            "The golden hour. Grof's matrices. Medical procedures",
+            "Transitional states of the baby. What might worry a mother",
+            "Psychological needs of the child. The fourth trimester",
+            "Sleep, bathing, colic, walking..."
+          ]
+        },
+        {
+          "title": "Module 6. Breastfeeding",
+          "lessons": [
+            "Benefits of breastfeeding",
+            "First latch. Breast anatomy",
+            "Three pillars of BF: on-demand feeding, night feedings, correct latch",
+            "Possible difficulties: cracks, lactostasis, low milk supply"
+          ]
+        },
+        {
+          "title": "Module 7. After childbirth",
+          "lessons": [
+            "Early postpartum period. Stitches and lochia",
+            "Psychology of a new mother. Baby blues",
+            "Postpartum body recovery"
+          ]
+        },
+        {
+          "title": "Module 8. Special cases",
+          "lessons": [
+            "Caesarean section: emergency and elective. Labor induction",
+            "Breech birth, twins, VBAC",
+            "Premature babies. How to help them adapt"
+          ]
+        }
+      ]
+    },
+    "author": {
+      "tag": "Course Author",
+      "name": "Kateryna Mishchuk",
+      "statsYears": "8+",
+      "statsLabel": "years of experience",
+      "bio": "I am the one who knows how to give birth without pain and unnecessary medical interventions. The one who is always on your side. Knowing that a woman's body is perfectly designed to give birth easily and painlessly.",
+      "cred1": "Doula with medical education",
+      "cred2": "Midwife",
+      "cred3": "Certified breastfeeding specialist",
+      "cred4": "Author of the natural gentle birth preparation program"
+    },
+    "reviews": {
+      "tag": "Reviews",
+      "title": "What participants say",
+      "items": [
+        {
+          "name": "Olena",
+          "text": "Thank you for the course! I gave birth easily and without fear. The knowledge I received helped me feel confident during childbirth."
+        },
+        {
+          "name": "Mariia",
+          "text": "The course completely changed my perception of childbirth. I stopped being afraid and gave birth naturally! I recommend it to all future mothers."
+        },
+        {
+          "name": "Anna",
+          "text": "After my first C-section I was afraid, but thanks to the course I had a VBAC! Kateryna is an incredible support."
+        },
+        {
+          "name": "Viktoria",
+          "text": "The best investment in my motherhood. Breastfeeding was easy because I was prepared."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Still have questions?",
+      "desc": "Write to us, and we will gladly consult you about the course.",
+      "nameLabel": "Your name",
+      "namePlaceholder": "How should we address you?",
+      "messageLabel": "Your question",
+      "messagePlaceholder": "Describe what you are interested in..."
+    },
+    "coursesSubtitle": "Our courses",
+    "coursesTitle": "Available courses",
+    "coursesDesc": "Choose the course that suits you best",
+    "noCourses": "Currently no courses available"
+  },
   "sidebar": {
     "all_courses": "All Courses",
     "all_modules": "All Modules",
@@ -14,31 +202,6 @@
     "dashboardTitle": "Dashboard",
     "user": "User",
     "legal": "Legal Information"
-  },
-  "landing": {
-    "navbar": {
-      "about": "About",
-      "program": "Program",
-      "author": "Author",
-      "courses": "Courses",
-      "reviews": "Reviews",
-      "login": "Login",
-      "join": "Join",
-      "loginCabinet": "Go to Cabinet",
-      "joinCourse": "Join Course"
-    },
-    "hero": {
-      "badge": "Online Course for Future Mothers",
-      "title1": "Preparation for ",
-      "titleHighlight": "healthy",
-      "title2": " birth and happy motherhood",
-      "desc": "Birth and motherhood without pain, fear, or doubts. Over 1000 women have already walked this path with us.",
-      "joinBtn": "Join the course",
-      "learnMoreBtn": "Learn more",
-      "statNumber": "1000+",
-      "statText": "happy mothers",
-      "imgAlt": "Happy pregnant woman"
-    }
   },
   "legal": {
     "title": "Legal Information",
@@ -409,37 +572,6 @@
       "submit": "Change Password"
     }
   },
-  "landing": {
-    "nav": {
-      "courses": "Courses",
-      "features": "Features",
-      "about": "About Us"
-    },
-    "coursesSubtitle": "Our Courses",
-    "coursesTitle": "Available Courses",
-    "coursesDesc": "Choose the course that suits you best",
-    "noCourses": "No courses available at the moment",
-    "hero": {
-      "title": "Master Your Future",
-      "subtitle": "Accessible and quality education for everyone. Start your path to success today.",
-      "startBtn": "Start now",
-      "learnMoreBtn": "Learn more"
-    },
-    "features": {
-      "expert": {
-        "title": "Expert Knowledge",
-        "desc": "Curated content from industry leaders, presented in small, easy-to-digest lessons."
-      },
-      "community": {
-        "title": "Supportive Community",
-        "desc": "Join a network of like-minded people. We grow faster when we grow together."
-      },
-      "certified": {
-        "title": "Certified Development",
-        "desc": "Get certificates that matter. Validate your hard work and new skills."
-      }
-    }
-  },
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications yet",
@@ -465,6 +597,7 @@
     "downloadError": "Error downloading video. Try again later."
   },
   "appeal": {
+    "alertNoName": "Please enter your name.",
     "title": "Appeal",
     "subtitle": "Have questions or suggestions? Leave an appeal, and we will contact you",
     "newAppeal": "New appeal",

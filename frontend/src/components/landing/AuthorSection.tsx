@@ -1,17 +1,19 @@
 
 import { motion } from 'framer-motion';
 import { Award, GraduationCap, Heart, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const AUTHOR_IMG = '/images/author-kateryna.png';
 
-const credentials = [
-    { icon: Heart, text: 'Доула з медичною освітою' },
-    { icon: GraduationCap, text: 'Акушерка' },
-    { icon: Award, text: 'Сертифікований спеціаліст з грудного вигодовування' },
-    { icon: Star, text: 'Автор програми підготовки до природніх м\'яких пологів' },
-];
-
 export default function AuthorSection() {
+    const { t } = useTranslation();
+
+    const credentials = [
+        { icon: Heart, text: t('landing.author.cred1', 'Доула з медичною освітою') },
+        { icon: GraduationCap, text: t('landing.author.cred2', 'Акушерка') },
+        { icon: Award, text: t('landing.author.cred3', 'Сертифікований спеціаліст з грудного вигодовування') },
+        { icon: Star, text: t('landing.author.cred4', 'Автор програми підготовки до природніх м\'яких пологів') },
+    ];
     return (
         <section id="author" className="py-24 lg:py-32 relative text-stone-800">
             <div className="absolute top-1/2 right-0 w-72 h-72 bg-brand-secondary/20 rounded-full blur-3xl -translate-y-1/2" />
@@ -40,8 +42,8 @@ export default function AuthorSection() {
                                 transition={{ delay: 0.5, duration: 0.5 }}
                                 className="absolute -bottom-4 -right-4 glass-strong rounded-2xl px-5 py-3"
                             >
-                                <p className="text-2xl font-bold text-brand-primary">8+</p>
-                                <p className="text-xs text-stone-500">років досвіду</p>
+                                <p className="text-2xl font-bold text-brand-primary">{t('landing.author.statsYears', '8+')}</p>
+                                <p className="text-xs text-stone-500">{t('landing.author.statsLabel', 'років досвіду')}</p>
                             </motion.div>
                         </div>
                     </motion.div>
@@ -54,14 +56,13 @@ export default function AuthorSection() {
                         transition={{ duration: 0.7, delay: 0.1 }}
                     >
                         <span className="inline-block text-brand-primary font-semibold text-sm tracking-wider uppercase mb-3">
-                            Автор курсу
+                            {t('landing.author.tag', 'Автор курсу')}
                         </span>
                         <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-                            Катерина Міщук
+                            {t('landing.author.name', 'Катерина Міщук')}
                         </h2>
                         <p className="text-stone-500 leading-relaxed mb-8 text-lg">
-                            Я та, хто знає, як народити без болю та зайвих медичних втручань. Та, хто завжди на твоєму боці.
-                            Знає, що тіло жінки ідеально створено для того, щоб народжувати легко та безболісно.
+                            {t('landing.author.bio', 'Я та, хто знає, як народити без болю та зайвих медичних втручань. Та, хто завжди на твоєму боці. Знає, що тіло жінки ідеально створено для того, щоб народжувати легко та безболісно.')}
                         </p>
                         
                         <div className="space-y-4">

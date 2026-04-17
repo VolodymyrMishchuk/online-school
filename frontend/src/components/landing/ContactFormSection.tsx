@@ -130,7 +130,7 @@ export default function ContactFormSection() {
 
     const handleSubmit = async () => {
         if (!name.trim()) {
-            showAlert("Будь ласка, введіть Ваше ім'я.");
+            showAlert(t('appeal.alertNoName', "Будь ласка, введіть Ваше ім'я."));
             return;
         }
 
@@ -193,10 +193,10 @@ export default function ContactFormSection() {
             <div className="max-w-3xl mx-auto px-6 relative z-10">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold text-stone-900 mb-4">
-                        Залишилися питання?
+                        {t('landing.contact.title', 'Залишилися питання?')}
                     </h2>
                     <p className="text-stone-500 text-lg">
-                        Напишіть нам, і ми з радістю проконсультуємо вас щодо курсу.
+                        {t('landing.contact.desc', 'Напишіть нам, і ми з радістю проконсультуємо вас щодо курсу.')}
                     </p>
                 </div>
 
@@ -205,13 +205,13 @@ export default function ContactFormSection() {
                         {/* Name */}
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-stone-700 mb-2">
-                                Ваше ім'я
+                                {t('landing.contact.nameLabel', "Ваше ім'я")}
                             </label>
                             <input
                                 type="text"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Як до вас звертатися?"
+                                placeholder={t('landing.contact.namePlaceholder', "Як до вас звертатися?")}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light outline-none transition-all bg-white hover:bg-white/90"
                             />
                         </div>
@@ -336,13 +336,13 @@ export default function ContactFormSection() {
                         {/* Message */}
                         <div>
                             <label className="flex items-center gap-2 text-sm font-medium text-stone-700 mb-2">
-                                Ваше питання
+                                {t('landing.contact.messageLabel', 'Ваше питання')}
                             </label>
                             <textarea
                                 rows={4}
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                placeholder="Опишіть, що вас цікавить..."
+                                placeholder={t('landing.contact.messagePlaceholder', 'Опишіть, що вас цікавить...')}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-light outline-none transition-all bg-white hover:bg-white/90 resize-none"
                             />
                         </div>

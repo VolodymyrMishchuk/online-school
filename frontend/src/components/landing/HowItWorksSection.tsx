@@ -1,34 +1,38 @@
 
 import { motion } from 'framer-motion';
 import { MonitorPlay, MessageCircle, BookOpen, FileText, Video } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const features = [
-    {
-        icon: MonitorPlay,
-        title: 'Лекції в особистому кабінеті',
-        desc: 'Всі модулі курсу доступні одразу. Доступ приходить в день оплати на пошту.',
-    },
-    {
-        icon: MessageCircle,
-        title: 'Закритий чат в Telegram',
-        desc: 'Для підтримки, спілкування та відповідей на питання.',
-    },
-    {
-        icon: BookOpen,
-        title: 'Домашні завдання',
-        desc: 'Після кожного модуля домашні завдання та тести.',
-    },
-    {
-        icon: FileText,
-        title: 'Додаткові матеріали',
-        desc: 'Документи, відео та протоколи для закріплення знань.',
-    },
-    {
-        icon: Video,
-        title: 'Zoom-зустрічі',
-        desc: 'Щотижневі онлайн зустрічі Питання/Відповідь + запис.',
-    },
-];
+export default function HowItWorksSection() {
+    const { t } = useTranslation();
+
+    const features = [
+        {
+            icon: MonitorPlay,
+            title: t('landing.howItWorks.step1Title', 'Лекції в особистому кабінеті'),
+            desc: t('landing.howItWorks.step1Desc', 'Всі модулі курсу доступні одразу. Доступ приходить в день оплати на пошту.'),
+        },
+        {
+            icon: MessageCircle,
+            title: t('landing.howItWorks.step2Title', 'Закритий чат в Telegram'),
+            desc: t('landing.howItWorks.step2Desc', 'Для підтримки, спілкування та відповідей на питання.'),
+        },
+        {
+            icon: BookOpen,
+            title: t('landing.howItWorks.step3Title', 'Домашні завдання'),
+            desc: t('landing.howItWorks.step3Desc', 'Після кожного модуля домашні завдання та тести.'),
+        },
+        {
+            icon: FileText,
+            title: t('landing.howItWorks.step4Title', 'Додаткові матеріали'),
+            desc: t('landing.howItWorks.step4Desc', 'Документи, відео та протоколи для закріплення знань.'),
+        },
+        {
+            icon: Video,
+            title: t('landing.howItWorks.step5Title', 'Zoom-зустрічі'),
+            desc: t('landing.howItWorks.step5Desc', 'Щотижневі онлайн зустрічі Питання/Відповідь + запис.'),
+        },
+    ];
 
 const container = {
     hidden: {},
@@ -40,7 +44,7 @@ const item = {
     show: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-export default function HowItWorksSection() {
+
     return (
         <section className="py-24 lg:py-32 bg-gradient-to-b from-transparent via-brand-secondary/15 to-transparent text-stone-800">
             <div className="max-w-7xl mx-auto px-6">
@@ -52,10 +56,10 @@ export default function HowItWorksSection() {
                     className="text-center mb-16"
                 >
                     <span className="inline-block text-brand-primary font-semibold text-sm tracking-wider uppercase mb-3">
-                        Формат
+                        {t('landing.howItWorks.tag', 'Формат')}
                     </span>
                     <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold">
-                        Як це працює?
+                        {t('landing.howItWorks.title', 'Як це працює?')}
                     </h2>
                 </motion.div>
                 

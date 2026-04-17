@@ -1,77 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
-
-const modules = [
-    {
-        title: 'Модуль 1. Вагітність',
-        lessons: [
-            'Я вагітна – як правильно діяти? Аналізи, дослідження',
-            'Сюрпризи вагітності. До чого потрібно бути готовою?',
-        ],
-    },
-    {
-        title: 'Модуль 2. Підготовка до пологів',
-        lessons: [
-            'Розпізнаємо предвісники пологів',
-            'Визначаємо дату пологів. Як діяти, коли розпочалися пологи',
-            'Коли їхати до пологового будинку? Моделюємо стрімкі пологи',
-            'План пологів. Вибираємо свою команду',
-        ],
-    },
-    {
-        title: 'Модуль 3. Фізіологія пологів',
-        lessons: [
-            'Як розпізнати перейми? Родові та тренувальні?',
-            'Потуги. Поза для пологів. Правильно зустрічаємо малюка',
-            'Пуповина. Народження плаценти. Гормони пологів',
-            'Права жінки. Медичні маніпуляції',
-        ],
-    },
-    {
-        title: 'Модуль 4. Відчуття під час пологів',
-        lessons: [
-            'Природні відчуття — це НЕ біль',
-            'Замкнене коло страх-біль-напруга',
-            'Масаж, дихання та інші способи полегшення',
-            'Вчимося розслаблятися',
-        ],
-    },
-    {
-        title: 'Модуль 5. Мій малюк',
-        lessons: [
-            'Золота година. Матриці Грофа. Медичні маніпуляції',
-            'Перехідні стани малюка. Що може турбувати маму',
-            'Психологічні потреби дитини. Четвертий триместр',
-            'Сон, купання, коліки, гуляння...',
-        ],
-    },
-    {
-        title: 'Модуль 6. Грудне вигодовування',
-        lessons: [
-            'Переваги грудного вигодовування',
-            'Перше прикладання. Анатомія молочної залози',
-            'Три кити ГВ: годування на вимогу, нічні годування, правильне прикладання',
-            'Можливі труднощі: тріщини, лактостаз, мало молока',
-        ],
-    },
-    {
-        title: 'Модуль 7. Після пологів',
-        lessons: [
-            'Ранній післяпологовий період. Шви та лохії',
-            'Психологія новонародженої матері. Бебі блюз',
-            'Післяпологове відновлення тіла',
-        ],
-    },
-    {
-        title: 'Модуль 8. Особливі випадки',
-        lessons: [
-            'Кесарів розтин: екстрений та плановий. Стимуляція пологів',
-            'Тазові пологи, двійнята, вагінальні після КС',
-            'Недоношені діти. Як допомогти адаптуватися',
-        ],
-    },
-];
+import { useTranslation } from 'react-i18next';
 
 function ModuleItem({ module, index, isOpen, toggle }: any) {
     return (
@@ -122,6 +52,10 @@ function ModuleItem({ module, index, isOpen, toggle }: any) {
 
 export default function ProgramSection() {
     const [openIndex, setOpenIndex] = useState(0);
+    const { t } = useTranslation();
+    const rawModules = t('landing.program.modules', { returnObjects: true });
+    const modules: any[] = Array.isArray(rawModules) ? rawModules : [];
+
     return (
         <section id="program" className="py-24 lg:py-32">
             <div className="max-w-3xl mx-auto px-6">
@@ -133,13 +67,13 @@ export default function ProgramSection() {
                     className="text-center mb-16"
                 >
                     <span className="inline-block text-brand-primary font-semibold text-sm tracking-wider uppercase mb-3">
-                        Навчання
+                        {t('landing.program.tag', 'Навчання')}
                     </span>
                     <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold text-stone-800">
-                        Програма уроків
+                        {t('landing.program.title', 'Програма уроків')}
                     </h2>
                     <p className="mt-4 text-stone-500 max-w-lg mx-auto">
-                        8 модулів, що охоплюють все — від вагітності до післяпологового відновлення
+                        {t('landing.program.desc', '8 модулів, що охоплюють все — від вагітності до післяпологового відновлення')}
                     </p>
                 </motion.div>
                 

@@ -1,4 +1,192 @@
 {
+  "landing": {
+    "navbar": {
+      "about": "Über den Kurs",
+      "program": "Programm",
+      "author": "Autor",
+      "courses": "Kurse",
+      "reviews": "Bewertungen",
+      "login": "Anmelden",
+      "join": "Beitreten",
+      "loginCabinet": "Zum Kabinett",
+      "joinCourse": "Dem Kurs beitreten"
+    },
+    "hero": {
+      "tag": "Online-Kurs für werdende Mütter",
+      "title1": "Vorbereitung auf eine ",
+      "titleHighlight": "gesunde",
+      "title2": " Geburt und glückliche Mutterschaft",
+      "description": "Geburt und Mutterschaft ohne Schmerz, Angst und Zweifel. Mehr als 1000 Frauen sind diesen Weg bereits mit uns gegangen.",
+      "joinBtn": "Am Kurs teilnehmen",
+      "moreBtn": "Mehr erfahren",
+      "statsAmount": "1000+",
+      "statsLabel": "glückliche Mütter"
+    },
+    "forWhom": {
+      "tag": "Für wen",
+      "title": "Für wen ist der Kurs «Unter dem Herzen»?",
+      "audience1Title": "Für werdende Erstmütter",
+      "audience1p1": "Die lernen möchten, mit Schmerzen umzugehen",
+      "audience1p2": "Die ohne unnötige medizinische Eingriffe gebären möchten",
+      "audience1p3": "Die alles Notwendige über natürliche Geburt wissen wollen",
+      "audience1p4": "Die ohne Angst gebären möchten",
+      "audience2Title": "Für erfahrene Mütter",
+      "audience2p1": "Die eine vaginale Geburt nach einem Kaiserschnitt (VBAC) planen",
+      "audience2p2": "Die eine negative Erfahrung gemacht haben und diese nicht wiederholen möchten",
+      "audience2p3": "Die stillen möchten oder Zweifel haben",
+      "audience2p4": "Die wissen möchten, wie man sich nach der Geburt richtig erholt"
+    },
+    "howItWorks": {
+      "tag": "Format",
+      "title": "Wie funktioniert es?",
+      "step1Title": "Vorlesungen im persönlichen Bereich",
+      "step1Desc": "Alle Kursmodule sind sofort verfügbar. Der Zugang wird am Tag der Zahlung per E-Mail gesendet.",
+      "step2Title": "Geschlossener Telegram-Chat",
+      "step2Desc": "Für Unterstützung, Kommunikation und Beantwortung von Fragen.",
+      "step3Title": "Hausaufgaben",
+      "step3Desc": "Hausaufgaben und Tests nach jedem Modul.",
+      "step4Title": "Zusätzliche Materialien",
+      "step4Desc": "Dokumente, Videos und Protokolle zur Festigung des Wissens.",
+      "step5Title": "Zoom-Meetings",
+      "step5Desc": "Wöchentliche Online-Q&A-Meetings + Aufzeichnung."
+    },
+    "topics": {
+      "tag": "Programm",
+      "title": "Was werden Sie lernen?",
+      "topic1Title": "Physiologie der Schwangerschaft und Geburt",
+      "topic1Desc": "Wie Körper, Hormone und Gehirn in jeder Phase der Geburt arbeiten. Was nach der Geburt passiert und wie man sich erholt.",
+      "topic2Title": "Natürliche Geburt",
+      "topic2Desc": "Wie man die Geburt als ein Fest in Erinnerung behält und die Gesundheit von Ihnen und Ihrem Baby erhält. KS, VBAC, Beckenendlage.",
+      "topic3Title": "Baby",
+      "topic3Desc": "Wie Sie Ihr Baby verstehen, seine Grundbedürfnisse erfüllen und den Alltag organisieren.",
+      "topic4Title": "Schmerzen bei der Geburt",
+      "topic4Desc": "Warum es weh tut und wirksame nicht-medizinische Methoden zur Schmerzlinderung. Massage, Atmung und Entspannung.",
+      "topic5Title": "Stillen",
+      "topic5Desc": "Wie Laktation funktioniert. Wie man problemlos stillt und Schwierigkeiten überwindet.",
+      "topic6Title": "Entbindungsklinik",
+      "topic6Desc": "Ihre Rechte und die Pflichten des medizinischen Personals. Wie man mit dem Arzt kommuniziert. Medizinische Verfahren."
+    },
+    "program": {
+      "tag": "Ausbildung",
+      "title": "Vorlesungsprogramm",
+      "desc": "8 Module, die alles abdecken — von der Schwangerschaft bis zur Erholung nach der Geburt",
+      "modules": [
+        {
+          "title": "Modul 1. Schwangerschaft",
+          "lessons": [
+            "Ich bin schwanger – was ist zu tun? Tests, Untersuchungen",
+            "Überraschungen der Schwangerschaft. Worauf sollte man vorbereitet sein?"
+          ]
+        },
+        {
+          "title": "Modul 2. Vorbereitung auf die Geburt",
+          "lessons": [
+            "Erkennen der Geburtsanzeichen",
+            "Bestimmung des Geburtstermins. Was tun, wenn die Wehen einsetzen",
+            "Wann ins Krankenhaus? Simulation einer Sturzgeburt",
+            "Geburtsplan. Die Wahl Ihres Teams"
+          ]
+        },
+        {
+          "title": "Modul 3. Physiologie der Geburt",
+          "lessons": [
+            "Wie erkennt man Wehen? Echte vs. Übungswehen?",
+            "Pressen. Geburtspositionen. Das Baby richtig empfangen",
+            "Nabelschnur. Geburt der Plazenta. Geburtshormone",
+            "Rechte der Frau. Medizinische Eingriffe"
+          ]
+        },
+        {
+          "title": "Modul 4. Empfindungen während der Geburt",
+          "lessons": [
+            "Natürliche Empfindungen sind KEIN Schmerz",
+            "Der Teufelskreis aus Angst-Schmerz-Spannung",
+            "Massage, Atmung und andere Linderungsmaßnahmen",
+            "Lernen sich zu entspannen"
+          ]
+        },
+        {
+          "title": "Modul 5. Mein Baby",
+          "lessons": [
+            "Die goldene Stunde. Grof's Matrizen. Medizinische Eingriffe",
+            "Übergangszustände des Babys. Was eine Mutter beunruhigen könnte",
+            "Psychologische Bedürfnisse des Kindes. Das vierte Trimester",
+            "Schlafen, Baden, Kolik, Spaziergänge..."
+          ]
+        },
+        {
+          "title": "Modul 6. Stillen",
+          "lessons": [
+            "Vorteile des Stillens",
+            "Erstes Anlegen. Anatomie der Brust",
+            "Drei Säulen des Stillens: nach Bedarf, nachts, richtiges Anlegen",
+            "Mögliche Schwierigkeiten: Risse, Milchstau, wenig Milch"
+          ]
+        },
+        {
+          "title": "Modul 7. Nach der Geburt",
+          "lessons": [
+            "Frühes Wochenbett. Nähte und Wochenfluss",
+            "Psychologie einer werdenden Mutter. Baby Blues",
+            "Körperliche Erholung nach der Geburt"
+          ]
+        },
+        {
+          "title": "Modul 8. Besondere Fälle",
+          "lessons": [
+            "Kaiserschnitt: Notfall und geplant. Geburtseinleitung",
+            "Beckenendlage, Zwillinge, VBAC",
+            "Frühgeborene. Wie man ihnen bei der Anpassung hilft"
+          ]
+        }
+      ]
+    },
+    "author": {
+      "tag": "Kursautorin",
+      "name": "Kateryna Mischtschuk",
+      "statsYears": "8+",
+      "statsLabel": "Jahre Erfahrung",
+      "bio": "Ich bin diejenige, die weiß, wie man ohne Schmerzen und unnötige medizinische Eingriffe gebärt. Diejenige, die immer an Ihrer Seite ist. In dem Wissen, dass der Körper der Frau perfekt dafür geschaffen ist, leicht und schmerzlos zu gebären.",
+      "cred1": "Doula mit medizinischer Ausbildung",
+      "cred2": "Hebamme",
+      "cred3": "Zertifizierte Stillberaterin",
+      "cred4": "Autorin des Programms zur Vorbereitung auf eine natürliche sanfte Geburt"
+    },
+    "reviews": {
+      "tag": "Bewertungen",
+      "title": "Was Teilnehmerinnen sagen",
+      "items": [
+        {
+          "name": "Olena",
+          "text": "Danke für den Kurs! Ich habe leicht und ohne Angst entbunden. Das Wissen, das ich erhalten habe, half mir, mich während der Geburt sicher zu fühlen."
+        },
+        {
+          "name": "Mariia",
+          "text": "Der Kurs hat meine Vorstellung von der Geburt komplett verändert. Ich habe aufgehört, Angst zu haben und natürlich entbunden! Ich empfehle es allen zukünftigen Müttern."
+        },
+        {
+          "name": "Anna",
+          "text": "Nach meinem ersten Kaiserschnitt hatte ich Angst, aber dank des Kurses hatte ich eine VBAC! Kateryna ist eine unglaubliche Unterstützung."
+        },
+        {
+          "name": "Viktoria",
+          "text": "Die beste Investition in meine Mutterschaft. Das Stillen war einfach, weil ich gut vorbereitet war."
+        }
+      ]
+    },
+    "contact": {
+      "title": "Noch Fragen?",
+      "desc": "Schreiben Sie uns und wir beraten Sie gerne zum Kurs.",
+      "nameLabel": "Ihr Name",
+      "namePlaceholder": "Wie dürfen wir Sie ansprechen?",
+      "messageLabel": "Ihre Frage",
+      "messagePlaceholder": "Beschreiben Sie, was Sie interessiert..."
+    },
+    "coursesSubtitle": "Unsere Kurse",
+    "coursesTitle": "Verfügbare Kurse",
+    "coursesDesc": "Wählen Sie den Kurs, der am besten zu Ihnen passt",
+    "noCourses": "Derzeit keine Kurse verfügbar"
+  },
   "sidebar": {
     "all_courses": "Alle Kurse",
     "all_modules": "Alle Module",
@@ -14,31 +202,6 @@
     "dashboardTitle": "Dashboard",
     "user": "Benutzer",
     "legal": "Rechtliche Informationen"
-  },
-  "landing": {
-    "navbar": {
-      "about": "Über",
-      "program": "Programm",
-      "author": "Autorin",
-      "courses": "Kurse",
-      "reviews": "Bewertungen",
-      "login": "Anmelden",
-      "join": "Beitreten",
-      "loginCabinet": "Zum Portal",
-      "joinCourse": "Kurs beitreten"
-    },
-    "hero": {
-      "badge": "Online-Kurs für werdende Mütter",
-      "title1": "Vorbereitung auf eine ",
-      "titleHighlight": "gesunde",
-      "title2": " Geburt und glückliche Mutterschaft",
-      "desc": "Geburt und Mutterschaft ohne Schmerz, Angst und Zweifel. Mehr als 1000 Frauen sind diesen Weg bereits mit uns gegangen.",
-      "joinBtn": "Kurs beitreten",
-      "learnMoreBtn": "Mehr erfahren",
-      "statNumber": "1000+",
-      "statText": "glückliche Mütter",
-      "imgAlt": "Glückliche schwangere Frau"
-    }
   },
   "legal": {
     "title": "Rechtliche Informationen",
@@ -409,37 +572,6 @@
       "submit": "Passwort ändern"
     }
   },
-  "landing": {
-    "nav": {
-      "courses": "Kurse",
-      "features": "Vorteile",
-      "about": "Über uns"
-    },
-    "coursesSubtitle": "Unsere Kurse",
-    "coursesTitle": "Verfügbare Kurse",
-    "coursesDesc": "Wählen Sie den Kurs, der am besten zu Ihnen passt",
-    "noCourses": "Derzeit sind keine Kurse verfügbar",
-    "hero": {
-      "title": "Meistern Sie Ihre Zukunft",
-      "subtitle": "Zugängliche und qualitativ hochwertige Bildung für alle. Beginnen Sie noch heute Ihren Weg zum Erfolg.",
-      "startBtn": "Jetzt starten",
-      "learnMoreBtn": "Mehr erfahren"
-    },
-    "features": {
-      "expert": {
-        "title": "Expertenwissen",
-        "desc": "Kuratierte Inhalte von Branchenführern, präsentiert in kleinen, leicht verdaulichen Lektionen."
-      },
-      "community": {
-        "title": "Unterstützende Community",
-        "desc": "Treten Sie einem Netzwerk gleichgesinnter Menschen bei. Zusammen wachsen wir schneller."
-      },
-      "certified": {
-        "title": "Zertifizierte Weiterentwicklung",
-        "desc": "Erhalten Sie Zertifikate, die zählen. Bestätigen Sie Ihre harte Arbeit und neuen Fähigkeiten."
-      }
-    }
-  },
   "notifications": {
     "title": "Benachrichtigungen",
     "empty": "Noch keine Benachrichtigungen",
@@ -465,6 +597,7 @@
     "downloadError": "Fehler beim Herunterladen des Videos. Versuchen Sie es später erneut."
   },
   "appeal": {
+    "alertNoName": "Bitte geben Sie Ihren Namen ein.",
     "title": "Anfrage",
     "subtitle": "Haben Sie Fragen oder Vorschläge? Hinterlassen Sie eine Anfrage und wir werden Sie kontaktieren",
     "newAppeal": "Neue Anfrage",

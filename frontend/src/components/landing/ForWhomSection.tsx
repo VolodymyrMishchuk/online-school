@@ -1,29 +1,33 @@
 
 import { motion } from 'framer-motion';
 import { Baby, Heart, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-const audiences = [
-    {
-        title: 'Для тих, хто вперше стає мамою',
-        icon: Baby,
-        points: [
-            'Хто хоче впоратись з болем',
-            'Хто хоче народжувати без зайвих медичних втручань',
-            'Хто бажає знати все необхідне про природні пологи',
-            'Хто хоче народжувати без страху',
-        ],
-    },
-    {
-        title: 'Для мам з досвідом',
-        icon: Heart,
-        points: [
-            'Хто планує вагінальні пологи після Кесарського розтину',
-            'Хто мав негативний досвід і не хоче його повторення',
-            'Хто бажає годувати груддю або має сумніви',
-            'Хто бажає знати як правильно відновитись після пологів',
-        ],
-    },
-];
+export default function ForWhomSection() {
+    const { t } = useTranslation();
+
+    const audiences = [
+        {
+            title: t('landing.forWhom.audience1Title', 'Для тих, хто вперше стає мамою'),
+            icon: Baby,
+            points: [
+                t('landing.forWhom.audience1p1', 'Хто хоче впоратись з болем'),
+                t('landing.forWhom.audience1p2', 'Хто хоче народжувати без зайвих медичних втручань'),
+                t('landing.forWhom.audience1p3', 'Хто бажає знати все необхідне про природні пологи'),
+                t('landing.forWhom.audience1p4', 'Хто хоче народжувати без страху'),
+            ],
+        },
+        {
+            title: t('landing.forWhom.audience2Title', 'Для мам з досвідом'),
+            icon: Heart,
+            points: [
+                t('landing.forWhom.audience2p1', 'Хто планує вагінальні пологи після Кесарського розтину'),
+                t('landing.forWhom.audience2p2', 'Хто мав негативний досвід і не хоче його повторення'),
+                t('landing.forWhom.audience2p3', 'Хто бажає годувати груддю або має сумніви'),
+                t('landing.forWhom.audience2p4', 'Хто бажає знати як правильно відновитись після пологів'),
+            ],
+        },
+    ];
 
 const container = {
     hidden: {},
@@ -35,7 +39,7 @@ const item = {
     show: { opacity: 1, y: 0, transition: { duration: 0.6 } },
 };
 
-export default function ForWhomSection() {
+
     return (
         <section id="about" className="py-24 lg:py-32 relative text-stone-800">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl" />
@@ -49,10 +53,10 @@ export default function ForWhomSection() {
                     className="text-center mb-16"
                 >
                     <span className="inline-block text-brand-primary font-semibold text-sm tracking-wider uppercase mb-3">
-                        Для кого
+                        {t('landing.forWhom.tag', 'Для кого')}
                     </span>
                     <h2 className="font-sans text-3xl sm:text-4xl lg:text-5xl font-bold">
-                        Для кого курс «Під Серцем»?
+                        {t('landing.forWhom.title', 'Для кого курс «Під Серцем»?')}
                     </h2>
                 </motion.div>
                 
