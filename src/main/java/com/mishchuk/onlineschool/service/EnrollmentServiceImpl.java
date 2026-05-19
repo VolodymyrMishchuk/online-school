@@ -101,4 +101,9 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                                 .map(enrollmentMapper::toDto)
                                 .toList();
         }
+
+        @Override
+        public boolean isEnrolled(UUID studentId, UUID courseId) {
+                return enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).isPresent();
+        }
 }

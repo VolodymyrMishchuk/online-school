@@ -11,4 +11,6 @@ public interface EnrollmentService {
     List<EnrollmentDto> getEnrollmentsByStudent(UUID studentId);
 
     List<EnrollmentDto> getAllEnrollments();
+
+    boolean isEnrolled(UUID studentId, UUID courseId);
 }

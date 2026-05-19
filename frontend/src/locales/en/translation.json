@@ -201,7 +201,9 @@
     "promo_codes": "Promo Codes",
     "dashboardTitle": "Dashboard",
     "user": "User",
-    "legal": "Legal Information"
+    "legal": "Legal Information",
+    "payments": "Payments",
+    "purchases": "Purchases"
   },
   "legal": {
     "title": "Legal Information",
@@ -855,5 +857,46 @@
       "purchaseErrorMsg": "Failed to purchase the course. Please try again."
     },
     "indefinite": "Indefinite"
+  },
+  "adminPayments": {
+    "title": "Payments",
+    "searchPlaceholder": "Search...",
+    "periodLabel": "Period:",
+    "resetFiltersTitle": "Reset filters",
+    "noPaymentsFound": "No payments found",
+    "loadError": "Failed to load payments",
+    "receiptTitle": "Download receipt",
+    "receiptLoadError": "Failed to download receipt",
+    "fakeAdminMessage": "Detailed payment information is only available to platform administrators.",
+    "colIndex": "#",
+    "colDate": "Date",
+    "colUser": "User",
+    "colRegion": "Region",
+    "colCourse": "Course",
+    "colAmount": "Amount",
+    "colSystem": "System",
+    "colStatus": "Status",
+    "colReceipt": "Receipt",
+    "totalLabel": "Total"
+  },
+  "myPurchases": {
+    "title": "My Purchases",
+    "noPaymentsFound": "You have no purchases yet",
+    "noPaymentsDesc": "Browse our catalog and choose a course for yourself.",
+    "goToCatalog": "Go to catalog",
+    "receiptTitle": "Download receipt",
+    "receiptLoadError": "Failed to download receipt",
+    "colIndex": "#",
+    "colDate": "Date",
+    "colCourse": "Course",
+    "colAmount": "Amount",
+    "colSystem": "System",
+    "colStatus": "Status",
+    "colReceipt": "Receipt",
+    "colDuration": "Duration",
+    "colExpires": "Valid Until",
+    "unlimited": "Unlimited",
+    "expired": "Expired",
+    "daysShort": "d"
   }
 }

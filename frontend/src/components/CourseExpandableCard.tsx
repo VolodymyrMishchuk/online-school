@@ -246,7 +246,7 @@ function CourseExpandableCard({
                                         {course.name}
                                     </h3>
                                     {/* Status Badge */}
-                                    {isAdmin && !isMyCoursesPage && (
+                                    {isAdmin && !isMyCoursesPage && !isCatalogMode && (
                                         <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium mr-2 ` +
                                             (course.status === 'PUBLISHED' ? (hasImage ? 'bg-green-500/20 text-green-100 border border-green-500/30' : 'bg-green-100 text-green-800') :
                                                 course.status === 'ARCHIVED' ? (hasImage ? 'bg-gray-500/20 text-gray-100 border border-gray-500/30' : 'bg-gray-100 text-gray-800') :
@@ -254,7 +254,7 @@ function CourseExpandableCard({
                                             {course.status}
                                         </span>
                                     )}
-                                    {isAdmin && course.version && !isMyCoursesPage && (
+                                    {isAdmin && course.version && !isMyCoursesPage && !isCatalogMode && (
                                         <span className={`inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium mr-2 ${hasImage ? 'bg-blue-500/20 text-blue-100 border border-blue-500/30' : 'bg-blue-100 text-blue-800'}`}>
                                             v{course.version}
                                         </span>

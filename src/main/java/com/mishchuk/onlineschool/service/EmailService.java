@@ -14,4 +14,6 @@ public interface EmailService {
     void sendAccessExtendedEmail(String to, String userName, String courseName, LocalDate expirationDate);
 
     void sendCourseAccessRevokedEmail(String to, String userName, String courseName);
+
+    void sendPaymentReceiptEmail(String to, String userName, String courseName, byte[] pdfReceipt);
 }

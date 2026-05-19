@@ -1,53 +1,28 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getCourses } from '../api/courses';
-import { enrollInCourse } from '../api/enrollments';
 import { BookOpen, Clock, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
-import { ConfirmModal } from '../components/ConfirmModal';
+import { PaymentModal } from '../components/modals/PaymentModal';
 
 export default function CatalogPage() {
     const { t } = useTranslation();
     const { data: courses, isLoading } = useQuery({ queryKey: ['courses'], queryFn: () => getCourses() });
     const navigate = useNavigate();
 
-    // Alert Modal State
-    const [isAlertOpen, setIsAlertOpen] = useState(false);
-    const [alertMessage, setAlertMessage] = useState('');
-    const [alertTitle, setAlertTitle] = useState('');
-    const [alertType, setAlertType] = useState<'info' | 'warning' | 'danger'>('warning');
-
-    const showAlert = (message: string, type: 'info' | 'warning' | 'danger' = 'warning', title = t('common.notification', 'Сповіщення')) => {
-        setAlertMessage(message);
-        setAlertType(type);
-        setAlertTitle(title);
-        setIsAlertOpen(true);
-    };
-
-    // Get user from local storage
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
-
-    const enrollMutation = useMutation({
-        mutationFn: (courseId: string) => {
-            if (!user) throw new Error("User not logged in");
-            return enrollInCourse(user.userId, courseId);
-        },
-        onSuccess: () => {
-            showAlert(t('catalog.enrollSuccess', 'Ви успішно записалися!'), 'info', t('common.success', 'Успіх'));
-        },
-        onError: (error: any) => {
-            showAlert(t('catalog.enrollError', 'Помилка при записі: ') + (error.response?.data?.message || t('common.unknownError', 'Невідома помилка')));
-        }
-    });
+    const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
     const handleEnroll = (courseId: string) => {
-        if (!user) {
-            navigate('/login');
-            return;
+        const course = courses?.find(c => c.id === courseId);
+        if (course) {
+            setSelectedCourse(course);
         }
-        enrollMutation.mutate(courseId);
+    };
+
+    const handlePaymentSuccess = () => {
+        setSelectedCourse(null);
+        navigate('/dashboard/my-courses');
     };
 
     if (isLoading) return <div className="min-h-screen flex items-center justify-center text-brand-primary font-medium">{t('common.loading', 'Завантаження...')}</div>;
@@ -65,10 +40,7 @@ export default function CatalogPage() {
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {courses?.map((course) => (
                         <div key={course.id} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-brand-light transition-all duration-300 flex flex-col h-full">
-                            <div className="flex justify-between items-start mb-6">
-                                <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${course.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                                    {course.status}
-                                </div>
+                            <div className="flex justify-end items-start mb-6">
                                 {/* Placeholder for difficulty or category icon */}
                             </div>
 
@@ -99,15 +71,17 @@ export default function CatalogPage() {
                 </div>
             </div>
 
-            <ConfirmModal
-                isOpen={isAlertOpen}
-                onClose={() => setIsAlertOpen(false)}
-                onConfirm={() => setIsAlertOpen(false)}
-                title={alertTitle}
-                message={alertMessage}
-                isAlert={true}
-                type={alertType}
-            />
+
+            {selectedCourse && (
+                <PaymentModal
+                    isOpen={!!selectedCourse}
+                    onClose={() => setSelectedCourse(null)}
+                    courseId={selectedCourse.id}
+                    courseName={selectedCourse.name}
+                    price={selectedCourse.price || 0}
+                    onSuccess={handlePaymentSuccess}
+                />
+            )}
         </div>
     );
 }

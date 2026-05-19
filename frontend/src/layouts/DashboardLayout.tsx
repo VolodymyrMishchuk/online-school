@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket, ShieldCheck } from 'lucide-react';
+import { BookOpen, FileText, GraduationCap, Heart, LogOut, Settings, FolderOpen, Users, Bell, MessageSquare, Ticket, ShieldCheck, CreditCard } from 'lucide-react';
 import { getPerson } from '../api/persons';
 import { enrollInCourse } from '../api/enrollments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -29,7 +29,17 @@ export default function DashboardLayout() {
             
             const oauthUser = { userId: searchUserId, role, firstName, lastName, email, avatarUrl };
             
-            // Save to localStorage
+            if (window.opener && window.opener !== window) {
+                // We are inside a popup
+                window.opener.postMessage({
+                    type: 'OAUTH_SUCCESS',
+                    payload: { token, ...oauthUser }
+                }, window.location.origin);
+                window.close();
+                return oauthUser;
+            }
+
+            // Standard redirect flow
             localStorage.setItem('token', token);
             localStorage.setItem('userId', searchUserId);
             localStorage.setItem('userRole', role);
@@ -95,6 +105,7 @@ export default function DashboardLayout() {
 
         // Optional: Set up interval to refresh count periodically
         const interval = setInterval(fetchUnreadCount, 60000); // Every minute
+        
         return () => clearInterval(interval);
     }, []);
 
@@ -122,11 +133,13 @@ export default function DashboardLayout() {
             { to: '/dashboard/all-modules', icon: FolderOpen, label: t('sidebar.all_modules') },
             { to: '/dashboard/all-lessons', icon: FileText, label: t('sidebar.all_lessons') },
             { to: '/dashboard/users', icon: Users, label: t('sidebar.users') },
+            { to: '/dashboard/payments', icon: CreditCard, label: t('sidebar.payments', 'Оплати') },
             { to: '/dashboard/appeals', icon: MessageSquare, label: t('sidebar.appeals') },
         ] : [
             { to: '/dashboard/appeal', icon: MessageSquare, label: t('sidebar.contact') }
         ]),
         { to: '/dashboard/my-courses', icon: GraduationCap, label: t('sidebar.my_courses') },
+        { to: '/dashboard/purchases', icon: CreditCard, label: t('sidebar.purchases', 'Покупки') },
         { to: '/dashboard/promo-codes', icon: Ticket, label: t('sidebar.promo_codes') },
         { to: '/dashboard/notifications', icon: Bell, label: t('sidebar.notifications') },
         { to: '/dashboard/settings', icon: Settings, label: t('sidebar.settings') },

@@ -26,6 +26,9 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsPage from './pages/TermsPage';
 import LegalPage from './pages/LegalPage';
 
+import AdminPaymentsPage from './pages/AdminPaymentsPage';
+import MyPurchasesPage from './pages/MyPurchasesPage';
+
 const queryClient = new QueryClient();
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -59,8 +62,10 @@ function App() {
             <Route path="all-courses" element={<AllCoursesPage />} />
             <Route path="all-modules" element={<AdminRoute><AllModulesPage /></AdminRoute>} />
             <Route path="all-lessons" element={<AdminRoute><AllLessonsPage /></AdminRoute>} />
+            <Route path="payments" element={<AdminRoute><AdminPaymentsPage /></AdminRoute>} />
             <Route path="my-courses" element={<MyCoursesPage />} />
             <Route path="my-lessons" element={<MyLessonsPage />} />
+            <Route path="purchases" element={<MyPurchasesPage />} />
             <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
             <Route path="notifications" element={<NotificationsPage />} />
             <Route path="settings" element={<SettingsPage />} />

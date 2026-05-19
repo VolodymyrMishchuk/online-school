@@ -10,13 +10,17 @@ import { BookOpen, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { PaymentModal } from '../components/modals/PaymentModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function AllCoursesPage() {
     const { t } = useTranslation();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCourse, setEditingCourse] = useState<CourseDto | undefined>(undefined);
     const [courseToDelete, setCourseToDelete] = useState<CourseDto | null>(null);
+    const [selectedPaymentCourse, setSelectedPaymentCourse] = useState<CourseDto | null>(null);
 
     // Alert Modal State
     const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -67,15 +71,6 @@ export default function AllCoursesPage() {
         }
     });
 
-    const enrollMutation = useMutation({
-        mutationFn: ({ studentId, courseId }: { studentId: string; courseId: string }) =>
-            enrollInCourse(studentId, courseId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['allCourses'] });
-            queryClient.invalidateQueries({ queryKey: ['myEnrollments'] });
-        }
-    });
-
     const handleRefresh = () => {
         queryClient.invalidateQueries({ queryKey: ['allCourses'] });
         queryClient.invalidateQueries({ queryKey: ['allModules'] });
@@ -88,9 +83,8 @@ export default function AllCoursesPage() {
             return;
         }
 
-        const userId = localStorage.getItem('userId') || '';
-        if (userId) {
-            enrollMutation.mutate({ studentId: userId, courseId });
+        if (course) {
+            setSelectedPaymentCourse(course);
         }
     };
 
@@ -219,6 +213,21 @@ export default function AllCoursesPage() {
                 isAlert={true}
                 type="info"
             />
+
+            {selectedPaymentCourse && (
+                <PaymentModal
+                    isOpen={!!selectedPaymentCourse}
+                    onClose={() => setSelectedPaymentCourse(null)}
+                    courseId={selectedPaymentCourse.id}
+                    courseName={selectedPaymentCourse.name}
+                    price={selectedPaymentCourse.price || 0}
+                    onSuccess={() => {
+                        setSelectedPaymentCourse(null);
+                        queryClient.invalidateQueries({ queryKey: ['allCourses'] });
+                        navigate('/dashboard/my-courses');
+                    }}
+                />
+            )}
         </div>
     );
 }

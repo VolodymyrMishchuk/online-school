@@ -107,3 +107,6 @@ databaseChangeLog:
   - include:
       file: changesing/036-alter-persons-add-avatar-url.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/037-create-payments-table.sql
+      relativeToChangelogFile: true

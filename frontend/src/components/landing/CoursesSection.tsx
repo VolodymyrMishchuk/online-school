@@ -5,6 +5,8 @@ import CourseExpandableCard from '../CourseExpandableCard';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { PaymentModal } from '../modals/PaymentModal';
 
 export default function CoursesSection() {
     const { t } = useTranslation();
@@ -20,19 +22,21 @@ export default function CoursesSection() {
         queryFn: () => getModules()
     });
 
+    const [selectedCourse, setSelectedCourse] = useState<any>(null);
+
     // Only show published courses on landing page
     const publishedCourses = courses?.filter(c => c.status === 'PUBLISHED') || [];
 
     const handleEnroll = (courseId: string) => {
-        // Store intent
-        localStorage.setItem('pendingEnrollment', courseId);
-        
-        const token = localStorage.getItem('token');
-        if (token) {
-            navigate('/dashboard/my-courses');
-        } else {
-            navigate('/login?redirect=/dashboard/my-courses');
+        const course = publishedCourses.find(c => c.id === courseId);
+        if (course) {
+            setSelectedCourse(course);
         }
+    };
+
+    const handlePaymentSuccess = () => {
+        setSelectedCourse(null);
+        navigate('/dashboard/my-courses');
     };
 
     return (
@@ -89,6 +93,17 @@ export default function CoursesSection() {
                     </div>
                 )}
             </div>
+
+            {selectedCourse && (
+                <PaymentModal
+                    isOpen={!!selectedCourse}
+                    onClose={() => setSelectedCourse(null)}
+                    courseId={selectedCourse.id}
+                    courseName={selectedCourse.name}
+                    price={selectedCourse.price || 0}
+                    onSuccess={handlePaymentSuccess}
+                />
+            )}
         </section>
     );
 }

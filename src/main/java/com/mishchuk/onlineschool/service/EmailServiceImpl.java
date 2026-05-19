@@ -100,6 +100,38 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlEmail(to, "Доступ до курсу продовжено!", "email/access-extended", context);
     }
 
+    @Override
+    public void sendPaymentReceiptEmail(String to, String userName, String courseName, byte[] pdfReceipt) {
+        log.info("Sending payment receipt email to {} for course {}", to, courseName);
+        Context context = new Context();
+        context.setVariable("userName", userName);
+        context.setVariable("courseName", courseName);
+        
+        sendHtmlEmailWithAttachment(to, "Чек про оплату: " + courseName, "email/receipt-email", context, pdfReceipt, "receipt.pdf");
+    }
+
+    private void sendHtmlEmailWithAttachment(String to, String subject, String templateName, Context context, byte[] attachmentData, String attachmentName) {
+        try {
+            MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            String htmlContent = templateEngine.process(templateName, context);
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+            helper.setFrom("noreply@onlineschool.com");
+
+            org.springframework.core.io.ByteArrayResource resource = new org.springframework.core.io.ByteArrayResource(attachmentData);
+            helper.addAttachment(attachmentName, resource);
+
+            javaMailSender.send(mimeMessage);
+            log.info("Email with attachment sent successfully to {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send email with attachment to {}: {}", to, e.getMessage());
+        }
+    }
+
     private void sendHtmlEmail(String to, String subject, String templateName, Context context) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();

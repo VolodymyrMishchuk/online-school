@@ -201,7 +201,9 @@
     "promo_codes": "Промокоди",
     "dashboardTitle": "Дошбоард",
     "user": "Користувач",
-    "legal": "Правова інформація"
+    "legal": "Правова інформація",
+    "payments": "Оплати",
+    "purchases": "Покупки"
   },
   "legal": {
     "title": "Правова інформація",
@@ -808,5 +810,46 @@
       "purchaseErrorMsg": "Не вдалося придбати курс. Спробуйте ще раз."
     },
     "indefinite": "Безстроково"
+  },
+  "adminPayments": {
+    "title": "Оплати",
+    "searchPlaceholder": "Пошук...",
+    "periodLabel": "Період:",
+    "resetFiltersTitle": "Скинути фільтри",
+    "noPaymentsFound": "Платежів не знайдено",
+    "loadError": "Не вдалося завантажити платежі",
+    "receiptTitle": "Завантажити чек",
+    "receiptLoadError": "Не вдалося завантажити чек",
+    "fakeAdminMessage": "Детальна інформація про платежі доступна лише адміністраторам платформи.",
+    "colIndex": "#",
+    "colDate": "Дата",
+    "colUser": "Користувач",
+    "colRegion": "Регіон",
+    "colCourse": "Курс",
+    "colAmount": "Сума",
+    "colSystem": "Система",
+    "colStatus": "Статус",
+    "colReceipt": "Чек",
+    "totalLabel": "Сума"
+  },
+  "myPurchases": {
+    "title": "Мої покупки",
+    "noPaymentsFound": "У вас ще немає покупок",
+    "noPaymentsDesc": "Ознайомтесь з нашим каталогом та оберіть курс для себе.",
+    "goToCatalog": "Перейти до каталогу",
+    "receiptTitle": "Завантажити чек",
+    "receiptLoadError": "Не вдалося завантажити чек",
+    "colIndex": "#",
+    "colDate": "Дата",
+    "colCourse": "Курс",
+    "colAmount": "Сума",
+    "colSystem": "Система",
+    "colStatus": "Статус",
+    "colReceipt": "Чек",
+    "colDuration": "Тривалість",
+    "colExpires": "Доки діє",
+    "unlimited": "Безлімітно",
+    "expired": "Строк вийшов",
+    "daysShort": "д"
   }
 }

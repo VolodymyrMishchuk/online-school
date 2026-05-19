@@ -201,7 +201,9 @@
     "promo_codes": "Gutscheine",
     "dashboardTitle": "Dashboard",
     "user": "Benutzer",
-    "legal": "Rechtliche Informationen"
+    "legal": "Rechtliche Informationen",
+    "payments": "Zahlungen",
+    "purchases": "Einkäufe"
   },
   "legal": {
     "title": "Rechtliche Informationen",
@@ -855,5 +857,46 @@
       "purchaseErrorMsg": "Der Kurs konnte nicht gekauft werden. Bitte versuchen Sie es erneut."
     },
     "indefinite": "Unbefristet"
+  },
+  "adminPayments": {
+    "title": "Zahlungen",
+    "searchPlaceholder": "Suchen...",
+    "periodLabel": "Zeitraum:",
+    "resetFiltersTitle": "Filter zurücksetzen",
+    "noPaymentsFound": "Keine Zahlungen gefunden",
+    "loadError": "Zahlungen konnten nicht geladen werden",
+    "receiptTitle": "Quittung herunterladen",
+    "receiptLoadError": "Quittung konnte nicht heruntergeladen werden",
+    "fakeAdminMessage": "Detaillierte Zahlungsinformationen sind nur Plattformadministratoren zugänglich.",
+    "colIndex": "#",
+    "colDate": "Datum",
+    "colUser": "Benutzer",
+    "colRegion": "Region",
+    "colCourse": "Kurs",
+    "colAmount": "Betrag",
+    "colSystem": "System",
+    "colStatus": "Status",
+    "colReceipt": "Quittung",
+    "totalLabel": "Gesamt"
+  },
+  "myPurchases": {
+    "title": "Meine Einkäufe",
+    "noPaymentsFound": "Sie haben noch keine Einkäufe",
+    "noPaymentsDesc": "Durchsuchen Sie unseren Katalog und wählen Sie einen Kurs für sich.",
+    "goToCatalog": "Zum Katalog gehen",
+    "receiptTitle": "Quittung herunterladen",
+    "receiptLoadError": "Quittung konnte nicht heruntergeladen werden",
+    "colIndex": "#",
+    "colDate": "Datum",
+    "colCourse": "Kurs",
+    "colAmount": "Betrag",
+    "colSystem": "System",
+    "colStatus": "Status",
+    "colReceipt": "Quittung",
+    "colDuration": "Dauer",
+    "colExpires": "Gültig bis",
+    "unlimited": "Unbegrenzt",
+    "expired": "Abgelaufen",
+    "daysShort": "T"
   }
 }

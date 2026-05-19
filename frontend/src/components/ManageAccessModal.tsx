@@ -273,7 +273,7 @@ export const ManageAccessModal: React.FC<ManageAccessModalProps> = ({ isOpen, on
 
             {/* Custom Confirmation Modal Overlay */}
             {confirmRevokeCourse && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                <div className="absolute inset-0 z-[60] flex items-center justify-center bg-white/40 backdrop-blur-md animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4 animate-in zoom-in-95 duration-200 border border-gray-100">
                         <div className="flex flex-col items-center text-center">
                             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4">
