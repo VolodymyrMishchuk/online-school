@@ -277,6 +277,7 @@
     "interfaceLanguage": "Interface Language",
     "firstNamePlaceholder": "John",
     "lastNamePlaceholder": "Doe",
+    "free": "Free",
     "languages": {
       "uk": "Ukrainian",
       "en": "English",
@@ -392,7 +393,11 @@
     "noModulesFound": "No available modules found",
     "currentCourse": "Current Course:",
     "willBeChanged": "(will be changed)",
-    "selectedModulesCount": "Selected:"
+    "selectedModulesCount": "Selected:",
+    "errorDiscountAmount": "Discount cannot be greater than the course price",
+    "errorRenewalDiscount": "Renewal discount cannot be greater than the course price",
+    "errorPromotionalDiscount": "Promotional discount cannot be greater than the next course price",
+    "errorPercentage": "Discount percentage cannot exceed 100%"
   },
   "courseExpandableCard": {
     "availableForMinutes_one": "Course available for another {{count}} minute",
@@ -404,7 +409,9 @@
     "buyCourse": "Buy Course",
     "extendForReview": "Extend access for video review",
     "extendWithDiscount": "Extend course with discount",
-    "getNewCourseDiscount": "Get -10€ discount on SUPER new course",
+    "extendWithDiscountLabel": "Extend course with {{discount}} discount",
+    "getDiscountOnNext": "Get {{discount}} discount on {{course}}",
+    "goToNextCourse": "Go to next course: {{course}}",
     "deleteCourse": "Delete Course",
     "courseContent": "Course Content",
     "noModulesYet": "No modules added yet",

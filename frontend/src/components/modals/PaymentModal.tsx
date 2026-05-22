@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CreditCard, Lock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { login, register, logout as apiLogout } from '../../api/auth';
 import { processPayment } from '../../api/payments';
@@ -41,8 +42,10 @@ export function PaymentModal({ isOpen, onClose, courseId, courseName, price, cur
             const userId = localStorage.getItem('userId');
             if (userId) {
                 const enrollments = await getMyEnrollments(userId);
-                const isEnrolled = enrollments.some(e => e.courseId === courseId);
-                if (isEnrolled) {
+                const activeEnrollment = enrollments.find(
+                    e => e.courseId === courseId && (e.status === 'ACTIVE' || e.status === 'PENDING')
+                );
+                if (activeEnrollment) {
                     setIsAlreadyEnrolled(true);
                 }
             }
@@ -111,7 +114,6 @@ export function PaymentModal({ isOpen, onClose, courseId, courseName, price, cur
     };
 
     const handlePayment = async () => {
-        alert('Увага: Це тестова оплата. Доступ до курсу буде надано, оплата пройшла успішно, але реальні гроші з вашого рахунку не будуть списані, оскільки підключення реальної оплати знаходиться в процесі розробки.');
         
         setError('');
         setIsProcessing(true);
@@ -130,8 +132,8 @@ export function PaymentModal({ isOpen, onClose, courseId, courseName, price, cur
         }
     };
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-md p-4">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/40 backdrop-blur-md p-4">
             <div className={`bg-white rounded-3xl w-full ${isAuthenticated ? 'max-w-md' : 'max-w-4xl'} shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300`}>
                 {/* Header */}
                 <div className="relative bg-brand-light/30 px-6 py-4 border-b border-gray-100 flex items-center justify-between">
@@ -391,5 +393,5 @@ export function PaymentModal({ isOpen, onClose, courseId, courseName, price, cur
                 )}
             </div>
         </div>
-    );
+    , document.body);
 }

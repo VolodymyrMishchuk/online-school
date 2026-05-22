@@ -277,6 +277,7 @@
     "interfaceLanguage": "Мова інтерфейсу",
     "firstNamePlaceholder": "Іван",
     "lastNamePlaceholder": "Петренко",
+    "free": "Безкоштовно",
     "languages": {
       "uk": "Українська",
       "en": "English",
@@ -413,7 +414,11 @@
     "noModulesFound": "Доступних модулів не знайдено",
     "currentCourse": "Поточний курс:",
     "willBeChanged": "(буде змінено)",
-    "selectedModulesCount": "Вибрано:"
+    "selectedModulesCount": "Вибрано:",
+    "errorDiscountAmount": "Знижка не може бути більшою за ціну курсу",
+    "errorRenewalDiscount": "Знижка на продовження не може бути більшою за ціну курсу",
+    "errorPromotionalDiscount": "Акційна знижка не може бути більшою за ціну наступного курсу",
+    "errorPercentage": "Відсоток знижки не може перевищувати 100%"
   },
   "courseExpandableCard": {
     "availableForMinutes_one": "Доступ залишився: {{count}} хвилина",
@@ -429,7 +434,9 @@
     "buyCourse": "Придбати курс",
     "extendForReview": "Отримати доступ за відеовідгук",
     "extendWithDiscount": "Продовжити курс зі знижкою",
-    "getNewCourseDiscount": "Отримати знижку -10€ на СУПЕР новий курс",
+    "extendWithDiscountLabel": "Продовжити курс зі знижкою {{discount}}",
+    "getDiscountOnNext": "Отримати знижку {{discount}} на {{course}}",
+    "goToNextCourse": "Перейти до наступного курсу: {{course}}",
     "deleteCourse": "Видалити курс",
     "courseContent": "Зміст Курсу",
     "noModulesYet": "Модулі ще не додано",

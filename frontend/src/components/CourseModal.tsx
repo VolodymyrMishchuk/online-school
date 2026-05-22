@@ -1,6 +1,6 @@
 import type { CourseDto, CreateCourseDto } from '../api/courses';
 import type { Module } from '../api/modules';
-import { X, BookOpen, Layers, CheckCircle, Euro, Percent, Clock, Tag, ArrowRight, FileText } from 'lucide-react';
+import { X, BookOpen, Layers, CheckCircle, Euro, Percent, Clock, Tag, ArrowRight, FileText, Settings2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { API_URL } from '../api/client';
 import { useTranslation } from 'react-i18next';
@@ -33,12 +33,18 @@ export const CourseModal: React.FC<CourseModalProps> = ({
     const [accessDuration, setAccessDuration] = useState<number | undefined>(undefined);
     const [promotionalDiscountPercentage, setPromotionalDiscountPercentage] = useState<number | undefined>(undefined);
     const [promotionalDiscountAmount, setPromotionalDiscountAmount] = useState<number | undefined>(undefined);
+    const [renewalDiscountPercentage, setRenewalDiscountPercentage] = useState<number | undefined>(undefined);
+    const [renewalDiscountAmount, setRenewalDiscountAmount] = useState<number | undefined>(undefined);
+    const [extendForReviewEnabled, setExtendForReviewEnabled] = useState(true);
+    const [renewalEnabled, setRenewalEnabled] = useState(true);
+    const [nextCourseDiscountEnabled, setNextCourseDiscountEnabled] = useState(true);
     const [nextCourseId, setNextCourseId] = useState<string | undefined>(undefined);
     const [selectedModuleIds, setSelectedModuleIds] = useState<string[]>([]);
     const [file, setFile] = useState<File | undefined>(undefined);
     const [previewUrl, setPreviewUrl] = useState<string | undefined>(undefined);
     const [deleteCover, setDeleteCover] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (initialData) {
@@ -51,6 +57,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setAccessDuration(initialData.accessDuration);
             setPromotionalDiscountPercentage(initialData.promotionalDiscountPercentage);
             setPromotionalDiscountAmount(initialData.promotionalDiscountAmount);
+            setRenewalDiscountPercentage(initialData.renewalDiscountPercentage);
+            setRenewalDiscountAmount(initialData.renewalDiscountAmount);
+            setExtendForReviewEnabled(initialData.extendForReviewEnabled !== false);
+            setRenewalEnabled(initialData.renewalEnabled !== false);
+            setNextCourseDiscountEnabled(initialData.nextCourseDiscountEnabled !== false);
             setNextCourseId(initialData.nextCourseId);
             setSelectedModuleIds(initialModuleIds);
             setPreviewUrl(initialData.coverImageUrl ? `${API_URL}${initialData.coverImageUrl}` : undefined);
@@ -65,6 +76,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({
             setAccessDuration(undefined);
             setPromotionalDiscountPercentage(undefined);
             setPromotionalDiscountAmount(undefined);
+            setRenewalDiscountPercentage(undefined);
+            setRenewalDiscountAmount(undefined);
+            setExtendForReviewEnabled(true);
+            setRenewalEnabled(true);
+            setNextCourseDiscountEnabled(true);
             setNextCourseId(undefined);
             setSelectedModuleIds([]);
             setFile(undefined);
@@ -84,6 +100,34 @@ export const CourseModal: React.FC<CourseModalProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(null);
+
+        const currentPrice = price || 0;
+        
+        if (discountAmount && discountAmount > currentPrice) {
+            setError(t('courseModal.errorDiscountAmount', 'Знижка не може бути більшою за ціну курсу'));
+            return;
+        }
+        if (renewalDiscountAmount && renewalDiscountAmount > currentPrice) {
+            setError(t('courseModal.errorRenewalDiscount', 'Знижка на продовження не може бути більшою за ціну курсу'));
+            return;
+        }
+        
+        if (promotionalDiscountAmount && nextCourseId) {
+            const nextCourse = courses.find(c => c.id === nextCourseId);
+            if (nextCourse && nextCourse.price !== undefined && promotionalDiscountAmount > nextCourse.price) {
+                 setError(t('courseModal.errorPromotionalDiscount', 'Акційна знижка не може бути більшою за ціну наступного курсу'));
+                 return;
+            }
+        }
+
+        if ((discountPercentage && discountPercentage > 100) || 
+            (renewalDiscountPercentage && renewalDiscountPercentage > 100) || 
+            (promotionalDiscountPercentage && promotionalDiscountPercentage > 100)) {
+            setError(t('courseModal.errorPercentage', 'Відсоток знижки не може перевищувати 100%'));
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await onSubmit({
@@ -95,6 +139,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 accessDuration,
                 promotionalDiscountPercentage,
                 promotionalDiscountAmount,
+                renewalDiscountPercentage,
+                renewalDiscountAmount,
+                extendForReviewEnabled,
+                renewalEnabled,
+                nextCourseDiscountEnabled,
                 nextCourseId,
                 moduleIds: selectedModuleIds,
                 deleteCoverImage: deleteCover // Pass the flag
@@ -323,91 +372,132 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                             </p>
                         </div>
 
-                        {/* Promotional Discount */}
-                        <div>
-                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
-                                <Percent className="w-4 h-4" />
-                                {t('courseModal.promotionalDiscount', 'Акційна знижка на наступний курс (% або фіксована сума)')}
-                            </label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Promotional Discount Percentage */}
-                                <div>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            value={promotionalDiscountPercentage || ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value ? parseInt(e.target.value) : undefined;
-                                                setPromotionalDiscountPercentage(val);
-                                                if (val && val > 0) setPromotionalDiscountAmount(undefined);
-                                            }}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                            placeholder={t('courseModal.promotionalPercentagePlaceholder', 'Наприклад: 15')}
-                                        />
-                                        <span className="absolute right-4 top-3.5 text-gray-400 font-medium">%</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1 ml-1">
-                                        {t('courseModal.promotionalPercentageHint', 'Знижка у відсотках')}
-                                    </p>
-                                </div>
-
-                                {/* Promotional Discount Amount */}
-                                <div>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={promotionalDiscountAmount || ''}
-                                            onChange={(e) => {
-                                                const val = e.target.value ? parseFloat(e.target.value) : undefined;
-                                                setPromotionalDiscountAmount(val);
-                                                if (val && val > 0) setPromotionalDiscountPercentage(undefined);
-                                            }}
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                            placeholder={t('courseModal.promotionalAmountPlaceholder', 'Наприклад: 10.00')}
-                                        />
-                                        <span className="absolute right-4 top-3.5 text-gray-400 font-medium">€</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mt-1 ml-1">
-                                        {t('courseModal.promotionalAmountHint', 'Фіксована знижка')}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Next Course Recommendation */}
-                        <div>
-                            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2 ml-1">
-                                <ArrowRight className="w-4 h-4" />
-                                {t('courseModal.nextCourse', 'Наступний рекомендований курс')}
-                            </label>
-                            <div className="relative">
-                                <select
-                                    value={nextCourseId || ''}
-                                    onChange={(e) => setNextCourseId(e.target.value || undefined)}
-                                    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white/50 outline-none transition-all focus:border-brand-primary focus:ring-2 focus:ring-brand-light focus:bg-white appearance-none"
-                                >
-                                    <option value="">{t('courseModal.notSpecified', 'Не вказано')}</option>
-                                    {courses
-                                        .filter(course => course.id !== initialData?.id)
-                                        .map(course => (
-                                            <option key={course.id} value={course.id}>
-                                                {course.name}
-                                            </option>
-                                        ))}
-                                </select>
-                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1 ml-1">
-                                {t('courseModal.nextCourseHint', 'Рекомендований наступний курс після завершення цього')}
+                        {/* Blocked Course Feature Flags */}
+                        <div className="border border-brand-primary/20 rounded-xl p-5 bg-brand-primary/3 space-y-3">
+                            {/* Section header */}
+                            <p className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                <Settings2 className="w-4 h-4 text-brand-primary" />
+                                {t('courseModal.blockedCourseOptions', 'Опції для картки з закінченим доступом')}
                             </p>
+
+                            {/* 1. Extend for review — simple toggle only */}
+                            <div className={`rounded-lg border transition-all ${extendForReviewEnabled ? 'border-brand-primary/40 bg-white shadow-sm' : 'border-gray-200 bg-gray-100/50 opacity-60'}`}>
+                                <label className="flex items-center gap-3 p-3 cursor-pointer">
+                                    <div className="relative flex items-center shrink-0">
+                                        <input type="checkbox" checked={extendForReviewEnabled}
+                                            onChange={(e) => setExtendForReviewEnabled(e.target.checked)}
+                                            className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-gray-300 transition-all checked:border-brand-primary checked:bg-brand-primary" />
+                                        <CheckCircle className="absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white w-3.5 h-3.5 left-[3px] top-[3px]" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">{t('courseModal.extendForReviewEnabled', 'Отримати доступ за відеовідгук')}</span>
+                                        <p className="text-xs text-gray-400">{t('courseModal.extendForReviewHint', 'Кнопка продовження доступу через відеовідгук')}</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {/* 2. Renewal — toggle + renewal discount fields */}
+                            <div className={`rounded-lg border transition-all ${renewalEnabled ? 'border-brand-primary/40 bg-white shadow-sm' : 'border-gray-200 bg-gray-100/50 opacity-60'}`}>
+                                <label className="flex items-center gap-3 p-3 cursor-pointer">
+                                    <div className="relative flex items-center shrink-0">
+                                        <input type="checkbox" checked={renewalEnabled}
+                                            onChange={(e) => setRenewalEnabled(e.target.checked)}
+                                            className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-gray-300 transition-all checked:border-brand-primary checked:bg-brand-primary" />
+                                        <CheckCircle className="absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white w-3.5 h-3.5 left-[3px] top-[3px]" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">{t('courseModal.renewalEnabled', 'Продовжити курс зі знижкою')}</span>
+                                        <p className="text-xs text-gray-400">{t('courseModal.renewalHint', 'Кнопка повторного придбання з актуальною знижкою')}</p>
+                                    </div>
+                                </label>
+                                {/* Renewal discount fields */}
+                                <div className="px-3 pb-3 border-t border-gray-100 pt-2">
+                                    <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                                        <Tag className="w-3 h-3" />
+                                        {t('courseModal.renewalDiscount', 'Знижка на продовження доступу')}
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="relative">
+                                            <input type="number" min="0" max="100"
+                                                value={renewalDiscountPercentage || ''}
+                                                onChange={(e) => { const val = e.target.value ? parseInt(e.target.value) : undefined; setRenewalDiscountPercentage(val); if (val && val > 0) setRenewalDiscountAmount(undefined); }}
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 outline-none transition-all focus:border-brand-primary focus:ring-1 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                placeholder="%" />
+                                            <span className="absolute right-3 top-2 text-gray-400 text-sm">%</span>
+                                        </div>
+                                        <div className="relative">
+                                            <input type="number" min="0" step="0.01"
+                                                value={renewalDiscountAmount || ''}
+                                                onChange={(e) => { const val = e.target.value ? parseFloat(e.target.value) : undefined; setRenewalDiscountAmount(val); if (val && val > 0) setRenewalDiscountPercentage(undefined); }}
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 outline-none transition-all focus:border-brand-primary focus:ring-1 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                placeholder="€" />
+                                            <span className="absolute right-3 top-2 text-gray-400 text-sm">€</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 3. Next course discount — toggle + promotional discount + next course selector */}
+                            <div className={`rounded-lg border transition-all ${nextCourseDiscountEnabled ? 'border-brand-primary/40 bg-white shadow-sm' : 'border-gray-200 bg-gray-100/50 opacity-60'}`}>
+                                <label className="flex items-center gap-3 p-3 cursor-pointer">
+                                    <div className="relative flex items-center shrink-0">
+                                        <input type="checkbox" checked={nextCourseDiscountEnabled}
+                                            onChange={(e) => setNextCourseDiscountEnabled(e.target.checked)}
+                                            className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-gray-300 transition-all checked:border-brand-primary checked:bg-brand-primary" />
+                                        <CheckCircle className="absolute pointer-events-none opacity-0 peer-checked:opacity-100 text-white w-3.5 h-3.5 left-[3px] top-[3px]" />
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">{t('courseModal.nextCourseDiscountEnabled', 'Отримати знижку на наступний курс')}</span>
+                                        <p className="text-xs text-gray-400">{t('courseModal.nextCourseDiscountHint', 'Кнопка переходу до наступного рекомендованого курсу')}</p>
+                                    </div>
+                                </label>
+                                <div className="px-3 pb-3 border-t border-gray-100 pt-2 space-y-3">
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                                            <Percent className="w-3 h-3" />
+                                            {t('courseModal.promotionalDiscount', 'Акційна знижка на наступний курс')}
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="relative">
+                                                <input type="number" min="0" max="100"
+                                                    value={promotionalDiscountPercentage || ''}
+                                                    onChange={(e) => { const val = e.target.value ? parseInt(e.target.value) : undefined; setPromotionalDiscountPercentage(val); if (val && val > 0) setPromotionalDiscountAmount(undefined); }}
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 outline-none transition-all focus:border-brand-primary focus:ring-1 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    placeholder="%" />
+                                                <span className="absolute right-3 top-2 text-gray-400 text-sm">%</span>
+                                            </div>
+                                            <div className="relative">
+                                                <input type="number" min="0" step="0.01"
+                                                    value={promotionalDiscountAmount || ''}
+                                                    onChange={(e) => { const val = e.target.value ? parseFloat(e.target.value) : undefined; setPromotionalDiscountAmount(val); if (val && val > 0) setPromotionalDiscountPercentage(undefined); }}
+                                                    className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 outline-none transition-all focus:border-brand-primary focus:ring-1 focus:ring-brand-light focus:bg-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    placeholder="€" />
+                                                <span className="absolute right-3 top-2 text-gray-400 text-sm">€</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-medium text-gray-500 mb-2 flex items-center gap-1">
+                                            <ArrowRight className="w-3 h-3" />
+                                            {t('courseModal.nextCourse', 'Наступний рекомендований курс')}
+                                        </p>
+                                        <div className="relative">
+                                            <select value={nextCourseId || ''} onChange={(e) => setNextCourseId(e.target.value || undefined)}
+                                                className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 bg-gray-50 outline-none transition-all focus:border-brand-primary focus:ring-1 focus:ring-brand-light focus:bg-white appearance-none">
+                                                <option value="">{t('courseModal.notSpecified', 'Не вказано')}</option>
+                                                {courses.filter(c => c.id !== initialData?.id).map(c => (
+                                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-400">
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Module Selection */}
@@ -468,6 +558,16 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                     </form>
                 </div>
 
+                {error && (
+                    <div className="px-6 pb-2 bg-white/50 backdrop-blur-sm">
+                        <div className="p-3 bg-red-50 text-red-500 text-sm rounded-lg border border-red-100 flex items-start gap-2">
+                            <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{error}</span>
+                        </div>
+                    </div>
+                )}
                 {/* Footer - Static */}
                 <div className="flex gap-4 p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm shrink-0">
                     <button

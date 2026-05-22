@@ -110,3 +110,9 @@ databaseChangeLog:
   - include:
       file: changesing/037-create-payments-table.sql
       relativeToChangelogFile: true
+  - include:
+      file: changesing/038-add-renewal-discount-to-courses.sql
+      relativeToChangelogFile: true
+  - include:
+      file: changesing/039-add-blocked-course-feature-flags.sql
+      relativeToChangelogFile: true

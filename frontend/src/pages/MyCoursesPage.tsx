@@ -85,6 +85,7 @@ export default function MyCoursesPage() {
                                 key={course.id}
                                 course={course}
                                 modules={modules || []}
+                                allCourses={allCourses || []}
                                 isMyCoursesPage={true}
                                 onEdit={() => { }} // Students cannot edit courses
                                 onDelete={() => { }} // Students cannot delete courses

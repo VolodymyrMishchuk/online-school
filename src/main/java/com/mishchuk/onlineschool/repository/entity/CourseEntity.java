@@ -50,6 +50,21 @@ public class CourseEntity {
     @Column(name = "promotional_discount_amount")
     private java.math.BigDecimal promotionalDiscountAmount;
 
+    @Column(name = "renewal_discount_percentage")
+    private Integer renewalDiscountPercentage;
+
+    @Column(name = "renewal_discount_amount")
+    private java.math.BigDecimal renewalDiscountAmount;
+
+    @Column(name = "extend_for_review_enabled", nullable = false)
+    private Boolean extendForReviewEnabled = true;
+
+    @Column(name = "renewal_enabled", nullable = false)
+    private Boolean renewalEnabled = true;
+
+    @Column(name = "next_course_discount_enabled", nullable = false)
+    private Boolean nextCourseDiscountEnabled = true;
+
     @OneToOne(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private CourseCoverEntity coverImage;
 

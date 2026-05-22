@@ -165,6 +165,11 @@ public class CourseServiceImpl implements CourseService {
                         baseDto.accessDuration(),
                         baseDto.promotionalDiscountPercentage(),
                         baseDto.promotionalDiscountAmount(),
+                        baseDto.renewalDiscountPercentage(),
+                        baseDto.renewalDiscountAmount(),
+                        baseDto.extendForReviewEnabled(),
+                        baseDto.renewalEnabled(),
+                        baseDto.nextCourseDiscountEnabled(),
                         baseDto.nextCourseId(),
                         baseDto.nextCourseName(),
                         baseDto.createdAt(),
@@ -206,10 +211,26 @@ public class CourseServiceImpl implements CourseService {
 
         courseMapper.updateEntityFromDto(dto, entity);
 
+        // Manually handle nextCourse since it's ignored in the mapper
+        if (dto.nextCourseId() != null) {
+            CourseEntity nextCourse = courseRepository.findById(dto.nextCourseId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Next course not found with id: " + dto.nextCourseId()));
+            entity.setNextCourse(nextCourse);
+        } else {
+            entity.setNextCourse(null);
+        }
+
         if (dto.promotionalDiscountPercentage() != null) {
             entity.setPromotionalDiscountAmount(null);
         } else if (dto.promotionalDiscountAmount() != null) {
             entity.setPromotionalDiscountPercentage(null);
+        }
+
+        // Renewal discount mutual exclusivity
+        if (dto.renewalDiscountPercentage() != null && dto.renewalDiscountPercentage() > 0) {
+            entity.setRenewalDiscountAmount(null);
+        } else if (dto.renewalDiscountAmount() != null && dto.renewalDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+            entity.setRenewalDiscountPercentage(null);
         }
 
         if (Boolean.TRUE.equals(dto.deleteCoverImage())) {

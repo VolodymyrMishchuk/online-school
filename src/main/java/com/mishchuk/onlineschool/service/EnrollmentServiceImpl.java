@@ -46,8 +46,23 @@ public class EnrollmentServiceImpl implements EnrollmentService {
                         }
                 }
 
-                if (enrollmentRepository.findByStudentIdAndCourseId(dto.studentId(), dto.courseId()).isPresent()) {
-                        throw new RuntimeException("Enrollment already exists");
+                var existingEnrollmentOpt = enrollmentRepository.findByStudentIdAndCourseId(dto.studentId(), dto.courseId());
+                if (existingEnrollmentOpt.isPresent()) {
+                        EnrollmentEntity existing = existingEnrollmentOpt.get();
+                        if ("BLOCKED".equals(existing.getStatus()) || "EXPIRED".equals(existing.getStatus())) {
+                                CourseEntity course = courseRepository.findById(dto.courseId())
+                                                .orElseThrow(() -> new RuntimeException("Course not found"));
+                                existing.setStatus("ACTIVE");
+                                if (course.getAccessDuration() != null && course.getAccessDuration() > 0) {
+                                        existing.setExpiresAt(OffsetDateTime.now().plusDays(course.getAccessDuration()));
+                                } else {
+                                        existing.setExpiresAt(null);
+                                }
+                                enrollmentRepository.save(existing);
+                                return; // Re-activated, no need to create new
+                        } else {
+                                throw new RuntimeException("Enrollment already exists and is active/pending");
+                        }
                 }
 
                 PersonEntity student = personRepository.findById(dto.studentId())
@@ -104,6 +119,8 @@ public class EnrollmentServiceImpl implements EnrollmentService {
 
         @Override
         public boolean isEnrolled(UUID studentId, UUID courseId) {
-                return enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId).isPresent();
+                return enrollmentRepository.findByStudentIdAndCourseId(studentId, courseId)
+                                .map(e -> "ACTIVE".equals(e.getStatus()) || "PENDING".equals(e.getStatus()))
+                                .orElse(false);
         }
 }

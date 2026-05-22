@@ -274,9 +274,10 @@
     "status": "Status",
     "active": "Aktiv",
     "inactive": "Inaktiv",
-    "interfaceLanguage": "Interface-Sprache",
+    "interfaceLanguage": "Oberflächensprache",
     "firstNamePlaceholder": "Max",
     "lastNamePlaceholder": "Mustermann",
+    "free": "Kostenlos",
     "languages": {
       "uk": "Ukrainisch",
       "en": "Englisch",
@@ -392,7 +393,11 @@
     "noModulesFound": "Keine verfügbaren Module gefunden",
     "currentCourse": "Aktueller Kurs:",
     "willBeChanged": "(wird geändert)",
-    "selectedModulesCount": "Ausgewählt:"
+    "selectedModulesCount": "Ausgewählt:",
+    "errorDiscountAmount": "Der Rabatt darf nicht größer als der Kurspreis sein",
+    "errorRenewalDiscount": "Der Verlängerungsrabatt darf nicht größer als der Kurspreis sein",
+    "errorPromotionalDiscount": "Der Aktionsrabatt darf nicht größer als der Preis des nächsten Kurses sein",
+    "errorPercentage": "Der Rabatt in Prozent darf 100% nicht überschreiten"
   },
   "courseExpandableCard": {
     "availableForMinutes_one": "Kurs noch für {{count}} Minute verfügbar",
@@ -402,8 +407,11 @@
     "availableForLabel": "Kurs noch für {{time}} verfügbar",
     "availableForLessThanDay": "Kurs noch weniger als einen Tag verfügbar",
     "buyCourse": "Kurs kaufen",
-    "extendForReview": "Zugang gegen Videorezension verlängern",
+    "extendForReview": "Zugang gegen Videobewertung verlängern",
     "extendWithDiscount": "Kurs mit Rabatt verlängern",
+    "extendWithDiscountLabel": "Kurs mit {{discount}} Rabatt verlängern",
+    "getDiscountOnNext": "Erhalte {{discount}} Rabatt auf {{course}}",
+    "goToNextCourse": "Zum nächsten Kurs: {{course}}",
     "getNewCourseDiscount": "Erhalten Sie -10€ Rabatt auf den SUPER neuen Kurs",
     "deleteCourse": "Kurs löschen",
     "courseContent": "Kursinhalt",

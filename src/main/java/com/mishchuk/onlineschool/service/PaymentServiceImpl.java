@@ -101,9 +101,9 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setPerson(person);
         payment.setCourse(course);
         payment.setAmount(finalAmount);
-        payment.setCurrency("USD"); // Default currency
+        payment.setCurrency("€");
         payment.setPaymentSystem(request.getPaymentSystem());
-        payment.setStatus(PaymentStatus.SUCCESS); // Mocking success
+        payment.setStatus(PaymentStatus.SUCCESS);
         payment.setCountry(request.getCountry());
 
         payment = paymentRepository.save(payment);

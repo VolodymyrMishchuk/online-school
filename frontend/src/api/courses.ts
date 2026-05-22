@@ -15,6 +15,11 @@ export interface CourseDto {
     accessDuration?: number; // Days
     promotionalDiscountPercentage?: number;
     promotionalDiscountAmount?: number;
+    renewalDiscountPercentage?: number;
+    renewalDiscountAmount?: number;
+    extendForReviewEnabled?: boolean;
+    renewalEnabled?: boolean;
+    nextCourseDiscountEnabled?: boolean;
     nextCourseId?: string;
     nextCourseName?: string;
     isEnrolled?: boolean;
@@ -40,6 +45,11 @@ export interface CreateCourseDto {
     accessDuration?: number;
     promotionalDiscountPercentage?: number;
     promotionalDiscountAmount?: number;
+    renewalDiscountPercentage?: number;
+    renewalDiscountAmount?: number;
+    extendForReviewEnabled?: boolean;
+    renewalEnabled?: boolean;
+    nextCourseDiscountEnabled?: boolean;
     nextCourseId?: string;
     moduleIds?: string[];
 }
@@ -54,6 +64,11 @@ export interface UpdateCourseDto {
     accessDuration?: number;
     promotionalDiscountPercentage?: number;
     promotionalDiscountAmount?: number;
+    renewalDiscountPercentage?: number;
+    renewalDiscountAmount?: number;
+    extendForReviewEnabled?: boolean;
+    renewalEnabled?: boolean;
+    nextCourseDiscountEnabled?: boolean;
     nextCourseId?: string;
     moduleIds?: string[];
     deleteCoverImage?: boolean;

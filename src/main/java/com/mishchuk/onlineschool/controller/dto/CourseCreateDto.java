@@ -13,6 +13,11 @@ public record CourseCreateDto(
                 Integer accessDuration,
                 Integer promotionalDiscountPercentage,
                 BigDecimal promotionalDiscountAmount,
+                Integer renewalDiscountPercentage,
+                BigDecimal renewalDiscountAmount,
+                Boolean extendForReviewEnabled,
+                Boolean renewalEnabled,
+                Boolean nextCourseDiscountEnabled,
                 UUID nextCourseId,
                 List<UUID> moduleIds) {
 }

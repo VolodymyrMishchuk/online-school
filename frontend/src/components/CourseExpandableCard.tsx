@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X, Settings2 } from 'lucide-react';
+import { BookOpen, Edit2, Trash2, ChevronDown, ChevronUp, ShoppingCart, Clock, X, Settings2, Tag } from 'lucide-react';
 import type { CourseDto } from '../api/courses';
 import { cloneCourse, updateCourseStatus } from '../api/courses';
 import type { Module } from '../api/modules';
@@ -11,11 +11,13 @@ import ModuleExpandableItem from './ModuleExpandableItem';
 import { ExtendAccessModal } from './ExtendAccessModal';
 import { FakeAdminRestrictionModal } from './FakeAdminRestrictionModal';
 import { ConfirmModal } from './ConfirmModal';
+import { PaymentModal } from './modals/PaymentModal';
 import { API_URL } from '../api/client';
 
 interface CourseExpandableCardProps {
     course: CourseDto;
     modules: Module[]; // All modules, we will filter for this course
+    allCourses?: CourseDto[]; // All courses to resolve next course price
     onEdit: (course: CourseDto) => void;
     onDelete: (course: CourseDto) => void;
     onEditLesson?: (lesson: Lesson) => void;
@@ -29,6 +31,7 @@ interface CourseExpandableCardProps {
 function CourseExpandableCard({
     course,
     modules,
+    allCourses = [],
     onEdit,
     onDelete,
     onEditLesson,
@@ -46,6 +49,8 @@ function CourseExpandableCard({
     const [isFakeAdminRestrictionModalOpen, setIsFakeAdminRestrictionModalOpen] = useState(false);
     const [isStatusUpdating, setIsStatusUpdating] = useState(false);
     const [isCloning, setIsCloning] = useState(false);
+    const [isNextCoursePaymentModalOpen, setIsNextCoursePaymentModalOpen] = useState(false);
+    const [isRenewalPaymentModalOpen, setIsRenewalPaymentModalOpen] = useState(false);
 
     // New UX states
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -112,8 +117,7 @@ function CourseExpandableCard({
     };
 
     const handleExtendWithPayment = () => {
-        // Placeholder for future logic
-        showAlert(t('common.errors.featureUnderDevelopment', 'Ця функція перебуває у стадії розробки.'), 'info');
+        setIsRenewalPaymentModalOpen(true);
     };
 
     const handleStatusChange = async (newStatus: string) => {
@@ -414,24 +418,69 @@ function CourseExpandableCard({
                             {/* Blocked Course Actions */}
                             {!isCatalogMode && course.isEnrolled && course.enrollmentStatus === 'BLOCKED' && (
                                 <div className="flex flex-col gap-2 w-full mt-4" onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                        onClick={() => setIsExtendModalOpen(true)}
-                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
-                                    >
-                                        {t('courseExpandableCard.extendForReview', 'Отримати доступ за відеовідгук')}
-                                    </button>
-                                    <button
-                                        onClick={handleExtendWithPayment}
-                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-brand-dark bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
-                                    >
-                                        {t('courseExpandableCard.extendWithDiscount', 'Продовжити курс зі знижкою')}
-                                    </button>
-                                    <button
-                                        onClick={() => showAlert(t('common.errors.featureUnderDevelopment', 'Ця функція перебуває у стадії розробки.'), 'info')}
-                                        className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm"
-                                    >
-                                        {t('courseExpandableCard.getNewCourseDiscount', 'Отримати знижку -10€ на СУПЕР новий курс')}
-                                    </button>
+                                    {/* Extend for review — visible only when flag is true */}
+                                    {course.extendForReviewEnabled !== false && (
+                                        <button
+                                            onClick={() => setIsExtendModalOpen(true)}
+                                            className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-brand-primary hover:bg-brand-primary/90 transition-colors shadow-sm"
+                                        >
+                                            {t('courseExpandableCard.extendForReview', 'Отримати доступ за відеовідгук')}
+                                        </button>
+                                    )}
+
+                                    {/* Renewal — visible only when flag is true */}
+                                    {course.renewalEnabled !== false && (
+                                        <button
+                                            onClick={handleExtendWithPayment}
+                                            className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-brand-dark bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm flex items-center justify-center gap-2"
+                                        >
+                                            <Tag className="w-4 h-4 shrink-0" />
+                                            <span>
+                                                {(() => {
+                                                    const renewalDiscountLabel = course.renewalDiscountAmount && course.renewalDiscountAmount > 0
+                                                        ? `-${course.renewalDiscountAmount}€`
+                                                        : course.renewalDiscountPercentage && course.renewalDiscountPercentage > 0
+                                                            ? `-${course.renewalDiscountPercentage}%`
+                                                            : null;
+                                                    return renewalDiscountLabel
+                                                        ? t('courseExpandableCard.extendWithDiscountLabel', 'Продовжити курс зі знижкою {{discount}}', { discount: renewalDiscountLabel })
+                                                        : t('courseExpandableCard.extendWithDiscount', 'Продовжити курс');
+                                                })()}
+                                            </span>
+                                        </button>
+                                    )}
+
+                                    {/* Next course discount — visible only when flag is true and nextCourse is set */}
+                                    {course.nextCourseDiscountEnabled !== false && course.nextCourseId && course.nextCourseName && (() => {
+                                        const hasPromoDiscount = (course.promotionalDiscountAmount && course.promotionalDiscountAmount > 0)
+                                            || (course.promotionalDiscountPercentage && course.promotionalDiscountPercentage > 0);
+                                        const discountLabel = course.promotionalDiscountAmount && course.promotionalDiscountAmount > 0
+                                            ? `-${course.promotionalDiscountAmount}€`
+                                            : course.promotionalDiscountPercentage && course.promotionalDiscountPercentage > 0
+                                                ? `-${course.promotionalDiscountPercentage}%`
+                                                : null;
+                                        return (
+                                            <button
+                                                onClick={() => setIsNextCoursePaymentModalOpen(true)}
+                                                className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+                                            >
+                                                <Tag className="w-4 h-4 shrink-0" />
+                                                <span>
+                                                    {hasPromoDiscount && discountLabel
+                                                        ? t('courseExpandableCard.getDiscountOnNext', 'Отримати знижку {{discount}} на {{course}}', {
+                                                            discount: discountLabel,
+                                                            course: course.nextCourseName
+                                                        })
+                                                        : t('courseExpandableCard.goToNextCourse', 'Перейти до наступного курсу: {{course}}', {
+                                                            course: course.nextCourseName
+                                                        })
+                                                    }
+                                                </span>
+                                            </button>
+                                        );
+                                    })()}
+
+                                    {/* Delete — always visible */}
                                     <button
                                         onClick={handleDeleteCourse}
                                         className="w-full text-center px-4 py-2 text-sm font-medium rounded-lg text-red-600 bg-red-50 hover:bg-red-100 transition-colors shadow-sm"
@@ -603,6 +652,56 @@ function CourseExpandableCard({
                         }
                     }}
                 />
+
+                {/* Payment Modal for Next Recommended Course */}
+                {course.nextCourseId && course.nextCourseName && (() => {
+                    const nextCourse = allCourses.find(c => c.id === course.nextCourseId);
+                    const basePrice = nextCourse?.price ?? 0;
+                    // Apply promotional discount from the current (completed/blocked) course
+                    let finalPrice = basePrice;
+                    if (course.promotionalDiscountAmount && course.promotionalDiscountAmount > 0) {
+                        finalPrice = Math.max(0, basePrice - course.promotionalDiscountAmount);
+                    } else if (course.promotionalDiscountPercentage && course.promotionalDiscountPercentage > 0) {
+                        finalPrice = basePrice * (1 - course.promotionalDiscountPercentage / 100);
+                    }
+                    return (
+                        <PaymentModal
+                            isOpen={isNextCoursePaymentModalOpen}
+                            onClose={() => setIsNextCoursePaymentModalOpen(false)}
+                            courseId={course.nextCourseId!}
+                            courseName={course.nextCourseName!}
+                            price={finalPrice}
+                            onSuccess={() => {
+                                setIsNextCoursePaymentModalOpen(false);
+                                if (onRefresh) onRefresh();
+                            }}
+                        />
+                    );
+                })()}
+
+                {/* Payment Modal for Renewal (same course, renewal discount applied) */}
+                {(() => {
+                    const basePrice = course.price ?? 0;
+                    let renewalPrice = basePrice;
+                    if (course.renewalDiscountAmount && course.renewalDiscountAmount > 0) {
+                        renewalPrice = Math.max(0, basePrice - course.renewalDiscountAmount);
+                    } else if (course.renewalDiscountPercentage && course.renewalDiscountPercentage > 0) {
+                        renewalPrice = basePrice * (1 - course.renewalDiscountPercentage / 100);
+                    }
+                    return (
+                        <PaymentModal
+                            isOpen={isRenewalPaymentModalOpen}
+                            onClose={() => setIsRenewalPaymentModalOpen(false)}
+                            courseId={course.id}
+                            courseName={course.name}
+                            price={renewalPrice}
+                            onSuccess={() => {
+                                setIsRenewalPaymentModalOpen(false);
+                                if (onRefresh) onRefresh();
+                            }}
+                        />
+                    );
+                })()}
 
                 <FakeAdminRestrictionModal
                     isOpen={isFakeAdminRestrictionModalOpen}
